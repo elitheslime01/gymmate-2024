@@ -1,10 +1,8 @@
-import { Box, Button, Flex, Heading, Input, InputGroup, InputLeftElement, InputRightElement, useToast, VStack } from "@chakra-ui/react"
+import { Box, Button, Flex, Heading, Input, InputGroup, InputLeftElement, InputRightElement, VStack } from "@chakra-ui/react"
 import { FaEye, FaEyeSlash } from "react-icons/fa"
 import { MdEmail } from "react-icons/md"
 import { RiLockPasswordFill } from "react-icons/ri"
 import useWalkinStore from "../store/walkin"
-import { useState } from "react"
-import { useStudentStore } from "../store/student.js"
 
 
 const WalkinLogin = () => {
@@ -16,11 +14,6 @@ const WalkinLogin = () => {
         setShowLogOptions,
     } = useWalkinStore();
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const { loginStudent } = useStudentStore();
-    const toast = useToast();
-
     const togglePasswordVisibility = (field) => {
         setShowPassword({ [field]: !showPassword[field] });
     };
@@ -29,36 +22,10 @@ const WalkinLogin = () => {
         setShowLogin(false); 
     };
 
-    const handleInputChange = (setter) => (event) => {
-        setter(event.target.value);
-    };
-
-    const handleLogin = async () => {
-        // Log the inputs for debugging
-        console.log("Email:", email);
-        console.log("Password:", password);
-    
-        const result = await loginStudent(email, password);
-        const { success = false, message = "An unexpected error occurred." } = result || {}; // Use fallback values
-    
-        toast({
-          title: success ? "Success" : "Error",
-          description: message,
-          status: success ? "success" : "error",
-          duration: 3000,
-          isClosable: true
-        });
-    
-        if (success) {
-          // Clear the input fields
-          setEmail(''); // Reset email
-          setPassword(''); // Reset password
-    
-          // Navigate to the dashboard or another page
-          setShowLogOptions(true)
-          setShowLogin(false);
-        }
-      };
+    const handleLogLogin = ()  => {
+        setShowLogOptions(true)
+        setShowLogin(false);
+    }
 
     return (
         <Box p={8} w="full" maxW="4xl" display={isRegistered ? 'none' : 'block'}>
@@ -80,8 +47,7 @@ const WalkinLogin = () => {
                         boxShadow='lg' 
                         rounded='md'
                         bg="white"
-                        h='50px'
-                        onChange={handleInputChange(setEmail)}
+                        h='50px' // Set height to match InputLeftElement
                     />
                 </InputGroup>
 
@@ -104,7 +70,6 @@ const WalkinLogin = () => {
                         rounded='md'
                         h='50px'
                         bg="white"
-                        onChange={handleInputChange(setPassword)}
                     />
                     <InputRightElement 
                         width='4.5rem' 
@@ -125,7 +90,7 @@ const WalkinLogin = () => {
 
             <Flex justify="space-between" mt={20}>
                 <Button bgColor="white" color="#FE7654" border="2px" borderColor="#FE7654" _hover={{ bg: '#FE7654', color: 'white' }} _active={{ bg: '#cc4a2d' }} px={6} py={2} rounded="md" onClick={handleLogCancel}>Cancel</Button>
-                <Button bgColor='#FE7654' color='white' _hover={{ bg: '#e65c3b' }} _active={{ bg: '#cc4a2d' }} px={6} py={2} rounded="md" onClick={handleLogin}>Log In</Button>
+                <Button bgColor='#FE7654' color='white' _hover={{ bg: '#e65c3b' }} _active={{ bg: '#cc4a2d' }} px={6} py={2} rounded="md" onClick={handleLogLogin}>Log In</Button>
             </Flex>
         </Box>
   )

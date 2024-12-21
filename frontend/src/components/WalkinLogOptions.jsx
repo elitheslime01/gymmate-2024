@@ -1,6 +1,5 @@
-import { Box, Button, Divider, Flex, Heading, Text, useToast, VStack } from "@chakra-ui/react"
+import { Box, Button, Divider, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import useWalkinStore from "../store/walkin"
-import { useStudentStore } from "../store/student.js";
 
 
 const WalkinLogOptions = () => {
@@ -12,9 +11,6 @@ const WalkinLogOptions = () => {
         setShowLogin
     } = useWalkinStore();
 
-    const { logout } = useStudentStore();
-    const toast = useToast();
-
     const handleOptLogin = () => {
         setShowLogin(true); 
         setShowRegister(false); 
@@ -25,21 +21,10 @@ const WalkinLogOptions = () => {
         setShowLogOptions(false);
     }
 
-    const handleLogout = () => {
-        logout(); 
-    
-        toast({
-          title: "Logged out",
-          description: "You have successfully logged out.",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
-    
-        // Navigate to the login page
+    const handleLogOptCancel  = () => {
         setShowLogOptions(false);
         setShowLogin(true);
-      };
+    }
 
 
     return (
@@ -93,7 +78,7 @@ const WalkinLogOptions = () => {
                     _hover={{ bg: '#FE7654', color: 'white' }} 
                     _active={{ bg: '#cc4a2d' }} px={6} py={2} 
                     rounded="md" 
-                    onClick={handleLogout}>
+                    onClick={handleLogOptCancel}>
                         Log out
                 </Button>
             </Flex>
