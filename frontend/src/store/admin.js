@@ -58,7 +58,7 @@ logout: async () => {
   }
 },
 
-  clearError: () => {
+clearError: () => {
     set({ error: null });
-  },
+},
 }));

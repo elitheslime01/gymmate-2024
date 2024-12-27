@@ -1,9 +1,10 @@
-import { Box, Button, Flex, Heading, Input, InputGroup, InputLeftElement, InputRightElement, VStack } from "@chakra-ui/react"
+import { useToast, Box, Button, Flex, Heading, Input, InputGroup, InputLeftElement, InputRightElement, VStack } from "@chakra-ui/react"
 import { FaEye, FaEyeSlash } from "react-icons/fa"
 import { MdEmail } from "react-icons/md"
 import { RiLockPasswordFill } from "react-icons/ri"
 import useWalkinStore from "../store/walkin"
-
+import { useState } from "react";
+import { useStudentStore } from "../store/student"
 
 const WalkinLogin = () => {
     const {
@@ -14,17 +15,48 @@ const WalkinLogin = () => {
         setShowLogOptions,
     } = useWalkinStore();
 
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const { loginStudent } = useStudentStore();
+
+    const toast = useToast();
+
     const togglePasswordVisibility = (field) => {
         setShowPassword({ [field]: !showPassword[field] });
+    };
+
+    const handleInputChange = (setter) => (event) => {
+        setter(event.target.value);
     };
 
     const handleLogCancel = () => {
         setShowLogin(false); 
     };
 
-    const handleLogLogin = ()  => {
+    const handleLogLogin = async ()  => {
+        console.log("Email:", email);
+        console.log("Password:", password);
+
+        const result = await loginStudent(email, password);
+        const { success = false, message = "An unexpected error occurred." } = result || {};
+        
+        toast({
+            title: success ? "Success" : "Error",
+            description: message,
+            status: success ? "success" : "error",
+            duration: 3000,
+            isClosable: true
+        });
+    
+        if (success) {
+        // Clear the input fields
+        setEmail(''); // Reset email
+        setPassword(''); // Reset password
+    
         setShowLogOptions(true)
         setShowLogin(false);
+        }
     }
 
     return (
@@ -47,7 +79,9 @@ const WalkinLogin = () => {
                         boxShadow='lg' 
                         rounded='md'
                         bg="white"
-                        h='50px' // Set height to match InputLeftElement
+                        h='50px'
+                        value={email}
+                        onChange={handleInputChange(setEmail)}
                     />
                 </InputGroup>
 
@@ -64,7 +98,9 @@ const WalkinLogin = () => {
                     <Input
                         variant="outline" 
                         pr='4.5rem'
-                        type={showPassword.password ? 'text' : 'password'} 
+                        type={showPassword.password ? 'text' : 'password'}
+                        value={password}
+                        onChange={handleInputChange(setPassword)}
                         placeholder='Password'
                         boxShadow='lg' 
                         rounded='md'

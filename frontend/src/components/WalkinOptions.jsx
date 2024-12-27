@@ -1,5 +1,4 @@
-import { Box, Flex, IconButton, Heading, VStack, Button, Text, Divider } from "@chakra-ui/react"
-import { ChevronLeftIcon } from "@chakra-ui/icons";
+import { Box, Flex, Heading, VStack, Button, Text, Divider } from "@chakra-ui/react"
 import useWalkinStore from "../store/walkin";
 
 const WalkinOptions = () => {
@@ -18,19 +17,12 @@ const WalkinOptions = () => {
 
     return (
         <Box p={8} minW="full" maxW="4xl">
-            <Flex align="center" mb={6} justify="space-between">
-                <IconButton
-                    icon={<ChevronLeftIcon boxSize={6} />}
-                    colorScheme="orange"
-                    variant="ghost"
-                    aria-label="Back"
-                    mr={2}
-                />
+            <Flex alignSelf="center" mb={6} justify="space-between">
                 <Heading as="h1" size="md" color="gray.800" textAlign="center" flex="1">
                     Do you have an existing GymMate Account?
                 </Heading>
             </Flex>
-                <Flex justify="space-between" align="center">
+            <Flex justify="space-between" align="center">
                 <VStack flex="1" textAlign="center" whiteSpace="nowrap">
                     <Text color="gray.600" mb={4}>
                         No, I don’t have a GymMate account.
