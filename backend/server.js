@@ -5,6 +5,7 @@ import adminsRoutes from "./routes/admin.route.js";
 import scheduleRoutes from "./routes/schedule.route.js"; // Import the schedule routes
 import cors from 'cors';
 import studentsRoutes from "./routes/student.route.js";
+import arRoutes from "./routes/ar.route.js";
 
 dotenv.config()
 
@@ -22,3 +23,4 @@ app.use(cors());
 app.use("/api/admins", adminsRoutes)
 app.use("/api/schedules", scheduleRoutes);
 app.use("/api/students", studentsRoutes);
+app.use("/api/ar", arRoutes);
