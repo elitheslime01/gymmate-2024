@@ -1,35 +1,34 @@
 import mongoose from "mongoose";
 import Student from "../models/student.model.js";
+import Priority from "../models/priority.model.js";
 
 export const createStudent = async (req, res) => {
-    const student = req.body; //user will send this data
+  const student = req.body; // User will send this data
 
-    if (!student._fName ||
-        !student._lName ||
-        !student._sex ||
-        !student._college ||
-        !student._course ||
-        !student._year || 
-        !student._section ||
-        !student._umakEmail || 
-        !student._umakID || 
-        !student._password ||
-        !student._lastLogin)
-    {
-        return res.status(400).json({ success:false, message: "Please fill in all fields" });
-    }
+  // Validate required fields
+  if (!student._fName || !student._lName || !student._sex || 
+      !student._college || !student._course || !student._year || 
+      !student._section || !student._umakEmail || !student._umakID || 
+      !student._password || !student._lastLogin) {
+      return res.status(400).json({ success: false, message: "Please fill in all fields" });
+  }
 
-    const newStudent = new Student(student);
+  const newStudent = new Student({
+      ...student,
+      _unsuccessfulAttempts: 0, // Initialize priority fields
+      _noShows: 0,
+      _attendedSlots: 0,
+  });
 
-    try {
-        await newStudent.save();
-        res.status(201).json({success: true, data: newStudent});
-    } catch (error) {
-        console.error("Error in Creating Student: ", error.message);
-        res.status(500).json({success: false, message: "Server Error"});
-    }
-
-}
+  try {
+      // Save the student
+      await newStudent.save();
+      res.status(201).json({ success: true, data: newStudent });
+  } catch (error) {
+      console.error("Error in Creating Student: ", error.message);
+      res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
 
 export const loginStudent = async (req, res) => {
     const { email, password } = req.body;
@@ -53,7 +52,23 @@ export const loginStudent = async (req, res) => {
       student._activeStat = true;
       await student.save(); // Save the updated student document
   
-      res.status(200).json({ success: true, user: { id: student._id, name: student._fName } });
+      res.status(200).json({ 
+        success: true, 
+        user: {
+            _id: student._id,
+            _fName: student._fName,
+            _lName: student._lName,
+            _sex: student._sex,
+            _college: student._college,
+            _course: student._course,
+            _year: student._year,
+            _section: student._section,
+            _umakEmail: student._umakEmail,
+            _umakID: student._umakID,
+            _activeStat: student._activeStat,
+            // Add any other fields you want to include
+        }
+      });    
     } catch (error) {
       console.error("Error during student login: ", error.message);
       res.status(500).json({ success: false, message: "Server error." });

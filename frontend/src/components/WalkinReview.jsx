@@ -1,8 +1,8 @@
-import { Box, Button, Flex, Heading, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, useDisclosure, VStack } from "@chakra-ui/react";
+import { useToast, Box, Button, Flex, Heading, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, useDisclosure, VStack } from "@chakra-ui/react";
 import useWalkinStore from "../store/walkin";
+import { useStudentStore } from "../store/student"; // Import the student store
 
 const WalkinReview = () => {
-
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const {
@@ -10,24 +10,92 @@ const WalkinReview = () => {
         setShowARInput,
         showReview,
         setShowReview,
-        showRegister,
         setIsRegistered,
         setIsBooked,
+        formattedDate,
+        selectedTimeSlot,
+        arCode,
+        showRegister,
+        addARCode,
+        addToQueue, // Import the addToQueue function
     } = useWalkinStore();
 
+    const { user, isLoggedIn } = useStudentStore(); // Get user data from the student store
+    const toast = useToast();
+
+    console.log("User  object:", user);
+
     const handleRevCancel = () => {
-        setShowARInput(true)
+        setShowARInput(true);
         setShowReview(false);
     }
 
-    const handleRevProceed  = () => {
+    const handleRevProceed = () => {
         onOpen();
     }
 
-    const handleConfirm = () => {
-        if (showRegister) setIsRegistered(true);
-        else if (showReview) setIsBooked(true);
-        onClose(); 
+    const handleConfirm = async () => {
+        if (!arCode || arCode.trim() === "") {
+            toast({
+                title: "Error",
+                description: "AR code is required.",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
+    
+        // First, check if the AR code exists or add it if it doesn't
+        const arResult = await addARCode(arCode, user._id);
+        if (!arResult.success) {
+            toast({
+                title: "Error",
+                description: arResult.message,
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
+    
+        const arId = arResult.arId; // Ensure arId is extracted correctly
+        if (!arId) {
+            toast({
+                title: "Error",
+                description: "Failed to retrieve AR ID.",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
+    
+        // Add the student to the queue
+        const result = await addToQueue(
+            user._id, // Student ID
+            formattedDate, // Selected date
+            {
+                startTime: selectedTimeSlot._startTime,
+                endTime: selectedTimeSlot._endTime,
+            },
+            selectedTimeSlot._id, // Schedule ID
+            arId // AR ID
+        );
+    
+        if (result.success) {
+            if (showRegister) setIsRegistered(true);
+            else if (showReview) setIsBooked(true);
+            onClose(); // Close the modal after successful addition to the queue
+        } else {
+            toast({
+                title: "Error",
+                description: result.message,
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+        }
     };
 
     return (
@@ -36,30 +104,16 @@ const WalkinReview = () => {
             <Flex justify="space-between" align="flex-start" gap={10}>
                 <Box flex="1" pr={2}>
                     <VStack align="start" spacing={4} whiteSpace="nowrap">
-                        <Text fontWeight="semibold">Full Name: </Text>
-                        <Text fontWeight="semibold">Student ID: </Text>
-                        <Text fontWeight="semibold">UMak Email Address: </Text>
-                    </VStack>
-                </Box>
-                <Box flex="1" pr={2}>
-                    <VStack align="end" spacing={4} whiteSpace="nowrap">
-                        <Text>{""}</Text>
-                        <Text>{""}</Text>
-                        <Text>{""}</Text>
+                        <Text fontWeight="semibold">Full Name: {isLoggedIn ? `${user._fName} ${user._lName}` : 'N/A'}</Text>
+                        <Text fontWeight="semibold">Student ID: {isLoggedIn ? user._umakID : 'N/A'}</Text>
+                        <Text fontWeight="semibold">UMak Email Address: {isLoggedIn ? user._umakEmail : 'N/A'}</Text>
                     </VStack>
                 </Box>
                 <Box flex="1" pl={2}>
                     <VStack align="start" spacing={4} whiteSpace="nowrap">
-                        <Text fontWeight="semibold">Selected Date: </Text>
-                        <Text fontWeight="semibold">Selected Time: </Text>
-                        <Text fontWeight="semibold">AR Number: </Text>
-                    </VStack>
-                </Box>
-                <Box flex="1" pl={2}>
-                    <VStack align="end" spacing={4} whiteSpace="nowrap">
-                        <Text>{""}</Text>
-                        <Text>{""}</Text>
-                        <Text>{""}</Text>
+                        <Text fontWeight="semibold">Selected Date: {formattedDate}</Text>
+                        <Text fontWeight="semibold">Selected Time Slot: {selectedTimeSlot ? `${selectedTimeSlot._startTime} - ${selectedTimeSlot._endTime}` : 'N/A'}</Text>
+                        <Text fontWeight="semibold">AR Number: {arCode}</Text>
                     </VStack>
                 </Box>
             </Flex>
@@ -70,7 +124,7 @@ const WalkinReview = () => {
 
             <Modal isOpen={isOpen} onClose={onClose} isCentered>
                 <ModalOverlay />
-                <Flex justifyContent="center" alignItems="center"> {/* Add this Flex container */}
+                <Flex justifyContent="center" alignItems="center">
                     <ModalContent>
                         <ModalHeader>Are you sure your information is correct?</ModalHeader>
                         <ModalBody>
@@ -79,20 +133,15 @@ const WalkinReview = () => {
                                 <li>Once confirmed, AR Number cannot be used again.</li>
                             </Text>
                         </ModalBody>
-                        <ModalFooter display="flex" justifyContent="space-between">
-                            <Button onClick={onClose} bgColor="white" color="#FE7654" border="2px" borderColor="#FE7654" _hover={{ bg: '#FE7654', color: 'white' }} _active={{ bg: '#cc4a2d' }} w="40" px={4} py={2} rounded="md" display="flex" alignItems="center">
-                                Cancel
-                            </Button>
-                            <Button bgColor='#FE7654' color='white' _hover={{ bg: '#e65c3b' }} _active={{ bg: '#cc4a2d' }} w="40" px={4} py={2} rounded="md" display="flex" alignItems="center" onClick={handleConfirm}>
-                                Confirm
-                            </Button>
+                        <ModalFooter>
+                            <Button onClick={onClose} bgColor="white" color="#FE7654" border="2px" borderColor="#FE7654" _hover={{ bg: '#FE7654', color : 'white' }} _active={{ bg: '#cc4a2d' }} mr={3}>Cancel</Button>
+                            <Button colorScheme="blue" onClick={handleConfirm}>Confirm</Button>
                         </ModalFooter>
                     </ModalContent>
                 </Flex>
             </Modal>
         </Box>
-        
-    )
-}
+    );
+};
 
-export default WalkinReview
+export default WalkinReview;

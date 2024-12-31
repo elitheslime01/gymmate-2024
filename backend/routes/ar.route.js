@@ -1,9 +1,10 @@
 import express from "express";
-import { uploadAR } from "../controller/ar.controller.js";
+import { uploadAR, checkAR } from "../controller/ar.controller.js";
 
 const router = express.Router();
 
-router.post("/", uploadAR);
+router.post("/uploadAR", uploadAR);
+router.post("/checkAR", checkAR);
 
 const arRoutes = router;
 

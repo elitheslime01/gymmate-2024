@@ -9,10 +9,6 @@ const arSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    _status: {
-        type: String,
-        required: true
-    },
     _studentID: {
         type: mongoose.Schema.Types.ObjectId, 
         ref: "Student", 

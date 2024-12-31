@@ -13,4 +13,6 @@ router.post("/", createSchedule);
 // Route to update a schedule time slot
 router.put("/update", updateSchedule);
 
-export default router;
+const scheduleRoutes = router;
+
+export default scheduleRoutes;

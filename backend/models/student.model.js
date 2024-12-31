@@ -49,6 +49,19 @@ const studentSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
         required: true
+    },
+    // Priority attributes
+    _unsuccessfulAttempts: {
+        type: Number,
+        default: 0,
+    },
+    _noShows: {
+        type: Number,
+        default: 0,
+    },
+    _attendedSlots: {
+        type: Number,
+        default: 0,
     }
 }, {
     timestamps: true
@@ -56,4 +69,4 @@ const studentSchema = new mongoose.Schema({
 
 const Student = mongoose.model("Student", studentSchema);
 
-export default Student
+export default Student;
