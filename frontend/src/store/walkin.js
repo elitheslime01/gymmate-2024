@@ -155,28 +155,6 @@ const useWalkinStore = create((set) => ({
             return { success: false, message: "An error occurred while adding to the queue." };
         }
     },
-    checkIfStudentInQueue: async (studentId, date, timeSlot) => {
-        try {
-            const response = await fetch('http://localhost:5000/api/queues/checkIfStudentInQueue', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ studentId, date, timeSlot }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                return { success: true, isInQueue: data.isInQueue };
-            } else {
-                return { success: false, message: data.message || "Failed to check queue status." };
-            }
-        } catch (error) {
-            console.error("Error checking if student is in queue:", error);
-            return { success: false, message: "Server error." };
-        }
-    },
 }));
 
 export default useWalkinStore;

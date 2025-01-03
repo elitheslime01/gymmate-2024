@@ -17,7 +17,6 @@ const WalkinReview = () => {
         arCode,
         showRegister,
         addARCode,
-        checkIfStudentInQueue,
         addToQueue, // Import the addToQueue function
     } = useWalkinStore();
 
@@ -47,39 +46,7 @@ const WalkinReview = () => {
             return;
         }
     
-        // First, check if the student is already in the queue
-        const queueCheckResult = await checkIfStudentInQueue(
-            user._id, // Student ID
-            formattedDate, // Selected date
-            {
-                startTime: selectedTimeSlot._startTime,
-                endTime: selectedTimeSlot._endTime,
-            }
-        );
-    
-        if (!queueCheckResult.success) {
-            toast({
-                title: "Error",
-                description: queueCheckResult.message,
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
-            return;
-        }
-    
-        if (queueCheckResult.isInQueue) {
-            toast({
-                title: "Error",
-                description: "Student is already in the queue for this time slot.",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
-            return; // Exit early if the student is already in the queue
-        }
-    
-        // If the student is not in the queue, proceed to upload the AR code
+        // First, check if the AR code exists or add it if it doesn't
         const arResult = await addARCode(arCode, user._id);
         if (!arResult.success) {
             toast({
