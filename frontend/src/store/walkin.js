@@ -18,6 +18,7 @@ const useWalkinStore = create((set) => ({
     arCode: "",
     isARCodeValid: false,
     selectedTimeSlot: null,
+    arImage: null,
     showPassword: { password: false, confirmPassword: false }, 
 
     setCurrentDate: (date) => set({ currentDate: date }),
@@ -37,6 +38,7 @@ const useWalkinStore = create((set) => ({
     setArCode: (code) => set({ arCode: code }),
     setSelectedTimeSlot: (slot) => set({ selectedTimeSlot: slot }),
     setShowPassword: (value) => set((state) => ({ showPassword: { ...state.showPassword, ...value } })),
+    setARImage: (arImage) => set({ arImage }),
 
     // Function to fetch schedule data by date
     fetchScheduleByDate: async (date) => {
@@ -117,37 +119,37 @@ const useWalkinStore = create((set) => ({
         }
     },
 
-    addToQueue: async (studentId, date, timeSlot, scheduleId, arId) => {
+    addToQueue: async (studentId, date, timeSlot, scheduleId, arId, arImage) => {
         console.log('studentId:', studentId);
         console.log('date:', date);
         console.log('timeSlot:', timeSlot);
         console.log('scheduleId:', scheduleId); // Add this log
         console.log('arId:', arId);
-    
+        console.log('arImage:', arImage);
+        
         try {
+            const formData = new FormData();
+            formData.append('studentId', studentId);
+            formData.append('date', date);
+            formData.append('timeSlot', JSON.stringify({
+            startTime: timeSlot.startTime,
+            endTime: timeSlot.endTime,
+            }));
+            formData.append('scheduleId', scheduleId);
+            formData.append('arId', arId);
+            formData.append('image', arImage);
+        
             const response = await fetch('http://localhost:5000/api/queues/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    studentId,
-                    date,
-                    timeSlot: {
-                        startTime: timeSlot.startTime,
-                        endTime: timeSlot.endTime,
-                    },
-                    scheduleId, // Ensure this is included
-                    arId, // Ensure this is included
-                }),
+            method: 'POST',
+            body: formData,
             });
-    
+        
             if (!response.ok) {
-                const errorData = await response.json();
-                console.error("Failed to add to queue:", errorData.message);
-                return { success: false, message: errorData.message };
+            const errorData = await response.json();
+            console.error("Failed to add to queue:", errorData.message);
+            return { success: false, message: errorData.message };
             }
-    
+        
             const data = await response.json();
             return { success: true, message: "Successfully added to queue.", data };
         } catch (error) {

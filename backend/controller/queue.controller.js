@@ -4,8 +4,10 @@ import AR from "../models/ar.model.js";
 
 // Function to add a student to the queue
 export const addStudentToQueue = async (req, res) => {
+    
     const { studentId, date, timeSlot, scheduleId, arId } = req.body;
-  
+    const arImage = req.files.buffer;
+
     // Validate input
     if (
       !studentId ||
@@ -14,12 +16,13 @@ export const addStudentToQueue = async (req, res) => {
       !timeSlot.startTime ||
       !timeSlot.endTime ||
       !scheduleId ||
-      !arId
+      !arId ||
+      !arImage
     ) {
       return res.status(400).json({
         success: false,
         message:
-          "Student ID, date, time slot (start and end times), schedule ID, and AR ID are required.",
+          "Student ID, date, time slot (start and end times), schedule ID, AR ID, and image are required.",
       });
     }
   
@@ -67,7 +70,7 @@ export const addStudentToQueue = async (req, res) => {
       }
   
       // Add the student to the queue with the AR ID
-      queue.students.push({ _studentId: studentId, _scheduleID: scheduleId, _arID: arId });
+      queue.students.push({ _studentId: studentId, _scheduleID: scheduleId, _arID: arId, _arImage: arImage.buffer });
   
       // Save the queue
       await queue.save();

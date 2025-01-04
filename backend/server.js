@@ -7,6 +7,7 @@ import cors from 'cors';
 import studentsRoutes from "./routes/student.route.js";
 import arRoutes from "./routes/ar.route.js";
 import queueRoutes from "./routes/queue.route.js";
+import upload from "./utils/multer.js";
 
 dotenv.config()
 
@@ -14,6 +15,8 @@ const app = express()
 const PORT = process.env.PORT || 5000
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(upload.single('image'))
 
 app.listen(PORT, () => {
     connectDB();

@@ -31,6 +31,10 @@ const queueSchema = new mongoose.Schema({
             ref: "AR", 
             required: true,
         },
+        _arImage: {
+            type: Buffer,
+            required: true,
+        },
     }],
     createdAt: {
         type: Date,
