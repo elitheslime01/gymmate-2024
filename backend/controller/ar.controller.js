@@ -4,7 +4,7 @@ import AR from "../models/ar.model.js";
 export const uploadAR = async (req, res) => {
     const { _code, _studentID } = req.body;
 
-    if (!_code || !_studentID ) {
+    if (!_code || !_studentID) {
         return res.status(400).json({ success: false, message: "One or more fields are empty" });
     }
 
@@ -14,7 +14,7 @@ export const uploadAR = async (req, res) => {
             return res.status(400).json({ success: false, message: "AR code already exists." });
         }
 
-        const newAR = new AR({ _code, _dateSubmitted: new Date(), _studentID});
+        const newAR = new AR({ _code, _dateSubmitted: new Date(), _studentID });
         await newAR.save();
         
         // Ensure the response includes the AR ID

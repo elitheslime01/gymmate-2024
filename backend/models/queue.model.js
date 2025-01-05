@@ -31,11 +31,14 @@ const queueSchema = new mongoose.Schema({
             ref: "AR", 
             required: true,
         },
+<<<<<<< HEAD
         // _arImageID: {
         //     type: mongoose.Schema.Types.ObjectId,
         //     ref: "ARImage", 
         //     required: true,
         // },
+=======
+>>>>>>> parent of 4eb965c (feat: update code multipart)
     }],
     createdAt: {
         type: Date,
