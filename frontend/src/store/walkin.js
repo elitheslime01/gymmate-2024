@@ -38,7 +38,10 @@ const useWalkinStore = create((set) => ({
     setArCode: (code) => set({ arCode: code }),
     setSelectedTimeSlot: (slot) => set({ selectedTimeSlot: slot }),
     setShowPassword: (value) => set((state) => ({ showPassword: { ...state.showPassword, ...value } })),
-    setARImage: (arImage) => set({ arImage }),
+    setARImage: (arImage) => {
+        console.log('arImage:', arImage);
+        set({ arImage });
+    },
 
     // Function to fetch schedule data by date
     fetchScheduleByDate: async (date) => {
@@ -119,37 +122,37 @@ const useWalkinStore = create((set) => ({
         }
     },
 
-    addToQueue: async (studentId, date, timeSlot, scheduleId, arId, arImage) => {
+    addToQueue: async (studentId, date, timeSlot, scheduleId, arId) => {
         console.log('studentId:', studentId);
         console.log('date:', date);
         console.log('timeSlot:', timeSlot);
         console.log('scheduleId:', scheduleId); // Add this log
         console.log('arId:', arId);
-        console.log('arImage:', arImage);
-        
+
         try {
-            const formData = new FormData();
-            formData.append('studentId', studentId);
-            formData.append('date', date);
-            formData.append('timeSlot', JSON.stringify({
-            startTime: timeSlot.startTime,
-            endTime: timeSlot.endTime,
-            }));
-            formData.append('scheduleId', scheduleId);
-            formData.append('arId', arId);
-            formData.append('image', arImage);
-        
             const response = await fetch('http://localhost:5000/api/queues/add', {
-            method: 'POST',
-            body: formData,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    _studentId: studentId, 
+                    _dateSubmitted: date,
+                    _timeSlot: {
+                        startTime: timeSlot.startTime,
+                        endTime: timeSlot.endTime,
+                    },
+                    _scheduleId: scheduleId,
+                    _arId: arId,
+                }),
             });
-        
+
             if (!response.ok) {
-            const errorData = await response.json();
-            console.error("Failed to add to queue:", errorData.message);
-            return { success: false, message: errorData.message };
+                const errorData = await response.json();
+                console.error("Failed to add to queue:", errorData.message);
+                return { success: false, message: errorData.message };
             }
-        
+
             const data = await response.json();
             return { success: true, message: "Successfully added to queue.", data };
         } catch (error) {
@@ -157,6 +160,48 @@ const useWalkinStore = create((set) => ({
             return { success: false, message: "An error occurred while adding to the queue." };
         }
     },
+
+    uploadARImage: async (arImage, studentId) => {
+        try {
+            if (!arImage || typeof arImage !== 'object' || !arImage.size) {
+                console.error('Error: arImage is not a file object');
+                return;
+              }
+            
+          const formData = new FormData();
+          formData.append('_arImage', arImage);
+          formData.append('_studentId', studentId);
+    
+          const response = await fetch('http://localhost:5000/api/arImage/upload', {
+            method: 'POST',
+            body: formData,
+          });
+    
+          if (response.ok) {
+            const data = await response.json();
+            set({ arImage: data });
+          } else {
+            console.error('Error uploading AR image:', response.statusText);
+          }
+        } catch (error) {
+          console.error('Error uploading AR image:', error.message);
+        }
+      },
+    
+      getARImage: async (studentID) => {
+        try {
+          const response = await fetch(`http://localhost:5000/api/arImage/${studentID}`);
+    
+          if (response.ok) {
+            const data = await response.json();
+            set({ arImage: data });
+          } else {
+            console.error('Error getting AR image:', response.statusText);
+          }
+        } catch (error) {
+          console.error('Error getting AR image:', error.message);
+        }
+      },
 }));
 
 export default useWalkinStore;

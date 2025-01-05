@@ -17,7 +17,9 @@ const WalkinReview = () => {
         arCode,
         showRegister,
         addARCode,
-        addToQueue, // Import the addToQueue function
+        addToQueue,
+        // arImage,
+        // uploadARImage
     } = useWalkinStore();
 
     const { user, isLoggedIn } = useStudentStore(); // Get user data from the student store
@@ -70,7 +72,20 @@ const WalkinReview = () => {
             });
             return;
         }
-    
+
+        // const arImageId = await uploadARImage(arImage, user._id);
+        
+        // if (!arImageId.success) {
+        //     toast({
+        //         title: "Error",
+        //         description: arImageId.message,
+        //         status: "error",
+        //         duration: 3000,
+        //         isClosable: true,
+        //     });
+        //     return;
+        // }
+
         // Add the student to the queue
         const result = await addToQueue(
             user._id, // Student ID
@@ -80,7 +95,8 @@ const WalkinReview = () => {
                 endTime: selectedTimeSlot._endTime,
             },
             selectedTimeSlot._id, // Schedule ID
-            arId // AR ID
+            arId,
+            //arImageId
         );
     
         if (result.success) {

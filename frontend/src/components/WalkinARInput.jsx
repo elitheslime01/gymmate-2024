@@ -48,17 +48,14 @@ const WalkinARInput = () => {
     };
 
     const handleImageChange = (event) => {
-        console.log('event.target.files:', event.target.files);
         const file = event.target.files[0];
-
-        if (!file.type.match("image.*")) {
-            alert("Only images are allowed");
-            return;
+        const maxSize = 1024 * 1024 * 5; // 5MB
+        if (file.size > maxSize) {
+          alert("File size exceeds the limit");
+          return;
         }
-
         setARImage(event.target.files[0]);
-        console.log('arImage:', arImage);
-    };
+      };
 
     return (
         <Box p={8} minW="full" maxW="4xl">

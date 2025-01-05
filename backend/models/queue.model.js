@@ -31,10 +31,11 @@ const queueSchema = new mongoose.Schema({
             ref: "AR", 
             required: true,
         },
-        _arImage: {
-            type: Buffer,
-            required: true,
-        },
+        // _arImageID: {
+        //     type: mongoose.Schema.Types.ObjectId,
+        //     ref: "ARImage", 
+        //     required: true,
+        // },
     }],
     createdAt: {
         type: Date,

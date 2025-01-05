@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import Student from "../models/student.model.js";
-import Priority from "../models/priority.model.js";
 
 export const createStudent = async (req, res) => {
   const student = req.body; // User will send this data
