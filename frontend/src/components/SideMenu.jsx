@@ -1,10 +1,41 @@
-import { Box, Button, Icon, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Icon, Text, VStack, useToast } from "@chakra-ui/react"
 import { MdAccountCircle, MdDashboard, MdSettings } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
-
+import { useAdminStore } from '../store/admin.js';
+import useScheduleStore from '../store/schedule.js'; // Correct import for default exportimport { useEffect } from 'react';
+import { useEffect } from "react";
 const SideMenu = () => {
 
   const navigate = useNavigate(); 
+  const { logout } = useAdminStore();
+  const toast = useToast();
+  const { setCurrentDate, setSelectedDay, setSelectedTime } = useScheduleStore();
+
+    useEffect(() => {
+        // This will run when the component unmounts
+        return () => {
+            // Clear selections
+            setCurrentDate(new Date()); // Reset to current date
+            setSelectedDay(null); // Reset selected day
+            setSelectedTime(null); // Reset selected time
+        };
+    }, [setCurrentDate, setSelectedDay, setSelectedTime]);
+
+
+  const handleLogout = () => {
+    logout(); 
+
+    toast({
+      title: "Logged out",
+      description: "You have successfully logged out.",
+      status: "success",
+      duration: 3000,
+      isClosable: true,
+    });
+
+    // Navigate to the login page
+    navigate('/');
+  };
 
   return (
 
@@ -81,6 +112,7 @@ const SideMenu = () => {
                   _active={{ bg: '#cc4a2d' }}
                   marginLeft="auto"
                   marginRight="auto"
+                  onClick={handleLogout}
                 >
                   Log out
                 </Button>

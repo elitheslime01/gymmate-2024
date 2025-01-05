@@ -3,8 +3,7 @@ import { ChevronLeftIcon, ChevronRightIcon, QuestionIcon } from '@chakra-ui/icon
 import useScheduleStore from "../store/schedule.js"; // Import the Zustand store
 
 const ScheduleCalendar = () => {
-    const { currentDate, selectedDay, setCurrentDate, setSelectedDay } = useScheduleStore(); // Use the Zustand store
-
+    const { currentDate,setFormattedDate, selectedDay, setCurrentDate, setSelectedDay, fetchScheduleByDate } = useScheduleStore();
     const daysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
     const getFirstDayOfMonth = (month, year) => new Date(year, month, 1).getDay();
 
@@ -20,11 +19,15 @@ const ScheduleCalendar = () => {
 
     const handleDayClick = (day) => {
         setSelectedDay(day); // Update the selected day
-        
+
         // Log the selected day, month, and year in yyyy-mm-dd format
         const selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
         const formattedDate = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+        setFormattedDate(formattedDate)
         console.log(`You pressed: ${formattedDate}`); // Logs in yyyy-mm-dd format
+
+        // Fetch schedule data for the selected date
+        fetchScheduleByDate(formattedDate); // Call the function from the store
     };
 
     const renderDays = () => {
@@ -45,8 +48,9 @@ const ScheduleCalendar = () => {
                     width="40px"
                     height="40px"
                     mx="auto"
-                    bg={selectedDay === i ? "#071434" : "transparent"} // Change background if active
-                    color={selectedDay === i ? "white" : "black"} // Change text color if active
+                    border="2px"
+                    bg="white"
+                    borderColor={selectedDay === i ? "#FE7654" : "transparent"} // Change background if active
                     onClick={() => handleDayClick(i)} // Handle day click
                 >
                     {i}
@@ -60,7 +64,7 @@ const ScheduleCalendar = () => {
     const renderWeekDays = () => {
         const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         return weekDays.map((day, index) => (
-            <Box key={index} textAlign="center" fontWeight="light">
+            <Box  key={index} textAlign="center" fontWeight="light">
                 {day}
             </Box>
         ));
@@ -68,8 +72,8 @@ const ScheduleCalendar = () => {
 
     return (
         <Box width="100%" bg="white" borderRadius="lg" boxShadow="lg">
-            <Flex bg="#071434" color="white" p={4} borderTopRadius="lg" justify="space-between" align="center">
-                <Text fontSize="lg" fontWeight="semibold">Select Date</Text>
+            <Flex color="#071434" p={4} justify="space-between" align="center">
+                <Text fontSize="lg" fontWeight="semibold">Date</Text>
                 <Tooltip label="Help" aria-label="A tooltip">
                     <QuestionIcon />
                 </Tooltip>
@@ -96,7 +100,7 @@ const ScheduleCalendar = () => {
                 <Grid templateColumns="repeat(7, 1fr)" gap={2}>
                     {renderWeekDays()}
                 </Grid>
-                <Grid templateColumns="repeat(7, 1fr)" gap={2}>
+                <Grid templateColumns="repeat(7, 1fr)" gap={2} >
                     {renderDays()}
                 </Grid>
             </Box>
