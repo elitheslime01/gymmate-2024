@@ -37,13 +37,10 @@ const useWalkinStore = create((set) => ({
     setArCode: (code) => set({ arCode: code }),
     setSelectedTimeSlot: (slot) => set({ selectedTimeSlot: slot }),
     setShowPassword: (value) => set((state) => ({ showPassword: { ...state.showPassword, ...value } })),
-<<<<<<< HEAD
     setARImage: (arImage) => {
         console.log('arImage:', arImage);
         set({ arImage });
     },
-=======
->>>>>>> parent of 4eb965c (feat: update code multipart)
 
     // Function to fetch schedule data by date
     fetchScheduleByDate: async (date) => {
@@ -130,18 +127,13 @@ const useWalkinStore = create((set) => ({
         console.log('timeSlot:', timeSlot);
         console.log('scheduleId:', scheduleId); // Add this log
         console.log('arId:', arId);
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> parent of 4eb965c (feat: update code multipart)
         try {
             const response = await fetch('http://localhost:5000/api/queues/add', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-<<<<<<< HEAD
                 body: JSON.stringify({ 
                     _studentId: studentId, 
                     _dateSubmitted: date,
@@ -153,31 +145,11 @@ const useWalkinStore = create((set) => ({
                     _arId: arId,
                 }),
             });
-
-=======
-                body: JSON.stringify({
-                    studentId,
-                    date,
-                    timeSlot: {
-                        startTime: timeSlot.startTime,
-                        endTime: timeSlot.endTime,
-                    },
-                    scheduleId, // Ensure this is included
-                    arId, // Ensure this is included
-                }),
-            });
-    
->>>>>>> parent of 4eb965c (feat: update code multipart)
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error("Failed to add to queue:", errorData.message);
                 return { success: false, message: errorData.message };
             }
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> parent of 4eb965c (feat: update code multipart)
             const data = await response.json();
             return { success: true, message: "Successfully added to queue.", data };
         } catch (error) {
