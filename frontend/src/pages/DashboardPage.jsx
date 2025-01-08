@@ -57,6 +57,11 @@ const DashboardPage = () => {
               onClick={() => navigate('/walkin')}
             />
             <DashboardButtons 
+              text="Queue Management" 
+              onClick={() => navigate('/queue')}
+              icon={ImTable} 
+            />
+            <DashboardButtons 
               text="Booking Management" 
               icon={ImTable} 
             />

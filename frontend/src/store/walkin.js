@@ -121,11 +121,12 @@ const useWalkinStore = create((set) => ({
         }
     },
 
-    addToQueue: async (studentId, date, timeSlot, scheduleId, arId) => {
+    addToQueue: async (studentId, date, timeSlot, scheduleId, timeSlotId, arId) => {
         console.log('studentId:', studentId);
         console.log('date:', date);
         console.log('timeSlot:', timeSlot);
-        console.log('scheduleId:', scheduleId); // Add this log
+        console.log('scheduleDataId:', scheduleId); // Add this log
+        console.log('timeSlotId:', timeSlotId); 
         console.log('arId:', arId);
 
         try {
@@ -136,11 +137,12 @@ const useWalkinStore = create((set) => ({
                 },
                 body: JSON.stringify({ 
                     _studentId: studentId, 
-                    _dateSubmitted: date,
+                    _date: date,
                     _timeSlot: {
                         startTime: timeSlot.startTime,
                         endTime: timeSlot.endTime,
                     },
+                    _timeSlotId: timeSlotId,
                     _scheduleId: scheduleId,
                     _arId: arId,
                 }),

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const queueSchema = new mongoose.Schema({
+const bookingSchema = new mongoose.Schema({
     _date: {
         type: Date,
         required: true,
@@ -39,10 +39,6 @@ const queueSchema = new mongoose.Schema({
         _priorityScore: {
             type: Number,
             required: true,
-        },
-        _queueStatus: {
-            type: String,
-            required: true,
         }
     }],
     createdAt: {
@@ -51,6 +47,6 @@ const queueSchema = new mongoose.Schema({
     },
 });
 
-const Queue = mongoose.model("Queue", queueSchema);
+const Booking = mongoose.model("Booking", bookingSchema);
 
-export default Queue;
+export default Booking;

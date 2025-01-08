@@ -18,6 +18,7 @@ const WalkinReview = () => {
         showRegister,
         addARCode,
         addToQueue,
+        scheduleData,
         // arImage,
         // uploadARImage
     } = useWalkinStore();
@@ -25,7 +26,7 @@ const WalkinReview = () => {
     const { user, isLoggedIn } = useStudentStore(); // Get user data from the student store
     const toast = useToast();
 
-    console.log("User  object:", user);
+    //console.log("User  object:", user);
 
     const handleRevCancel = () => {
         setShowARInput(true);
@@ -88,15 +89,15 @@ const WalkinReview = () => {
 
         // Add the student to the queue
         const result = await addToQueue(
-            user._id, // Student ID
-            formattedDate, // Selected date
+            user._id, 
+            formattedDate, 
             {
                 startTime: selectedTimeSlot._startTime,
                 endTime: selectedTimeSlot._endTime,
             },
-            selectedTimeSlot._id, // Schedule ID
-            arId,
-            //arImageId
+            scheduleData._id,
+            selectedTimeSlot._id, 
+            arId
         );
     
         if (result.success) {
