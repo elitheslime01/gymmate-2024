@@ -17,9 +17,9 @@ const useQueueStore = create((set) => ({
         },
         params: { date, timeSlot },
       });
-      console.log('Response:', response); // Log the response object
+      console.log('Response:', response); 
     const data = await response.json();
-    console.log('Fetched data:', data); // Log the fetched data
+    console.log('Fetched data:', data); 
     set({ queues: data });
     } catch (error) {
       console.error("Error fetching queues:", error.message);

@@ -12,14 +12,14 @@ const DashboardButtons = ({ text, icon, ...props }) => {
       display="flex" 
       alignItems="center" 
       p={4} 
-      {...props} // Spread other props like onClick, etc.
+      {...props} 
     >
       <HStack gap='10'>
         <Heading 
           whiteSpace='pre-wrap' 
           textAlign='start' 
           as='h1' 
-          fontSize={{ base: '0.5rem', md: '1rem', lg: '1.5rem' }} // Responsive font size
+          fontSize={{ base: '0.5rem', md: '1rem', lg: '1.5rem' }} 
         >
           {text}
         </Heading>

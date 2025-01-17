@@ -76,7 +76,7 @@ const DashboardPage = () => {
           </SimpleGrid>
 
           <Box mt={4}>
-            <DashboardTable /> {/* Use the CustomTable component here */}
+            <DashboardTable /> 
           </Box>
         </Box>
       </VStack>

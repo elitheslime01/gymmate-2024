@@ -18,7 +18,6 @@ const WalkinBookSession = () => {
     };
 
     const handleBkProceed = () => {
-        // Check if a date and time slot are selected
         if (!selectedDay || !selectedTime) {
             toast({
                 title: "Selection Required",
@@ -27,7 +26,7 @@ const WalkinBookSession = () => {
                 duration: 3000,
                 isClosable: true,
             });
-            return; // Exit the function if no selection is made
+            return; 
         }
 
         // Proceed to the AR input if selections are valid

@@ -6,6 +6,7 @@ const router = express.Router();
 // Route for logging in an admin
 router.post("/login", loginAdmin);
 
+// Route for logging out an admin
 router.post("/logout", logoutAdmin);
 
 // Route for getting all admins

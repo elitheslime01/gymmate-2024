@@ -18,12 +18,10 @@ const WalkinReview = () => {
         showRegister,
         addARCode,
         addToQueue,
-        scheduleData,
-        // arImage,
-        // uploadARImage
+        scheduleData
     } = useWalkinStore();
 
-    const { user, isLoggedIn } = useStudentStore(); // Get user data from the student store
+    const { user, isLoggedIn } = useStudentStore();
     const toast = useToast();
 
     //console.log("User  object:", user);

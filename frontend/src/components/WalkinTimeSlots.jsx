@@ -8,7 +8,7 @@ const ScheduleTimeSlots = () => {
     const { setSelectedTimeSlot, selectedDay, scheduleData, selectedTime, setSelectedTime, fetchScheduleByDate } = useWalkinStore();
     const [showButtons, setShowButtons] = useState(false);
     const [buttonClicked, setButtonClicked] = useState(false);
-    const [selectedSlot, setSelectedSlot] = useState(null); // State for selected time slot
+    const [selectedSlot, setSelectedSlot] = useState(null);
 
     useEffect(() => {
         const fetchSchedule = async () => {
@@ -68,13 +68,13 @@ const ScheduleTimeSlots = () => {
                             <Button
                                 key={slot._startTime}
                                 w='48%'
-                                bg={selectedTime === slot._startTime ? "white" : "white"} // Highlight selected slot
+                                bg={selectedTime === slot._startTime ? "white" : "white"}
                                 border={selectedTime === slot._startTime ? "2px solid #FE7654" : "2px solid transparent"} 
-                                onClick={() => handleTimeClick(slot)} // Pass the slot data
+                                onClick={() => handleTimeClick(slot)}
                                 height="40%"
                                 boxShadow="lg"
                                 mb={2}
-                                _hover={{ bg: selectedSlot === slot ? "gray.300" : "white" }} // Change hover color for active button
+                                _hover={{ bg: selectedSlot === slot ? "gray.300" : "white" }} 
                             >
                                 <VStack spacing={5} align="center">
                                     <Heading fontSize='sm'>{`${slot._startTime} - ${slot._endTime}`}</Heading>

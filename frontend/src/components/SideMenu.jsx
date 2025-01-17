@@ -2,7 +2,7 @@ import { Box, Button, Icon, Text, VStack, useToast } from "@chakra-ui/react"
 import { MdAccountCircle, MdDashboard, MdSettings } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { useAdminStore } from '../store/admin.js';
-import useScheduleStore from '../store/schedule.js'; // Correct import for default exportimport { useEffect } from 'react';
+import useScheduleStore from '../store/schedule.js';
 import { useEffect } from "react";
 const SideMenu = () => {
 
@@ -12,12 +12,10 @@ const SideMenu = () => {
   const { setCurrentDate, setSelectedDay, setSelectedTime } = useScheduleStore();
 
     useEffect(() => {
-        // This will run when the component unmounts
         return () => {
-            // Clear selections
-            setCurrentDate(new Date()); // Reset to current date
-            setSelectedDay(null); // Reset selected day
-            setSelectedTime(null); // Reset selected time
+            setCurrentDate(new Date());
+            setSelectedDay(null);
+            setSelectedTime(null);
         };
     }, [setCurrentDate, setSelectedDay, setSelectedTime]);
 
@@ -33,7 +31,6 @@ const SideMenu = () => {
       isClosable: true,
     });
 
-    // Navigate to the login page
     navigate('/');
   };
 

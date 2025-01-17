@@ -5,7 +5,6 @@ import AR from "../models/ar.model.js";
 import MaxHeap from '../utils/maxHeap.js';
 import Booking from "../models/booking.model.js";
 
-// Function to add a student to the queue
 export const addStudentToQueue = async (req, res) => {
   // console.log(req.body);
   // console.log(req.body._studentId);
@@ -87,7 +86,6 @@ export const addStudentToQueue = async (req, res) => {
       _queueStatus: "Waiting for allocation",
     });
 
-    // Save the queue
     await queue.save();
 
     return res.status(200).json({

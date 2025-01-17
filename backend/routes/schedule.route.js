@@ -7,7 +7,7 @@ const router = express.Router();
 // Route to get a schedule by date
 router.get("/:date", getScheduleByDate);
 
-// Optional: Route to create a new schedule
+//      Route to create a new schedule
 router.post("/", createSchedule);
 
 // Route to update a schedule time slot

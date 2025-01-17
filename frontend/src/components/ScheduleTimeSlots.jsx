@@ -8,9 +8,9 @@ const ScheduleTimeSlots = () => {
     const { selectedDay,formattedDate, scheduleData, createSchedule, fetchScheduleByDate, updateSchedule } = useScheduleStore();
     const [showButtons, setShowButtons] = useState(false);
     const [buttonClicked, setButtonClicked] = useState(false);
-    const [selectedSlot, setSelectedSlot] = useState(null); // State for selected time slot
-    const [status, setStatus] = useState(""); // State for status selection
-    const [availableSlots, setAvailableSlots] = useState(0); // State for available slots
+    const [selectedSlot, setSelectedSlot] = useState(null);
+    const [status, setStatus] = useState(""); 
+    const [availableSlots, setAvailableSlots] = useState(0); 
     const { isOpen: isConfirmOpen, onOpen: onConfirmOpen, onClose: onConfirmClose } = useDisclosure();
     const { isOpen: isDetailsOpen, onOpen: onDetailsOpen, onClose: onDetailsClose } = useDisclosure();
     const toast = useToast();

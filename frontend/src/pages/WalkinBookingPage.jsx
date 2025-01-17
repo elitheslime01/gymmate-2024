@@ -151,7 +151,7 @@ const WalkinBookingPage = () => {
                     
                     <Modal isOpen={isOpen} onClose={onClose} isCentered>
                         <ModalOverlay />
-                        <Flex justifyContent="center" alignItems="center"> {/* Add this Flex container */}
+                        <Flex justifyContent="center" alignItems="center"> 
                             <ModalContent>
                                 <ModalHeader>Are you sure your information is correct?</ModalHeader>
                                 <ModalBody>

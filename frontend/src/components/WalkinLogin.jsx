@@ -51,8 +51,8 @@ const WalkinLogin = () => {
     
         if (success) {
         // Clear the input fields
-        setEmail(''); // Reset email
-        setPassword(''); // Reset password
+        setEmail(''); 
+        setPassword(''); 
     
         setShowLogOptions(true)
         setShowLogin(false);

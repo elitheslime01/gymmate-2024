@@ -19,9 +19,8 @@ export const loginAdmin = async (req, res) => {
       return res.status(401).json({ success: false, message: "Invalid Password." });
     }
 
-    // Set _activeStat to true upon successful login
     admin._activeStat = true;
-    await admin.save(); // Save the updated admin document
+    await admin.save(); 
 
     res.status(200).json({ success: true, user: { id: admin._id, name: admin._fName } });
   } catch (error) {
@@ -31,7 +30,7 @@ export const loginAdmin = async (req, res) => {
 };
 
 export const logoutAdmin = async (req, res) => {
-  const { userId } = req.body; // Assuming you send the user ID when logging out
+  const { userId } = req.body;
 
   try {
       const admin = await Admin.findById(userId);
@@ -39,9 +38,8 @@ export const logoutAdmin = async (req, res) => {
           return res.status(404).json({ success: false, message: "Admin not found." });
       }
 
-      // Set _activeStat to false upon logout
       admin._activeStat = false;
-      await admin.save(); // Save the updated admin document
+      await admin.save();
 
       res.status(200).json({ success: true, message: "Logout successful." });
   } catch (error) {
@@ -61,7 +59,7 @@ export const getAdmins = async (req, res) => {
 }
 
 export const createAdmin = async (req, res) => {
-    const admin = req.body; //user will send this data
+    const admin = req.body; 
 
     if (!admin._fName || admin._fName == "" ||
         !admin._lName || admin._lName == "" ||

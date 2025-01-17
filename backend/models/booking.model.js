@@ -7,11 +7,11 @@ const bookingSchema = new mongoose.Schema({
     },
     _timeSlot: {
         startTime: {
-            type: String, // e.g., "08:00 AM"
+            type: String, 
             required: true,
         },
         endTime: {
-            type: String, // e.g., "10:00 AM"
+            type: String,
             required: true,
         },
     },
@@ -23,12 +23,12 @@ const bookingSchema = new mongoose.Schema({
         },
         _scheduleId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Schedule", // Reference to the Schedule model
+            ref: "Schedule", 
             required: true,
         },
         _timeSlotId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "TimeSlot", // Reference to the TimeSlot model
+            ref: "TimeSlot", 
             required: true,
         },
         _arID: {

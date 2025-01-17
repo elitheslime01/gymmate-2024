@@ -21,12 +21,12 @@ const PORT = process.env.PORT || 5000
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(multer.single('_arImage')); // Use Multer for file uploads
+app.use(multer.single('_arImage')); 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-app.use('/public', express.static(path.join(__dirname, '../public'))); // Serve static files
+app.use('/public', express.static(path.join(__dirname, '../public'))); 
 
 app.listen(PORT, () => {
     connectDB();

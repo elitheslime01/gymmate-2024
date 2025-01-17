@@ -31,7 +31,7 @@ const WalkinARInput = () => {
         
             if (result.success) {
                 setShowARInput(false);
-                setShowReview(true); // Proceed to the review page
+                setShowReview(true); 
             } else {
                 toast({
                     title: "Error",
@@ -64,7 +64,7 @@ const WalkinARInput = () => {
         <Box p={8} minW="full" maxW="4xl">
             <Heading as="h1" size="md" textAlign="center" mb={10}>Input Acknowledgement Receipt Number</Heading>
             <VStack w='100%' gap="10" justify="center" mb={6}>
-                <HStack spacing={8}> {/* Adjust the value as needed for desired spacing */}
+                <HStack spacing={8}> 
                     <PinInput size='lg' onChange={(value) => setArCode(value)}>
                         <PinInputField borderWidth="0" bg="white" boxShadow="lg" />
                         <PinInputField borderWidth="0" bg="white" boxShadow="lg"/>

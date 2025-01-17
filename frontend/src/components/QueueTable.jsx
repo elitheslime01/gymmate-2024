@@ -69,7 +69,7 @@ const QueueTable = () => {
       </Flex>
       <TableContainer
         style={{
-          maxHeight: "500px", // adjust this value to set the fixed height
+          maxHeight: "500px", 
           height: "500px",
           overflowY: "auto",
         }}
@@ -88,7 +88,7 @@ const QueueTable = () => {
               queues.map((item, index) => (
                 item.students.map((student, studentIndex) => (
                   <Tr key={`${index}-${studentIndex}`}>
-                    <Td>{new Date(item._date).toLocaleDateString()}</Td> {/* Format the date */}
+                    <Td>{new Date(item._date).toLocaleDateString()}</Td> 
                     <Td>{student._studentId._fName}</Td>
                     <Td>{student._studentId._lName}</Td>
                     <Td>{student._queueStatus}</Td>

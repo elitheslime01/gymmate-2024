@@ -16,7 +16,7 @@ const WalkinRegister = () => {
         setIsBooked
     } = useWalkinStore();
 
-    const { createStudent } = useStudentStore(); // Access the createStudent function from the student store
+    const { createStudent } = useStudentStore(); 
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     // State variables for registration form
@@ -56,7 +56,7 @@ const WalkinRegister = () => {
         console.log("Student data prepared for registration:", studentData);
         
         if (!firstName || !lastName || !sex || !college || !course || !year || !section || !email || !studentId || !password) {
-            console.error("One or more fields are empty."); // Debug log
+            console.error("One or more fields are empty.");
             return; // Prevent sending the request
         }
 
@@ -195,7 +195,7 @@ const WalkinRegister = () => {
 
             <Modal isOpen={isOpen} onClose={onClose} isCentered>
                 <ModalOverlay />
-                <Flex justifyContent="center" alignItems="center"> {/* Add this Flex container */}
+                <Flex justifyContent="center" alignItems="center"> 
                     <ModalContent>
                         <ModalHeader>Are you sure your information is correct?</ModalHeader>
                         <ModalBody>

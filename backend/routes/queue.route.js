@@ -6,8 +6,10 @@ const router = express.Router();
 
 // Route to add a student to the queue
 router.post("/add", addStudentToQueue);
+
 // Route to fetch all queues
 router.get("/get", fetchQueues);
+
 // Route to allocate students to booking collection
 router.post("/allocate", allocateStudentsToBooking);
 
