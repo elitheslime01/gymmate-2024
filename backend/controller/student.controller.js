@@ -4,7 +4,6 @@ import Student from "../models/student.model.js";
 export const createStudent = async (req, res) => {
   const student = req.body; // User will send this data
 
-  // Validate required fields
   if (!student._fName || !student._lName || !student._sex || 
       !student._college || !student._course || !student._year || 
       !student._section || !student._umakEmail || !student._umakID || 
@@ -14,7 +13,7 @@ export const createStudent = async (req, res) => {
 
   const newStudent = new Student({
       ...student,
-      _unsuccessfulAttempts: 0, // Initialize priority fields
+      _unsuccessfulAttempts: 0, 
       _noShows: 0,
       _attendedSlots: 0,
   });
@@ -47,9 +46,8 @@ export const loginStudent = async (req, res) => {
         return res.status(401).json({ success: false, message: "Invalid Password." });
       }
   
-      // Set _activeStat to true upon successful login
       student._activeStat = true;
-      await student.save(); // Save the updated student document
+      await student.save();
   
       res.status(200).json({ 
         success: true, 
@@ -65,7 +63,6 @@ export const loginStudent = async (req, res) => {
             _umakEmail: student._umakEmail,
             _umakID: student._umakID,
             _activeStat: student._activeStat,
-            // Add any other fields you want to include
         }
       });    
     } catch (error) {
@@ -75,17 +72,15 @@ export const loginStudent = async (req, res) => {
   };
   
   export const logoutStudent = async (req, res) => {
-    const { userId } = req.body; // Assuming you send the user ID when logging out
+    const { userId } = req.body;
   
     try {
         const student = await Student.findById(userId);
         if (!student) {
             return res.status(404).json({ success: false, message: "Student not found." });
         }
-  
-        // Set _activeStat to false upon logout
         student._activeStat = false;
-        await student.save(); // Save the updated student document
+        await student.save();
   
         res.status(200).json({ success: true, message: "Logout successful." });
     } catch (error) {

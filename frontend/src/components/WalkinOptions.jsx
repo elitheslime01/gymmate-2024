@@ -27,7 +27,7 @@ const WalkinOptions = () => {
                     <Text color="gray.600" mb={4}>
                         No, I don’t have a GymMate account.
                     </Text>
-                    <Button 
+                    <Button
                         bgColor='#FE7654'
                         color='white'
                         _hover={{ bg: '#e65c3b' }} 

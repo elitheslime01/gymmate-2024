@@ -1,4 +1,4 @@
-import { create } from 'zustand'; // Ensure this import is correct
+import { create } from 'zustand';
 
 export  const useStudentStore = create((set, get) => ({
     students: [],
@@ -9,14 +9,14 @@ export  const useStudentStore = create((set, get) => ({
 
     // Function to set students
     setStudents: (newStudents) => {
-        console.log("Setting students in the store:", newStudents); // Debug log
+        console.log("Setting students in the store:", newStudents); 
         set({ students: newStudents });
     },
 
     // Function to create a new student
     createStudent: async (studentData) => {
-        console.log("Attempting to create a new student:", studentData); // Debug log
-        set({ isLoading: true, error: null }); // Start loading and reset error
+        console.log("Attempting to create a new student:", studentData); 
+        set({ isLoading: true, error: null }); 
         try {
             const response = await fetch('http://localhost:5000/api/students', {
                 method: 'POST',
@@ -28,29 +28,28 @@ export  const useStudentStore = create((set, get) => ({
 
             const result = await response.json();
 
-            console.log("Response from server:", result); // Debug log
+            console.log("Response from server:", result); 
 
             if (response.ok) {
-                console.log("Student created successfully:", result.data); // Debug log
+                console.log("Student created successfully:", result.data); 
                 set((state) => ({
-                    students: [...state.students, result.data], // Add new student to the list
-                    isLoading: false, // Stop loading
+                    students: [...state.students, result.data], 
+                    isLoading: false, 
                 }));
-                return { success: true }; // Return success
+                return { success: true }; 
             } else {
-                console.error("Error creating student:", result.message); // Debug log
-                set({ error: result.message, isLoading: false }); // Set error message
-                return { success: false, error: result.message }; // Return failure
+                console.error("Error creating student:", result.message);
+                set({ error: result.message, isLoading: false }); 
+                return { success: false, error: result.message }; 
             }
         } catch (error) {
-            console.error("Error during student creation:", error); // Debug log
-            set({ error: error.message, isLoading: false }); // Set error message
-            return { success: false, error: error.message }; // Return failure
+            console.error("Error during student creation:", error); 
+            set({ error: error.message, isLoading: false }); 
+            return { success: false, error: error.message }; 
         }
     },
     
     loginStudent: async (email, password) => {
-        // Input validation
         if (!email || !password) {
             return { success: false, message: "Please fill in all fields." };
         }
@@ -65,7 +64,7 @@ export  const useStudentStore = create((set, get) => ({
             const data = await response.json();
     
             if (response.ok) {
-                set({ user: data.user, isLoggedIn: true, isLoading: false }); // Store user data
+                set({ user: data.user, isLoggedIn: true, isLoading: false }); 
                 return { success: true, message: "Login successful." };
             } else {
                 set({ error: data.message || 'Login failed', isLoading: false });
@@ -78,23 +77,21 @@ export  const useStudentStore = create((set, get) => ({
     },
     
     logout: async () => {
-      const userId = get().user?.id; // Access the userId from the state
+      const userId = get().user?.id; 
       if (!userId) {
           console.error("User ID not found.");
-          return; // Exit if userId is not available
+          return; 
       }
     
       try {
           const response = await fetch('http://localhost:5000/api/students/logout', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ userId }), // Send the user ID
+              body: JSON.stringify({ userId }),
           });
     
           if (response.ok) {
-              set({ user: null, isLoggedIn: false }); // Reset the user state
-          } else {
-              // Handle error if needed
+              set({ user: null, isLoggedIn: false });
           }
       } catch (error) {
           console.error("Error during logout: ", error);

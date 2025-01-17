@@ -28,7 +28,7 @@ const LoginPage = () => {
     console.log("Password:", password);
 
     const result = await loginAdmin(email, password);
-    const { success = false, message = "An unexpected error occurred." } = result || {}; // Use fallback values
+    const { success = false, message = "An unexpected error occurred." } = result || {}; 
 
     toast({
       title: success ? "Success" : "Error",
@@ -40,10 +40,9 @@ const LoginPage = () => {
 
     if (success) {
       // Clear the input fields
-      setEmail(''); // Reset email
-      setPassword(''); // Reset password
+      setEmail(''); 
+      setPassword(''); 
 
-      // Navigate to the dashboard or another page
       navigate('/dashboard');
     }
   };

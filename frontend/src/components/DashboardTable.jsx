@@ -8,7 +8,6 @@ const DashboardTable = () => {
     { studentId: "S003", name: "Charlie Brown", bookedSchedule: "2023-10-03 1:00 PM", bookingStatus: "Cancelled" },
     { studentId: "S004", name: "Diana Prince", bookedSchedule: "2023-10-04 3:00 PM", bookingStatus: "Confirmed" },
     { studentId: "S005", name: "Ethan Hunt", bookedSchedule: "2023-10-05 2:00 PM", bookingStatus: "Pending" },
-    // Add more rows as needed
   ];
 
   return (

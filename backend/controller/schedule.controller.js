@@ -1,12 +1,11 @@
-// backend/controller/schedule.controller.js
-import Schedule from "../models/schedule.model.js"; // Import the Schedule model
+import Schedule from "../models/schedule.model.js";
 
 // Function to fetch a schedule by date
 export const getScheduleByDate = async (req, res) => {
-    const { date } = req.params; // Get the date from the request parameters
+    const { date } = req.params; 
 
     try {
-        const schedule = await Schedule.findOne({ _date: new Date(date) }); // Query the schedule by date
+        const schedule = await Schedule.findOne({ _date: new Date(date) });
         if (!schedule) {
             return res.status(404).json({ success: false, message: "Schedule not found." });
         }
@@ -17,9 +16,9 @@ export const getScheduleByDate = async (req, res) => {
     }
 };
 
-// Function to create a new schedule (optional, if you need it)
+// Function to create a new schedule 
 export const createSchedule = async (req, res) => {
-    const { _date, timeSlots } = req.body; // Extract date and time slots from the request body
+    const { _date, timeSlots } = req.body; 
 
     if (!_date || !timeSlots || !Array.isArray(timeSlots)) {
         return res.status(400).json({ success: false, message: "Date and time slots are required." });
@@ -38,7 +37,7 @@ export const createSchedule = async (req, res) => {
 
 // Function to update a schedule time slot
 export const updateSchedule = async (req, res) => {
-    const { scheduleId, timeSlot } = req.body; // Get the schedule ID and time slot data from the request body
+    const { scheduleId, timeSlot } = req.body;  
 
     if (!scheduleId || !timeSlot) {
         return res.status(400).json({ success: false, message: "Schedule ID and time slot data are required." });

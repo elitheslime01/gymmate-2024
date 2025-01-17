@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Grid, Text, IconButton, Tooltip } from '@chakra-ui/react';
 import { ChevronLeftIcon, ChevronRightIcon, QuestionIcon } from '@chakra-ui/icons';
-import useScheduleStore from "../store/schedule.js"; // Import the Zustand store
+import useScheduleStore from "../store/schedule.js"; 
 
 const ScheduleCalendar = () => {
     const { currentDate,setFormattedDate, selectedDay, setCurrentDate, setSelectedDay, fetchScheduleByDate } = useScheduleStore();
@@ -9,12 +9,12 @@ const ScheduleCalendar = () => {
 
     const handlePrevMonth = () => {
         setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
-        setSelectedDay(null); // Reset selected day when changing month
+        setSelectedDay(null); 
     };
 
     const handleNextMonth = () => {
         setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
-        setSelectedDay(null); // Reset selected day when changing month
+        setSelectedDay(null); 
     };
 
     const handleDayClick = (day) => {

@@ -21,9 +21,14 @@ const queueSchema = new mongoose.Schema({
             ref: "Student", 
             required: true,
         },
-        _scheduleID: {
+        _scheduleId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Schedule", 
+            ref: "Schedule", // Reference to the Schedule model
+            required: true,
+        },
+        _timeSlotId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "TimeSlot", // Reference to the TimeSlot model
             required: true,
         },
         _arID: {
@@ -31,14 +36,14 @@ const queueSchema = new mongoose.Schema({
             ref: "AR", 
             required: true,
         },
-<<<<<<< HEAD
-        // _arImageID: {
-        //     type: mongoose.Schema.Types.ObjectId,
-        //     ref: "ARImage", 
-        //     required: true,
-        // },
-=======
->>>>>>> parent of 4eb965c (feat: update code multipart)
+        _priorityScore: {
+            type: Number,
+            required: true,
+        },
+        _queueStatus: {
+            type: String,
+            required: true,
+        }
     }],
     createdAt: {
         type: Date,

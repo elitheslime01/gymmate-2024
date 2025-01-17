@@ -50,7 +50,6 @@ const studentSchema = new mongoose.Schema({
         default: false,
         required: true
     },
-    // Priority attributes
     _unsuccessfulAttempts: {
         type: Number,
         default: 0,

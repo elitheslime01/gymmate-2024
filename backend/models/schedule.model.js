@@ -2,35 +2,35 @@ import mongoose from "mongoose";
 
 const timeSlotSchema = new mongoose.Schema({
     _startTime: {
-        type: String, // Use String for time representation (e.g., "08:00 AM")
+        type: String,
         required: true,
     },
     _endTime: {
-        type: String, // Use String for time representation (e.g., "10:00 AM")
+        type: String, 
         required: true,
     },
     _availableSlots: {
         type: Number,
-        default: 15, // Default number of available slots
-        min: 0, // Ensure it doesn't go below 0
+        default: 15, 
+        min: 0, 
     },
     _status: {
         type: String 
     },
     _isFullyBooked: {
         type: Boolean,
-        default: false, // Indicates if the slot is fully booked
+        default: false, 
     },
 });
 
 const scheduleSchema = new mongoose.Schema({
     _date: {
         type: Date,
-        required: true, // The specific date for the schedule
+        required: true, 
     },
-    timeSlots: [timeSlotSchema], // Array of time slots for the date
+    timeSlots: [timeSlotSchema],
 }, {
-    timestamps: true, // Automatically manage createdAt and updatedAt fields
+    timestamps: true, 
 });
 
 const Schedule = mongoose.model("Schedule", scheduleSchema);

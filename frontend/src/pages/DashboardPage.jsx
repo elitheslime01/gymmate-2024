@@ -57,6 +57,11 @@ const DashboardPage = () => {
               onClick={() => navigate('/walkin')}
             />
             <DashboardButtons 
+              text="Queue Management" 
+              onClick={() => navigate('/queue')}
+              icon={ImTable} 
+            />
+            <DashboardButtons 
               text="Booking Management" 
               icon={ImTable} 
             />
@@ -71,7 +76,7 @@ const DashboardPage = () => {
           </SimpleGrid>
 
           <Box mt={4}>
-            <DashboardTable /> {/* Use the CustomTable component here */}
+            <DashboardTable /> 
           </Box>
         </Box>
       </VStack>
