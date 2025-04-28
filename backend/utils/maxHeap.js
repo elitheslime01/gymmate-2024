@@ -6,6 +6,9 @@ class MaxHeap {
 
     // Insert a new element into the max heap
     insert(element) {
+        if (!element._priorityScore && element._priorityScore !== 0) {
+            throw new Error('Element must have a _priorityScore property');
+        }
         this.heap.push(element);
         this.heapifyUp(this.heap.length - 1);
     }
@@ -28,14 +31,12 @@ class MaxHeap {
 
     // Heapify up to maintain the max heap property
     heapifyUp(index) {
-        if (index <= 0) {
-            return;
-        }
-
+        if (index <= 0) return;
+        
         const parentIndex = Math.floor((index - 1) / 2);
         if (this.heap[parentIndex]._priorityScore < this.heap[index]._priorityScore) {
-            this.swap(parentIndex, index);
-            this.heapifyUp(parentIndex);
+          this.swap(parentIndex, index);
+          this.heapifyUp(parentIndex);
         }
     }
 
@@ -59,6 +60,21 @@ class MaxHeap {
         }
     }
 
+    updatePriority(studentId, newScore) {
+        const index = this.heap.findIndex(element => 
+            element._studentId === studentId
+        );
+        if (index !== -1) {
+            const oldScore = this.heap[index]._priorityScore;
+            this.heap[index]._priorityScore = newScore;
+            if (newScore > oldScore) {
+                this.heapifyUp(index);
+            } else if (newScore < oldScore) {
+                this.heapifyDown(index);
+            }
+        }
+    }
+
     // Swap two elements in the heap
     swap(i, j) {
         const temp = this.heap[i];
@@ -69,6 +85,13 @@ class MaxHeap {
     // Get the size of the heap
     size() {
         return this.heap.length;
+    }
+
+    peek() {
+        if (this.heap.length === 0) {
+            return null;
+        }
+        return this.heap[0];
     }
 }
 

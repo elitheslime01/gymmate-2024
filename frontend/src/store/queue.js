@@ -8,21 +8,34 @@ const useQueueStore = create((set) => ({
   timeSlot: { startTime: "", endTime: "" },
   setTimeSlot: (timeSlot) => set({ timeSlot }),
   
+  clearQueues: () => set({ queues: [], date: "", timeSlot: { startTime: "", endTime: "" } }),
+  
   fetchQueues: async (date, timeSlot) => {
     try {
-      const response = await fetch('http://localhost:5000/api/queues/get', {
+      // Clear existing queues before fetching
+      set({ queues: [] });
+
+      const response = await fetch(`http://localhost:5000/api/queues/get?date=${date}&startTime=${timeSlot.startTime}&endTime=${timeSlot.endTime}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        params: { date, timeSlot },
       });
-      console.log('Response:', response); 
-    const data = await response.json();
-    console.log('Fetched data:', data); 
-    set({ queues: data });
+
+      const data = await response.json();
+      
+      // Only set queues if we have valid data
+      if (data && Array.isArray(data)) {
+        // Filter queues by the selected date and time slot
+        const filteredQueues = data.filter(queue => 
+          new Date(queue._date).toISOString().split('T')[0] === date &&
+          queue._timeSlot.startTime === timeSlot.startTime
+        );
+        set({ queues: filteredQueues });
+      }
     } catch (error) {
       console.error("Error fetching queues:", error.message);
+      set({ queues: [] }); // Clear queues on error
     }
   },
 }));

@@ -6,7 +6,8 @@
     "mongodb": "^6.10.0",
     "mongoose": "^8.7.2",
     "multer": "^1.4.5-lts.1",
-    "nodemon": "^3.1.7"
+    "nodemon": "^3.1.7",
+    "vite": "^6.0.11"
   },
   "name": "gymmate-2024",
   "version": "1.0.0",

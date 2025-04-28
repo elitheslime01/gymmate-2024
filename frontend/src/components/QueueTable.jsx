@@ -3,26 +3,42 @@ import { useState, useEffect } from 'react';
 import useQueueStore from "../store/queue";
 
 const QueueTable = () => {
-  const { queues, setDate, setTimeSlot, fetchQueues } = useQueueStore();
+  const { queues, setDate, setTimeSlot, fetchQueues, clearQueues } = useQueueStore();
   const [date, setDateState] = useState("");
   const [timeSlot, setTimeSlotState] = useState({ startTime: "", endTime: "" });
 
+  // Clear data when component unmounts
+  useEffect(() => {
+    return () => {
+      clearQueues();
+    };
+  }, [clearQueues]);
+
+  // Reset states when date changes
   const handleDateChange = (e) => {
+    clearQueues(); // Clear existing data
     setDateState(e.target.value);
     setDate(e.target.value);
-    console.log("Date changed:", e.target.value);
+    setTimeSlotState({ startTime: "", endTime: "" });
+    setTimeSlot({ startTime: "", endTime: "" });
   };
-
+  
+  // Reset data when time slot changes
   const handleTimeSlotChange = (e) => {
     const { name, value } = e.target;
     if (name === "startTime") {
-      setTimeSlotState({ ...timeSlot, startTime: value, endTime: "10:00 AM" });
-      setTimeSlot({ ...timeSlot, startTime: value, endTime: "10:00 AM" });
-    } else if (name === "endTime") {
-      setTimeSlotState({ ...timeSlot, endTime: value });
-      setTimeSlot({ ...timeSlot, endTime: value });
+      clearQueues(); // Clear existing data
+      let endTime;
+      switch(value) {
+        case "08:00 AM": endTime = "10:00 AM"; break;
+        case "10:00 AM": endTime = "12:00 PM"; break;
+        case "12:00 PM": endTime = "02:00 PM"; break;
+        case "02:00 PM": endTime = "04:00 PM"; break;
+        default: endTime = "";
+      }
+      setTimeSlotState({ startTime: value, endTime });
+      setTimeSlot({ startTime: value, endTime });
     }
-    console.log("Time slot changed:", value);
   };
 
   useEffect(() => {
@@ -77,10 +93,11 @@ const QueueTable = () => {
         <Table bg="white" size="sm">
           <Thead bg="#071434" position="sticky" top={0} zIndex={1}>
             <Tr>
-              <Th color="white" textAlign="center" w="20%" >Date</Th>
+              <Th color="white" textAlign="center" h="30px">Date</Th>
               <Th color="white" textAlign="center">First Name</Th>
               <Th color="white" textAlign="center">Last Name</Th>
               <Th color="white" textAlign="center">Queue Status</Th>
+              <Th color="white" textAlign="center">Priority Score</Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -88,16 +105,17 @@ const QueueTable = () => {
               queues.map((item, index) => (
                 item.students.map((student, studentIndex) => (
                   <Tr key={`${index}-${studentIndex}`}>
-                    <Td>{new Date(item._date).toLocaleDateString()}</Td> 
-                    <Td>{student._studentId._fName}</Td>
-                    <Td>{student._studentId._lName}</Td>
-                    <Td>{student._queueStatus}</Td>
+                    <Td textAlign="center">{new Date(item._date).toLocaleDateString()}</Td> 
+                    <Td textAlign="center">{student._studentId._fName}</Td>
+                    <Td textAlign="center">{student._studentId._lName}</Td>
+                    <Td textAlign="center">{student._queueStatus}</Td>
+                    <Td textAlign="center">{student._priorityScore}</Td>
                   </Tr>
                 ))
               ))
             ) : (
               <Tr>
-                <Td colSpan={4} textAlign="center">No data available</Td>
+                <Td colSpan={5} textAlign="center">No data available</Td>
               </Tr>
             )}
           </Tbody>
