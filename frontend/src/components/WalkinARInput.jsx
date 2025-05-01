@@ -66,7 +66,7 @@ const WalkinARInput = () => {
             <VStack w='100%' gap="10" justify="center" mb={6}>
                 <HStack spacing={8}> 
                     <PinInput size='lg' onChange={(value) => setArCode(value)}>
-                        <PinInputField borderWidth="0" bg="white" boxShadow="lg" />
+                        <PinInputField borderWidth="0" bg="white" boxShadow="lg"/>
                         <PinInputField borderWidth="0" bg="white" boxShadow="lg"/>
                         <PinInputField borderWidth="0" bg="white" boxShadow="lg"/>
                         <PinInputField borderWidth="0" bg="white" boxShadow="lg"/>

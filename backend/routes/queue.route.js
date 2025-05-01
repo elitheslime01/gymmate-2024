@@ -1,5 +1,5 @@
 import express from "express";
-import { addStudentToQueue, fetchQueues, allocateStudentsToBooking} from "../controller/queue.controller.js";
+import { addStudentToQueue, fetchQueues, allocateStudentsToBooking, fetchCurrentMonthQueues} from "../controller/queue.controller.js";
 import upload from "../utils/multer.js";
 
 const router = express.Router();
@@ -12,6 +12,9 @@ router.get("/get", fetchQueues);
 
 // Route to allocate students to booking collection
 router.post("/allocate", allocateStudentsToBooking);
+
+// Route for fetching all queues
+router.get("/currentMonth", fetchCurrentMonthQueues);
 
 //router.post("/allocate", allocateSlots);
 

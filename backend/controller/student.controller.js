@@ -70,6 +70,30 @@ export const loginStudent = async (req, res) => {
       res.status(500).json({ success: false, message: "Server error." });
     }
   };
+
+  // Function to update student metrics
+  export const updateStudentMetrics = async (studentId, status) => {
+    try {
+      const student = await Student.findById(studentId);
+      if (!student) return;
+
+      switch(status) {
+        case 'unsuccessful':
+          student._unsuccessfulAttempts += 1;
+          break;
+        case 'noShow':
+          student._noShows += 1;
+          break;
+        case 'attended':
+          student._attendedSlots += 1;
+          break;
+      }
+
+      await student.save();
+    } catch (error) {
+      console.error('Error updating student metrics:', error);
+    }
+  };
   
   export const logoutStudent = async (req, res) => {
     const { userId } = req.body;

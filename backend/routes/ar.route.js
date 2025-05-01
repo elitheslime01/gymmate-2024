@@ -9,6 +9,8 @@ router.post("/uploadAR", uploadAR);
 // Route for checking ar code
 router.post("/checkAR", checkAR);
 
+
+
 const arRoutes = router;
 
 export default arRoutes;
