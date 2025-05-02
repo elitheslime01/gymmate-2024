@@ -15,11 +15,10 @@ const calculatePriorityScore = (student) => {
   }
   
   const unsuccessfulPoints = student._unsuccessfulAttempts || 0;
-  const noShowPenalty = Math.floor((student._noShows || 0) / 2);
+  const noShowPenalty = student._noShows ? Math.floor(student._noShows / 2) : 0; // Only penalize if there are no-shows
   const attendanceBonus = student._attendedSlots || 0;
-  const attendanceResetPenalty = Math.floor((student._attendedSlots || 0) / 3);
 
-  return attendanceBonus + unsuccessfulPoints - noShowPenalty - attendanceResetPenalty;
+  return attendanceBonus + unsuccessfulPoints - noShowPenalty;
 };
 
 export const addStudentToQueue = async (req, res) => {
@@ -96,6 +95,7 @@ export const addStudentToQueue = async (req, res) => {
     _arID: _arId,
     _priorityScore: calculatePriorityScore(student),
     _queueStatus: "Waiting for allocation",
+    _queuedAt: new Date() // Add timestamp when student is queued
   });
 
     await queue.save();
@@ -231,7 +231,17 @@ export const allocateStudentsToBooking = async (req, res) => {
         const student = maxHeap.extractMax();
         // Update metrics for unsuccessful allocation
         await updateStudentMetrics(student._studentId, 'unsuccessful');
+        
+        // Update queue status for unallocated students
+        student._queueStatus = "Not allocated - No slots available";
         unallocatedStudents.push(student);
+      }
+
+      // After allocating students and before saving changes
+      if (schedule.timeSlots[timeSlotIndex]._availableSlots === 0 && allocatedStudents.length > 0) {
+        // Only set to "Fully Booked" if there are actually allocated students
+        schedule.timeSlots[timeSlotIndex]._status = "Fully Booked";
+        schedule.timeSlots[timeSlotIndex]._isFullyBooked = true;
       }
 
       // Update the queue with only unallocated students

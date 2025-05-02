@@ -19,13 +19,34 @@ const QueueTable = () => {
     setSelectedStudent({ ...student, queueInfo });
     onOpen();
   };
-  // Clear data when component unmounts
+  // // Clear data when component unmounts
+  // useEffect(() => {
+  //   fetchAllCurrentMonthQueues();
+  //   return () => {
+  //     clearQueues();
+  //   };
+  // }, [fetchAllCurrentMonthQueues, clearQueues]);
+
+  // Add polling interval
   useEffect(() => {
+    // Initial fetch
     fetchAllCurrentMonthQueues();
+    
+    // Set up polling every 5 seconds
+    const intervalId = setInterval(() => {
+      if (date && timeSlot.startTime && timeSlot.endTime) {
+        fetchQueues(date, timeSlot);
+      } else {
+        fetchAllCurrentMonthQueues();
+      }
+    }, 5000); // 5000ms = 5 seconds
+
+    // Cleanup on unmount
     return () => {
+      clearInterval(intervalId);
       clearQueues();
     };
-  }, [fetchAllCurrentMonthQueues, clearQueues]);
+  }, [fetchAllCurrentMonthQueues, fetchQueues, date, timeSlot, clearQueues]);
 
   // Modify the existing useEffect to only fetch filtered data when date and timeSlot are selected
   useEffect(() => {
@@ -67,20 +88,9 @@ const QueueTable = () => {
   };
 
   const handleAllocate = async () => {
-    if (!date || !timeSlot.startTime) {
-      toast({
-        title: "Selection Required",
-        description: "Please select both date and time slot before allocating",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
     setIsAllocating(true);
     try {
-      const result = await allocateStudents(date, timeSlot);
+      const result = await allocateStudents();
       
       if (result.success) {
         toast({
@@ -90,6 +100,9 @@ const QueueTable = () => {
           duration: 3000,
           isClosable: true,
         });
+        
+        // Refresh the queue data after allocation
+        fetchAllCurrentMonthQueues();
       } else {
         toast({
           title: "Allocation Failed",
@@ -204,7 +217,7 @@ const QueueTable = () => {
       {/* Details Modal */}
       <Modal isOpen={isOpen} onClose={onClose} isCentered size="xl">
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent maxW="50%">
           <ModalHeader bg="#071434" color="white" roundedTop="md">Student Queue Details</ModalHeader>
           <ModalBody p={8}>
             {selectedStudent && (
@@ -285,26 +298,34 @@ const QueueTable = () => {
                     />
                   </Box>
                   <Box gridColumn="span 2">
-                    <Text mb={2} color="gray.700">Attendance History</Text>
                     <Grid templateColumns="repeat(3, 1fr)" gap={4}>
-                      <Input
-                        value={`ATTENDED: ${selectedStudent._studentId._attendedSlots || 0}`}
-                        bg="white"
-                        boxShadow="lg"
-                        isReadOnly
-                      />
-                      <Input
-                        value={`NO SHOWS: ${selectedStudent._studentId._noShows || 0}`}
-                        bg="white"
-                        boxShadow="lg"
-                        isReadOnly
-                      />
-                      <Input
-                        value={`UNSUCCESSFUL: ${selectedStudent._studentId._unsuccessfulAttempts || 0}`}
-                        bg="white"
-                        boxShadow="lg"
-                        isReadOnly
-                      />
+                      <Box>
+                        <Text mb={2} color="gray.700">Attended</Text>
+                        <Input
+                          value={selectedStudent._studentId._attendedSlots || 0}
+                          bg="white"
+                          boxShadow="lg"
+                          isReadOnly
+                        />
+                      </Box>
+                      <Box>
+                        <Text mb={2} color="gray.700">Cancellations/No Shows</Text>
+                        <Input
+                          value={selectedStudent._studentId._noShows || 0}
+                          bg="white"
+                          boxShadow="lg"
+                          isReadOnly
+                        />
+                      </Box>
+                      <Box>
+                        <Text mb={2} color="gray.700">Unsuccessful</Text>
+                        <Input
+                          value={selectedStudent._studentId._unsuccessfulAttempts || 0}
+                          bg="white"
+                          boxShadow="lg"
+                          isReadOnly
+                        />
+                      </Box>
                     </Grid>
                   </Box>
                 </Grid>
@@ -316,6 +337,15 @@ const QueueTable = () => {
                     <Text mb={2} color="gray.700">Queue Date</Text>
                     <Input
                       value={new Date(selectedStudent.queueInfo._date).toLocaleDateString()}
+                      bg="white"
+                      boxShadow="lg"
+                      isReadOnly
+                    />
+                  </Box>
+                  <Box>
+                    <Text mb={2} color="gray.700">Queued At</Text>
+                    <Input
+                      value={new Date(selectedStudent._queuedAt).toLocaleTimeString()}
                       bg="white"
                       boxShadow="lg"
                       isReadOnly

@@ -34,9 +34,9 @@ class MaxHeap {
         if (index <= 0) return;
         
         const parentIndex = Math.floor((index - 1) / 2);
-        if (this.heap[parentIndex]._priorityScore < this.heap[index]._priorityScore) {
-          this.swap(parentIndex, index);
-          this.heapifyUp(parentIndex);
+        if (this.shouldSwap(parentIndex, index)) {
+            this.swap(parentIndex, index);
+            this.heapifyUp(parentIndex);
         }
     }
 
@@ -44,20 +44,34 @@ class MaxHeap {
     heapifyDown(index) {
         const leftChildIndex = 2 * index + 1;
         const rightChildIndex = 2 * index + 2;
-        let largestIndex = index;
+        let highestPriorityIndex = index;
 
-        if (leftChildIndex < this.heap.length && this.heap[leftChildIndex]._priorityScore > this.heap[largestIndex]._priorityScore) {
-            largestIndex = leftChildIndex;
+        if (leftChildIndex < this.heap.length && this.shouldSwap(highestPriorityIndex, leftChildIndex)) {
+            highestPriorityIndex = leftChildIndex;
         }
 
-        if (rightChildIndex < this.heap.length && this.heap[rightChildIndex]._priorityScore > this.heap[largestIndex]._priorityScore) {
-            largestIndex = rightChildIndex;
+        if (rightChildIndex < this.heap.length && this.shouldSwap(highestPriorityIndex, rightChildIndex)) {
+            highestPriorityIndex = rightChildIndex;
         }
 
-        if (largestIndex !== index) {
-            this.swap(largestIndex, index);
-            this.heapifyDown(largestIndex);
+        if (highestPriorityIndex !== index) {
+            this.swap(highestPriorityIndex, index);
+            this.heapifyDown(highestPriorityIndex);
         }
+    }
+
+    shouldSwap(indexA, indexB) {
+        const scoreA = this.heap[indexA]._priorityScore;
+        const scoreB = this.heap[indexB]._priorityScore;
+        
+        if (scoreA !== scoreB) {
+            return scoreB > scoreA;
+        }
+        
+        // If priority scores are equal, compare queueing timestamps
+        const timeA = new Date(this.heap[indexA]._queuedAt).getTime();
+        const timeB = new Date(this.heap[indexB]._queuedAt).getTime();
+        return timeA < timeB; // Earlier timestamp gets priority
     }
 
     updatePriority(studentId, newScore) {

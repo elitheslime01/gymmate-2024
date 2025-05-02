@@ -42,7 +42,18 @@ const queueSchema = new mongoose.Schema({
         },
         _queueStatus: {
             type: String,
-            required: true,
+            enum: [
+            "Waiting for allocation",
+            "Not allocated - No slots available", 
+            "Not allocated - Cancelled",
+            "Not allocated - Reschedule"
+            ],
+            default: "Waiting for allocation"
+        },
+        _queuedAt: {
+            type: Date,
+            default: Date.now,
+            required: true
         }
     }],
     createdAt: {

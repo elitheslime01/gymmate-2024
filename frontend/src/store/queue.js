@@ -59,31 +59,27 @@ const useQueueStore = create((set) => ({
       set({ queues: [] }); // Clear queues on error
     }
   },
-  allocateStudents: async (date, timeSlot) => {
+  
+  allocateStudents: async () => {
     try {
       const response = await fetch('http://localhost:5000/api/queues/allocate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ date, timeSlot })
+        }
       });
-
+  
       const data = await response.json();
-
+  
       if (!data.success) {
         throw new Error(data.message);
       }
-
-      // Refresh queues after successful allocation
-      const fetchQueuesAction = useQueueStore.getState().fetchQueues;
-      await fetchQueuesAction(date, timeSlot);
-
+  
       return {
         success: true,
         data: data.data
       };
-
+  
     } catch (error) {
       console.error("Error allocating students:", error.message);
       return {
@@ -92,6 +88,17 @@ const useQueueStore = create((set) => ({
       };
     }
   },
+  
+  refreshQueueData: async () => {
+    const state = useQueueStore.getState();
+    if (state.date && state.timeSlot.startTime) {
+      // If there's a specific date and time slot selected
+      await state.fetchQueues(state.date, state.timeSlot);
+    } else {
+      // Otherwise refresh all current month queues
+      await state.fetchAllCurrentMonthQueues();
+    }
+  }
 }));
 
 export default useQueueStore;
