@@ -146,6 +146,7 @@ export const fetchCurrentMonthQueues = async (req, res) => {
 
 
 // Function to allocate students to booking collection
+// Function to allocate students to booking collection
 export const allocateStudentsToBooking = async (req, res) => {
   try {
     const allocationResults = [];
