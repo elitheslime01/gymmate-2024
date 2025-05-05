@@ -39,6 +39,19 @@ const bookingSchema = new mongoose.Schema({
         _priorityScore: {
             type: Number,
             required: true,
+        },
+        _bookingStatus: {
+            type: String,
+            enum: ["Awaiting Arrival", "Checked-In", "Completed", "Cancelled", "Not Attended"],
+            default: "Awaiting Arrival"
+        },
+        _timedIn: {
+            type: Date,
+            default: null
+        },
+        _timedOut: {
+            type: Date,
+            default: null
         }
     }],
     createdAt: {

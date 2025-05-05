@@ -9,6 +9,7 @@ import WalkinLogOptions from "../components/WalkinLogOptions";
 import WalkinBookSession from "../components/WalkinBookSession";
 import WalkinARInput from "../components/WalkinARInput";
 import WalkinReview from "../components/WalkinReview";
+import WalkinTimeInOut from "../components/WalkinTimeInOut";
 
 const WalkinBookingPage = () => {
     const {

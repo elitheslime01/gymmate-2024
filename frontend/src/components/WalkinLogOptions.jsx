@@ -1,20 +1,22 @@
 import { Box, Button, Divider, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import useWalkinStore from "../store/walkin"
-
+import { useStudentStore } from "../store/student" 
 
 const WalkinLogOptions = () => {
 
+    const {user} = useStudentStore();
+
     const {
-        setShowRegister,
         setShowBooking,
         setShowLogOptions,
+        setShowTimeInOut,
         setShowLogin
     } = useWalkinStore();
 
     const handleOptLogin = () => {
-        setShowLogin(true); 
-        setShowRegister(false); 
-    }
+        setShowTimeInOut(true);
+        setShowLogOptions(false);
+    };
 
     const handleLogOptBook = () => {
         setShowBooking(true);
@@ -31,7 +33,7 @@ const WalkinLogOptions = () => {
         <Box p={8} minW="full" maxW="4xl">
             <Flex align="center" mb={6} justify="space-between">
                 <Heading as="h1" size="md" color="gray.800" textAlign="center" flex="1">
-                    Hello *Name*, what do you want to do today?
+                    Hello {user?._fName || "Guest"}, what do you want to do today?
                 </Heading>
             </Flex>
                 <Flex justify="space-between" align="center">
@@ -41,8 +43,8 @@ const WalkinLogOptions = () => {
                         color='white'
                         _hover={{ bg: '#e65c3b' }} 
                         _active={{ bg: '#cc4a2d' }}
-                        size="lg" w="full"
-                        h="3em"
+                        size="lg" w="100%"
+                        h="100px"
                         whiteSpace="wrap"
                         onClick={handleLogOptBook}>
                         I want to book a session.
@@ -61,8 +63,8 @@ const WalkinLogOptions = () => {
                         color='white'
                         _hover={{ bg: '#e65c3b' }} 
                         _active={{ bg: '#cc4a2d' }}
-                        size="lg" w="full"
-                        h="3em"
+                        size="lg" w="100%"
+                        h="100px"
                         whiteSpace="wrap"
                         onClick={handleOptLogin}>
                         I want to time in/time out of my session.

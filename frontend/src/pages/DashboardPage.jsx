@@ -63,6 +63,7 @@ const DashboardPage = () => {
             />
             <DashboardButtons 
               text="Booking Management" 
+              onClick={() => navigate('/booking')}
               icon={ImTable} 
             />
             <DashboardButtons 

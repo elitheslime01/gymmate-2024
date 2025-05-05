@@ -146,10 +146,9 @@ export const fetchCurrentMonthQueues = async (req, res) => {
 
 
 // Function to allocate students to booking collection
+// Function to allocate students to booking collection
 export const allocateStudentsToBooking = async (req, res) => {
   try {
-
-    // Initialize allocationResults array
     const allocationResults = [];
 
     // Fetch all queues with populated student data
@@ -167,94 +166,95 @@ export const allocateStudentsToBooking = async (req, res) => {
       // Create max heap for this queue's students
       const maxHeap = new MaxHeap();
       
-      // Add all students from this queue to the heap
+      // Only add students who are waiting for allocation
+      const waitingStudents = queue.students.filter(
+        student => student._queueStatus === "Waiting for allocation"
+      );
+
+      // Skip if no students are waiting for allocation
+      if (waitingStudents.length === 0) {
+        continue;
+      }
+      
+      // Add waiting students to the heap
       try {
-        queue.students.forEach(student => {
+        waitingStudents.forEach(student => {
           maxHeap.insert(student);
         });
       } catch (error) {
         console.error("Error inserting students into heap:", error);
-        continue; // Skip this queue and move to next one
+        continue;
       }
 
-      // Get schedule and time slot info once
-      const firstStudent = queue.students[0];
+      // Get schedule and time slot info
+      const firstStudent = waitingStudents[0];
       const schedule = await Schedule.findById(firstStudent._scheduleId);
       const timeSlotIndex = schedule.timeSlots.findIndex(
         slot => slot._startTime === queue._timeSlot.startTime
       );
 
       if (!schedule || timeSlotIndex === -1) {
-        continue; // Skip this queue if schedule/timeslot not found
+        continue;
       }
 
       const allocatedStudents = [];
-      const unallocatedStudents = [];
+      const unallocatedStudents = [...queue.students.filter(
+        student => student._queueStatus !== "Waiting for allocation"
+      )]; // Keep non-waiting students as is
 
-      // Allocate students based on priority until slots run out
+      // Allocate waiting students based on priority
       while (maxHeap.size() > 0 && schedule.timeSlots[timeSlotIndex]._availableSlots > 0) {
         const student = maxHeap.extractMax();
-
-        // Add to booking
+        
         const existingBooking = await Booking.findOne({
           _date: queue._date,
           "_timeSlot.startTime": queue._timeSlot.startTime,
           "_timeSlot.endTime": queue._timeSlot.endTime,
         });
 
-        if (existingBooking?.students.some(s => s._studentId.toString() === student._studentId.toString())) {
-          continue;
+        if (!existingBooking?.students.some(s => s._studentId.toString() === student._studentId.toString())) {
+          await updateStudentMetrics(student._studentId, 'attended');
+
+          if (existingBooking) {
+            existingBooking.students.push(student);
+            await existingBooking.save();
+          } else {
+            const newBooking = new Booking({
+              _date: queue._date,
+              _timeSlot: queue._timeSlot,
+              students: [student],
+            });
+            await newBooking.save();
+          }
+
+          schedule.timeSlots[timeSlotIndex]._availableSlots -= 1;
+          allocatedStudents.push(student);
         }
-
-        // Update metrics for successful allocation
-        await updateStudentMetrics(student._studentId, 'attended');
-
-        if (existingBooking) {
-          existingBooking.students.push(student);
-          await existingBooking.save();
-        } else {
-          const newBooking = new Booking({
-            _date: queue._date,
-            _timeSlot: queue._timeSlot,
-            students: [student],
-          });
-          await newBooking.save();
-        }
-
-        // Decrement available slots
-        schedule.timeSlots[timeSlotIndex]._availableSlots -= 1;
-        allocatedStudents.push(student);
       }
 
-      // Process remaining unallocated students
+      // Handle remaining unallocated waiting students
       while (maxHeap.size() > 0) {
         const student = maxHeap.extractMax();
-        // Update metrics for unsuccessful allocation
         await updateStudentMetrics(student._studentId, 'unsuccessful');
-        
-        // Update queue status for unallocated students
         student._queueStatus = "Not allocated - No slots available";
         unallocatedStudents.push(student);
       }
 
-      // After allocating students and before saving changes
+      // Update schedule status if needed
       if (schedule.timeSlots[timeSlotIndex]._availableSlots === 0 && allocatedStudents.length > 0) {
-        // Only set to "Fully Booked" if there are actually allocated students
         schedule.timeSlots[timeSlotIndex]._status = "Fully Booked";
         schedule.timeSlots[timeSlotIndex]._isFullyBooked = true;
       }
 
-      // Update the queue with only unallocated students
+      // Update queue with allocated and unallocated students
       queue.students = unallocatedStudents;
       await queue.save();
-      
-      // Save schedule changes
       await schedule.save();
 
       allocationResults.push({
         queueId: queue._id,
         allocated: allocatedStudents.length,
-        unallocated: unallocatedStudents.length
+        unallocated: waitingStudents.length - allocatedStudents.length
       });
     }
 
@@ -262,10 +262,10 @@ export const allocateStudentsToBooking = async (req, res) => {
       success: true, 
       message: "Students allocated based on priority scores.",
       data: {
-          results: allocationResults,
-          totalQueuesProcessed: allocationResults.length,
-          totalAllocated: allocationResults.reduce((sum, result) => sum + result.allocated, 0),
-          totalUnallocated: allocationResults.reduce((sum, result) => sum + result.unallocated, 0)
+        results: allocationResults,
+        totalQueuesProcessed: allocationResults.length,
+        totalAllocated: allocationResults.reduce((sum, result) => sum + result.allocated, 0),
+        totalUnallocated: allocationResults.reduce((sum, result) => sum + result.unallocated, 0)
       }
     });
 
@@ -283,77 +283,3 @@ export const cleanupEmptyQueues = async () => {
     console.error("Error cleaning up empty queues:", error);
   }
 };
-
-// export const allocateStudentsToBooking = async (req, res) => {
-//   try {
-//     // Fetch all queues
-//     const queues = await Queue.find({}).populate("students._studentId").populate("students._scheduleId").populate("students._arID");
-
-//     // Initialize an array to store students who couldn't be allocated
-//     const unallocatedStudents = [];
-
-//     // Loop through each queue
-//     for (const queue of queues) {
-//       // Check if a booking already exists for the queue's date and time slot
-//       const existingBooking = await Booking.findOne({
-//         _date: queue._date,
-//         "_timeSlot.startTime": queue._timeSlot.startTime,
-//         "_timeSlot.endTime": queue._timeSlot.endTime,
-//       });
-
-//       // If a booking already exists, use it instead of creating a new one
-//       if (existingBooking) {
-//         // Add students from the queue to the existing booking
-//         existingBooking.students = existingBooking.students.concat(queue.students);
-//         await existingBooking.save();
-//       } else {
-//         // Create a new booking if one does not exist
-//         const newBooking = new Booking({
-//           _date: queue._date,
-//           _timeSlot: queue._timeSlot,
-//           students: queue.students,
-//         });
-//         await newBooking.save();
-//       }
-
-//       // Decrement available slots in the schedule for each allocated student
-//       for (const student of queue.students) {
-//         const schedule = await Schedule.findById(student._scheduleId);
-//         if (schedule) {
-//           const timeSlotIndex = schedule.timeSlots.findIndex((slot) => slot._startTime === queue._timeSlot.startTime);
-//           if (timeSlotIndex !== -1) {
-//             if (schedule.timeSlots[timeSlotIndex]._availableSlots > 0) {
-//               schedule.timeSlots[timeSlotIndex]._availableSlots -= 1;
-//               await schedule.save();
-//             } else {
-//               // If no more available slots, add student to unallocatedStudents array
-//               unallocatedStudents.push(student);
-//               break; // Stop allocating students for this queue
-//             }
-//           }
-//         } else {
-//           // If schedule is not found, add all students to unallocatedStudents array
-//           unallocatedStudents.push(...queue.students);
-//           break; // Stop allocating students for this queue
-//         }
-//       }
-
-//       // Remove the queue after allocating its students to a booking
-//       await Queue.deleteOne({ _id: queue._id });
-//     }
-
-//     // Return a response with the unallocated students
-//     if (unallocatedStudents.length > 0) {
-//       res.status(200).json({
-//         success: true,
-//         message: "Students allocated to booking collection successfully, but some students couldn't be allocated due to no more available slots.",
-//         unallocatedStudents: unallocatedStudents,
-//       });
-//     } else {
-//       res.status(200).json({ success: true, message: "Students allocated to booking collection successfully." });
-//     }
-//   } catch (error) {
-//     console.error("Error allocating students to booking collection:", error.message);
-//     res.status(500).json({ success: false, message: "Server error." });
-//   }
-// };

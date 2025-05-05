@@ -1,0 +1,96 @@
+import { create } from 'zustand';
+
+const useBookingStore = create((set) => ({
+  bookings: [],
+  setBookings: (bookings) => set({ bookings }),
+  date: "",
+  setDate: (date) => set({ date }),
+  timeSlot: { startTime: "", endTime: "" },
+  setTimeSlot: (timeSlot) => set({ timeSlot }),
+  
+  clearBookings: () => set({ bookings: [], date: "", timeSlot: { startTime: "", endTime: "" } }),
+
+  fetchAllCurrentMonthBookings: async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/bookings/currentMonth', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (data && Array.isArray(data)) {
+        set({ bookings: data });
+      }
+    } catch (error) {
+      console.error("Error fetching current month bookings:", error.message);
+      set({ bookings: [] });
+    }
+  },
+
+  fetchBookings: async (date, timeSlot) => {
+    try {
+      set({ bookings: [] });
+  
+      const response = await fetch(`http://localhost:5000/api/bookings/get?date=${date}&startTime=${timeSlot.startTime}&endTime=${timeSlot.endTime}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      const data = await response.json();
+      
+      if (data && Array.isArray(data)) {
+        // Filter bookings by both date and time slot
+        const filteredBookings = data.filter(booking => 
+          new Date(booking._date).toISOString().split('T')[0] === date &&
+          booking._timeSlot.startTime === timeSlot.startTime
+        );
+        set({ bookings: filteredBookings });
+      }
+    } catch (error) {
+      console.error("Error fetching bookings:", error.message);
+      set({ bookings: [] });
+    }
+  },
+
+  fetchBookingsByDate: async (date) => {
+    try {
+      set({ bookings: [] });
+
+      const response = await fetch(`http://localhost:5000/api/bookings/get?date=${date}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      
+      if (data && Array.isArray(data)) {
+        const filteredBookings = data.filter(booking => 
+          new Date(booking._date).toISOString().split('T')[0] === date
+        );
+        set({ bookings: filteredBookings });
+      }
+    } catch (error) {
+      console.error("Error fetching bookings by date:", error.message);
+      set({ bookings: [] });
+    }
+  },
+
+  refreshBookingData: async () => {
+    const state = useBookingStore.getState();
+    if (state.date && state.timeSlot.startTime) {
+      await state.fetchBookings(state.date, state.timeSlot);
+    } else if (state.date) {
+      await state.fetchBookingsByDate(state.date);
+    } else {
+      await state.fetchAllCurrentMonthBookings();
+    }
+  }
+}));
+
+export default useBookingStore;

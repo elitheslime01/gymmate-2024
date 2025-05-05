@@ -1,84 +1,69 @@
 import { 
   Table, Thead, Tbody, Tr, Th, Td, TableContainer, Box, Flex, Input, 
-  Select, useToast, IconButton, Spinner, Button, Modal, ModalOverlay, 
-  ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Text, Grid
+  Select, IconButton, Modal, ModalOverlay, ModalContent, ModalHeader, 
+  ModalBody, ModalFooter, useDisclosure, Text, Grid, Button
 } from "@chakra-ui/react";
-import { RepeatIcon, InfoIcon } from "@chakra-ui/icons";
+import { InfoIcon } from "@chakra-ui/icons";
 import { useState, useEffect } from 'react';
-import useQueueStore from "../store/queue";
+import useBookingStore from "../store/booking";
 
-const QueueTable = () => {
-  const { queues, setDate, setTimeSlot, fetchQueues, fetchQueuesByDate, clearQueues, allocateStudents, fetchAllCurrentMonthQueues } = useQueueStore();  const [date, setDateState] = useState("");
-  const toast = useToast();
+const BookingTable = () => {
+  const { bookings, setDate, setTimeSlot, fetchBookingsByDate, clearBookings, fetchBookings, fetchAllCurrentMonthBookings } = useBookingStore();
+  const [date, setDateState] = useState("");
   const [timeSlot, setTimeSlotState] = useState({ startTime: "", endTime: "" });
-  const [isAllocating, setIsAllocating] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const handleViewDetails = (student, queueInfo) => {
-    setSelectedStudent({ ...student, queueInfo });
+  const handleViewDetails = (student, bookingInfo) => {
+    setSelectedStudent({ ...student, bookingInfo });
     onOpen();
   };
-  // // Clear data when component unmounts
-  // useEffect(() => {
-  //   fetchAllCurrentMonthQueues();
-  //   return () => {
-  //     clearQueues();
-  //   };
-  // }, [fetchAllCurrentMonthQueues, clearQueues]);
 
-  // Add polling interval
   useEffect(() => {
-    // Initial fetch
-    fetchAllCurrentMonthQueues();
-    
-    // // Set up polling every 5 seconds
-    // const intervalId = setInterval(() => {
-    //   if (date && timeSlot.startTime && timeSlot.endTime) {
-    //     fetchQueues(date, timeSlot);
-    //   } else {
-    //     fetchAllCurrentMonthQueues();
-    //   }
-    // }, 5000); // 5000ms = 5 seconds
+    fetchAllCurrentMonthBookings();
+  }, [fetchAllCurrentMonthBookings]);
 
-    // Cleanup on unmount
-    return () => {
-      // clearInterval(intervalId);
-      clearQueues();
-    };
-  }, [fetchAllCurrentMonthQueues, fetchQueues, date, timeSlot, clearQueues]);
-
-  // Modify the existing useEffect to only fetch filtered data when date and timeSlot are selected
-  useEffect(() => {
-    if (date && timeSlot.startTime && timeSlot.endTime) {
-      fetchQueues(date, timeSlot);
-    }
-  }, [date, timeSlot, fetchQueues]);
-
-  // Reset states when date changes
-  // Update handleDateChange to not clear queues immediately
   const handleDateChange = (e) => {
     setDateState(e.target.value);
     setDate(e.target.value);
-    // Clear timeslot selection
     setTimeSlotState({ startTime: "", endTime: "" });
     setTimeSlot({ startTime: "", endTime: "" });
     
     if (!e.target.value) {
-      // If date is cleared, show all current month queues
-      fetchAllCurrentMonthQueues();
+      fetchAllCurrentMonthBookings();
     } else {
-      // If date is selected, show all queues for that date
-      fetchQueuesByDate(e.target.value);
+      fetchBookingsByDate(e.target.value);
     }
   };
 
-  // Reset data when time slot changes
+  // const handleTimeSlotChange = (e) => {
+  //   const { name, value } = e.target;
+  //   if (name === "startTime") {
+  //     clearBookings();
+  //     let endTime;
+  //     switch(value) {
+  //       case "08:00 AM": endTime = "10:00 AM"; break;
+  //       case "10:00 AM": endTime = "12:00 PM"; break;
+  //       case "12:00 PM": endTime = "02:00 PM"; break;
+  //       case "02:00 PM": endTime = "04:00 PM"; break;
+  //       default: endTime = "";
+  //     }
+  //     setTimeSlotState({ startTime: value, endTime });
+  //     setTimeSlot({ startTime: value, endTime });
+  //   }
+  // };
+
+  useEffect(() => {
+    if (date && timeSlot.startTime && timeSlot.endTime) {
+      fetchBookings(date, timeSlot);
+    }
+  }, [date, timeSlot, fetchBookings]);
+  
   const handleTimeSlotChange = (e) => {
     const { name, value } = e.target;
     if (name === "startTime") {
-      clearQueues(); // Clear existing data
       let endTime;
+      clearBookings();
       switch(value) {
         case "08:00 AM": endTime = "10:00 AM"; break;
         case "10:00 AM": endTime = "12:00 PM"; break;
@@ -88,48 +73,13 @@ const QueueTable = () => {
       }
       setTimeSlotState({ startTime: value, endTime });
       setTimeSlot({ startTime: value, endTime });
-    }
-  };
-
-  const handleAllocate = async () => {
-    setIsAllocating(true);
-    try {
-      const result = await allocateStudents();
       
-      if (result.success) {
-        toast({
-          title: "Allocation Complete",
-          description: `Successfully allocated ${result.data.totalAllocated} students`,
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
-        
-        // Refresh the queue data after allocation
-        fetchAllCurrentMonthQueues();
-      } else {
-        toast({
-          title: "Allocation Failed",
-          description: result.error || "Failed to allocate students",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
+      // If both date and time slot are selected, fetch filtered data
+      if (date && value) {
+        fetchBookings(date, { startTime: value, endTime });
       }
-    } finally {
-      setIsAllocating(false);
     }
   };
-
-  useEffect(() => {
-    if (date && timeSlot.startTime && timeSlot.endTime) {
-      console.log("Condition met, calling fetchQueues");
-      console.log("Fetching queues with date and time slot:", date, timeSlot);
-      fetchQueues(date, timeSlot).then((data) => {
-        console.log("Queues data:", data);
-      });
-    }
-  }, [date, timeSlot, fetchQueues]);
 
   return (
     <Box mb={0}>
@@ -140,10 +90,12 @@ const QueueTable = () => {
             value={date}
             onChange={handleDateChange}
             placeholder="Select Date (yyyy-mm-dd)"
-            bg="white" boxShadow="lg" 
+            bg="white" 
+            boxShadow="lg" 
           />
           <Select
-            bg="white" boxShadow="lg" 
+            bg="white" 
+            boxShadow="lg" 
             name="startTime"
             value={timeSlot.startTime}
             onChange={handleTimeSlotChange}
@@ -161,60 +113,57 @@ const QueueTable = () => {
             <option value="option2">Umak Email</option>
           </Select>
           <Input bg="white" boxShadow="lg" placeholder="Search" />
-          <IconButton
-            icon={isAllocating ? <Spinner size="sm" /> : <RepeatIcon />}
-            aria-label="Allocate Students"
-            bg="#FE7654"
-            color="white"
-            _hover={{ bg: '#e65c3b' }}
-            onClick={handleAllocate}
-            isLoading={isAllocating}
-          />
         </Flex>
       </Flex>
       <TableContainer>
         <Table bg="white" size="sm">
-          <Thead bg="#071434" position="sticky" top={0} zIndex={1}>
-            <Tr>
-              <Th color="white" textAlign="center" h="30px">Date</Th>
-              <Th color="white" textAlign="center">Time Slot</Th>
-              <Th color="white" textAlign="center">First Name</Th>
-              <Th color="white" textAlign="center">Last Name</Th>
-              <Th color="white" textAlign="center">Queue Status</Th>
-              <Th color="white" textAlign="center">Priority Score</Th>
-              <Th color="white" textAlign="center">Actions</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {queues && queues.length > 0 ? (
-              queues.map((item, index) => (
-                item.students.map((student, studentIndex) => (
-                  <Tr key={`${index}-${studentIndex}`}>
-                    <Td textAlign="center">{new Date(item._date).toLocaleDateString()}</Td>
-                    <Td textAlign="center">{`${item._timeSlot.startTime} - ${item._timeSlot.endTime}`.toUpperCase()}</Td>
-                    <Td textAlign="center">{student._studentId._fName.toUpperCase()}</Td>
-                    <Td textAlign="center">{student._studentId._lName.toUpperCase()}</Td>
-                    <Td textAlign="center">{student._queueStatus.toUpperCase()}</Td>
-                    <Td textAlign="center">{student._priorityScore}</Td>
-                    <Td textAlign="center">
-                      <IconButton
-                        icon={<InfoIcon />}
-                        variant="ghost"
-                        size="sm"
-                        color="#FE7654"
-                        _hover={{ bg: 'rgba(254, 118, 84, 0.1)', color: '#e65c3b' }}
-                        onClick={() => handleViewDetails(student, item)}
-                      />
-                    </Td>
-                  </Tr>
-                ))
+        <Thead bg="#071434" position="sticky" top={0} zIndex={1}>
+          <Tr>
+            <Th color="white" textAlign="center">Date</Th>
+            <Th color="white" textAlign="center">Time Slot</Th>
+            <Th color="white" textAlign="center">First Name</Th>
+            <Th color="white" textAlign="center">Last Name</Th>
+            <Th color="white" textAlign="center">Booking Status</Th>
+            <Th color="white" textAlign="center">Timed-In</Th>
+            <Th color="white" textAlign="center">Timed-Out</Th>
+            <Th color="white" textAlign="center">Actions</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {bookings && bookings.length > 0 ? (
+            bookings.map((item, index) => (
+              item.students.map((student, studentIndex) => (
+                <Tr key={`${index}-${studentIndex}`}>
+                  <Td textAlign="center">{new Date(item._date).toLocaleDateString()}</Td>
+                  <Td textAlign="center">{`${item._timeSlot.startTime} - ${item._timeSlot.endTime}`.toUpperCase()}</Td>
+                  <Td textAlign="center">{student._studentId._fName.toUpperCase()}</Td>
+                  <Td textAlign="center">{student._studentId._lName.toUpperCase()}</Td>
+                  <Td textAlign="center">{student._bookingStatus}</Td>
+                  <Td textAlign="center">
+                    {student._timedIn ? new Date(student._timedIn).toLocaleTimeString() : '--'}
+                  </Td>
+                  <Td textAlign="center">
+                    {student._timedOut ? new Date(student._timedOut).toLocaleTimeString() : '--'}
+                  </Td>
+                  <Td textAlign="center">
+                    <IconButton
+                      icon={<InfoIcon />}
+                      variant="ghost"
+                      size="sm"
+                      color="#FE7654"
+                      _hover={{ bg: 'rgba(254, 118, 84, 0.1)', color: '#e65c3b' }}
+                      onClick={() => handleViewDetails(student, item)}
+                    />
+                  </Td>
+                </Tr>
               ))
-            ) : (
-              <Tr>
-                <Td colSpan={7} textAlign="center">No data available</Td>
-              </Tr>
-            )}
-          </Tbody>
+            ))
+          ) : (
+            <Tr>
+              <Td colSpan={9} textAlign="center">No data available</Td>
+            </Tr>
+          )}
+        </Tbody>
         </Table>
       </TableContainer>
 
@@ -222,11 +171,10 @@ const QueueTable = () => {
       <Modal isOpen={isOpen} onClose={onClose} isCentered size="xl">
         <ModalOverlay />
         <ModalContent maxW="50%">
-          <ModalHeader bg="#071434" color="white" roundedTop="md">Student Queue Details</ModalHeader>
+          <ModalHeader bg="#071434" color="white" roundedTop="md">Student Booking Details</ModalHeader>
           <ModalBody p={8}>
             {selectedStudent && (
               <Box>
-                {/* Student Information Section */}
                 <Text fontSize="lg" fontWeight="bold" mb={4} color="#071434">Student Information</Text>
                 <Grid templateColumns="repeat(2, 1fr)" gap={6} mb={8}>
                   <Box>
@@ -241,7 +189,7 @@ const QueueTable = () => {
                   <Box>
                     <Text mb={2} color="gray.700">Student ID</Text>
                     <Input
-                      value={selectedStudent._studentId._umakID.toUpperCase()}
+                      value={selectedStudent._studentId._umakEmail.toUpperCase()}
                       bg="white"
                       boxShadow="lg"
                       isReadOnly
@@ -334,22 +282,12 @@ const QueueTable = () => {
                   </Box>
                 </Grid>
       
-                {/* Queue Information Section */}
-                <Text fontSize="lg" fontWeight="bold" mb={4} color="#071434">Queue Information</Text>
+                <Text fontSize="lg" fontWeight="bold" mb={4} color="#071434">Booking Information</Text>
                 <Grid templateColumns="repeat(2, 1fr)" gap={6}>
                   <Box>
-                    <Text mb={2} color="gray.700">Queue Date</Text>
+                    <Text mb={2} color="gray.700">Date</Text>
                     <Input
-                      value={new Date(selectedStudent.queueInfo._date).toLocaleDateString()}
-                      bg="white"
-                      boxShadow="lg"
-                      isReadOnly
-                    />
-                  </Box>
-                  <Box>
-                    <Text mb={2} color="gray.700">Queued At</Text>
-                    <Input
-                      value={new Date(selectedStudent._queuedAt).toLocaleTimeString()}
+                      value={new Date(selectedStudent.bookingInfo._date).toLocaleDateString()}
                       bg="white"
                       boxShadow="lg"
                       isReadOnly
@@ -358,16 +296,16 @@ const QueueTable = () => {
                   <Box>
                     <Text mb={2} color="gray.700">Time Slot</Text>
                     <Input
-                      value={`${selectedStudent.queueInfo._timeSlot.startTime} - ${selectedStudent.queueInfo._timeSlot.endTime}`}
+                      value={`${selectedStudent.bookingInfo._timeSlot.startTime} - ${selectedStudent.bookingInfo._timeSlot.endTime}`}
                       bg="white"
                       boxShadow="lg"
                       isReadOnly
                     />
                   </Box>
                   <Box>
-                    <Text mb={2} color="gray.700">Queue Status</Text>
+                    <Text mb={2} color="gray.700">Booking Status</Text>
                     <Input
-                      value={selectedStudent._queueStatus.toUpperCase()}
+                      value={selectedStudent._bookingStatus}
                       bg="white"
                       boxShadow="lg"
                       isReadOnly
@@ -377,6 +315,24 @@ const QueueTable = () => {
                     <Text mb={2} color="gray.700">Priority Score</Text>
                     <Input
                       value={selectedStudent._priorityScore}
+                      bg="white"
+                      boxShadow="lg"
+                      isReadOnly
+                    />
+                  </Box>
+                  <Box>
+                    <Text mb={2} color="gray.700">Timed-In</Text>
+                    <Input
+                      value={selectedStudent._timedIn ? new Date(selectedStudent._timedIn).toLocaleTimeString() : 'Not yet timed in'}
+                      bg="white"
+                      boxShadow="lg"
+                      isReadOnly
+                    />
+                  </Box>
+                  <Box>
+                    <Text mb={2} color="gray.700">Timed-Out</Text>
+                    <Input
+                      value={selectedStudent._timedOut ? new Date(selectedStudent._timedOut).toLocaleTimeString() : 'Not yet timed out'}
                       bg="white"
                       boxShadow="lg"
                       isReadOnly
@@ -406,4 +362,4 @@ const QueueTable = () => {
   );
 };
 
-export default QueueTable;
+export default BookingTable;

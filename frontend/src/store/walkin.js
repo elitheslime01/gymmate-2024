@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 
-const useWalkinStore = create((set) => ({
+const useWalkinStore = create((set, get) => ({
+    navigationStack: ['options'],
+    currentView: 'options',
     currentDate: new Date(),
     selectedDay: null, 
     selectedTime: null, 
@@ -18,6 +20,7 @@ const useWalkinStore = create((set) => ({
     arCode: "",
     isARCodeValid: false,
     selectedTimeSlot: null,
+    showTimeInOut: false,
     showPassword: { password: false, confirmPassword: false }, 
 
     setCurrentDate: (date) => set({ currentDate: date }),
@@ -34,9 +37,11 @@ const useWalkinStore = create((set) => ({
     setShowARInput: (value) => set({ showARInput: value }),
     setShowReview: (value) => set({ showReview: value }),
     setShowLogOptions: (value) => set({ showLogOptions: value }),
+    setShowTimeInOut: (value) => set({ showLogOptions: value }),
     setArCode: (code) => set({ arCode: code }),
     setSelectedTimeSlot: (slot) => set({ selectedTimeSlot: slot }),
     setShowPassword: (value) => set((state) => ({ showPassword: { ...state.showPassword, ...value } })),
+
     setARImage: (arImage) => {
         console.log('arImage:', arImage);
         set({ arImage });
@@ -200,6 +205,61 @@ const useWalkinStore = create((set) => ({
           console.error('Error getting AR image:', error.message);
         }
       },
+
+    // Navigation functions
+    navigateTo: (view) => {
+        const currentStack = get().navigationStack;
+        set({ 
+            navigationStack: [...currentStack, view],
+            currentView: view,
+            // Reset all show states first
+            showRegister: false,
+            showLogin: false,
+            showLogOptions: false,
+            showBooking: false,
+            showARInput: false,
+            showReview: false,
+            // Set the appropriate view state
+            [`show${view.charAt(0).toUpperCase() + view.slice(1)}`]: true
+        });
+    },
+
+    goBack: () => {
+        const currentStack = get().navigationStack;
+        if (currentStack.length > 1) {
+            const newStack = currentStack.slice(0, -1);
+            const previousView = newStack[newStack.length - 1];
+            set({ 
+                navigationStack: newStack,
+                currentView: previousView,
+                // Reset all show states
+                showRegister: false,
+                showLogin: false,
+                showLogOptions: false,
+                showBooking: false,
+                showARInput: false,
+                showReview: false,
+                // Set the appropriate view state
+                [`show${previousView.charAt(0).toUpperCase() + previousView.slice(1)}`]: true
+            });
+        }
+    },
+
+    // Reset navigation
+    resetNavigation: () => {
+        set({ 
+            navigationStack: ['options'],
+            currentView: 'options',
+            showRegister: false,
+            showLogin: false,
+            showLogOptions: false,
+            showBooking: false,
+            showARInput: false,
+            showReview: false,
+            isRegistered: false,
+            isBooked: false
+        });
+    }
 }));
 
 export default useWalkinStore;

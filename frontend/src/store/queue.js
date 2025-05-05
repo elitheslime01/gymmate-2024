@@ -89,13 +89,44 @@ const useQueueStore = create((set) => ({
     }
   },
   
+  // Add this new function
+  fetchQueuesByDate: async (date) => {
+    try {
+      set({ queues: [] });
+
+      const response = await fetch(`http://localhost:5000/api/queues/get?date=${date}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      
+      if (data && Array.isArray(data)) {
+        // Filter queues by just the date
+        const filteredQueues = data.filter(queue => 
+          new Date(queue._date).toISOString().split('T')[0] === date
+        );
+        set({ queues: filteredQueues });
+      }
+    } catch (error) {
+      console.error("Error fetching queues by date:", error.message);
+      set({ queues: [] });
+    }
+  },
+
+  // Modify the existing refreshQueueData function
   refreshQueueData: async () => {
     const state = useQueueStore.getState();
     if (state.date && state.timeSlot.startTime) {
-      // If there's a specific date and time slot selected
+      // If both date and timeslot are selected
       await state.fetchQueues(state.date, state.timeSlot);
+    } else if (state.date) {
+      // If only date is selected
+      await state.fetchQueuesByDate(state.date);
     } else {
-      // Otherwise refresh all current month queues
+      // If nothing is selected, show current month
       await state.fetchAllCurrentMonthQueues();
     }
   }

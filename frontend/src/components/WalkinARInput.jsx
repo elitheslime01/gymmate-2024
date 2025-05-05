@@ -6,6 +6,7 @@ const WalkinARInput = () => {
 
     const { setShowBooking, setShowARInput, setShowReview, arCode, setArCode, checkARCode, setARImage, arImage } = useWalkinStore();
     const toast = useToast();
+    
 
     const handleARCancel =  () => {
         setShowARInput(false);
