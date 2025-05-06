@@ -168,9 +168,9 @@ const BookingTable = () => {
       </TableContainer>
 
       {/* Details Modal */}
-      <Modal isOpen={isOpen} onClose={onClose} isCentered size="xl">
+      <Modal isOpen={isOpen} onClose={onClose} isCentered size="2xl">
         <ModalOverlay />
-        <ModalContent maxW="50%">
+        <ModalContent bg="white" boxShadow="lg" rounded="md">
           <ModalHeader bg="#071434" color="white" roundedTop="md">Student Booking Details</ModalHeader>
           <ModalBody p={8}>
             {selectedStudent && (

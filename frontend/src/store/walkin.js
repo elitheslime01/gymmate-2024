@@ -21,7 +21,8 @@ const useWalkinStore = create((set, get) => ({
     isARCodeValid: false,
     selectedTimeSlot: null,
     showTimeInOut: false,
-    showPassword: { password: false, confirmPassword: false }, 
+    showPassword: { password: false, confirmPassword: false },
+    currentBooking: null,
 
     setCurrentDate: (date) => set({ currentDate: date }),
     setSelectedDay: (day) => set({ selectedDay: day }),
@@ -37,7 +38,7 @@ const useWalkinStore = create((set, get) => ({
     setShowARInput: (value) => set({ showARInput: value }),
     setShowReview: (value) => set({ showReview: value }),
     setShowLogOptions: (value) => set({ showLogOptions: value }),
-    setShowTimeInOut: (value) => set({ showLogOptions: value }),
+    setShowTimeInOut: (value) => set({ showTimeInOut: value }),
     setArCode: (code) => set({ arCode: code }),
     setSelectedTimeSlot: (slot) => set({ selectedTimeSlot: slot }),
     setShowPassword: (value) => set((state) => ({ showPassword: { ...state.showPassword, ...value } })),
@@ -45,6 +46,30 @@ const useWalkinStore = create((set, get) => ({
     setARImage: (arImage) => {
         console.log('arImage:', arImage);
         set({ arImage });
+    },
+
+   
+
+    fetchCurrentBooking: async (studentId) => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/bookings/current/${studentId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+  
+        const data = await response.json();
+        if (response.ok) {
+          set({ currentBooking: data });
+          console.log("Current booking fetched successfully:", data);
+          return { success: true, data };
+        }
+        return { success: false, message: data.message };
+      } catch (error) {
+        console.error("Error fetching current booking:", error);
+        return { success: false, message: "Failed to fetch booking information" };
+      }
     },
 
     // Function to fetch schedule data by date

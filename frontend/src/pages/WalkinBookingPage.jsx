@@ -25,6 +25,7 @@ const WalkinBookingPage = () => {
         showReview,
         setShowReview,
         showLogOptions,
+        showTimeInOut
     } = useWalkinStore();
     const [countdown, setCountdown] = useState(5);
     const { isOpen, onClose } = useDisclosure();
@@ -83,7 +84,7 @@ const WalkinBookingPage = () => {
                     alignItems="center"
                     justifyContent="center" >
                     
-                    {!showRegister && !isRegistered && !showLogin && !showBooking && !showARInput && !showReview && !isBooked && !showLogOptions &&( 
+                    {!showRegister && !isRegistered && !showLogin && !showBooking && !showARInput && !showReview && !isBooked && !showLogOptions && !showTimeInOut && ( 
                     <Flex align="center" justify="center">
                         <WalkinOptions/>
                     </Flex>
@@ -134,6 +135,12 @@ const WalkinBookingPage = () => {
                     {showReview && (
                     <Flex justify="center" align="center">
                         <WalkinReview/>
+                    </Flex>
+                    )}
+
+                    {showTimeInOut && (
+                        <Flex justify="center" align="center">
+                        <WalkinTimeInOut/>
                     </Flex>
                     )}
 

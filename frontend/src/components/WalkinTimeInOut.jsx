@@ -12,50 +12,212 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useStudentStore } from "../store/student";
+import useWalkinStore from "../store/walkin";
 import { format } from 'date-fns';
 
 const WalkinTimeInOut = () => {
   const { user } = useStudentStore();
-  const [currentBooking, setCurrentBooking] = useState(null);
+  const { currentBooking, fetchCurrentBooking, setShowLogin, setShowTimeInOut } = useWalkinStore();
   const toast = useToast();
 
-  useEffect(() => {
-    const fetchCurrentBooking = async () => {
-      try {
-        const response = await fetch(`http://localhost:5000/api/bookings/current/${user._id}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+  // Find the logged-in student's booking information
+  const currentStudent = currentBooking?.students?.find(
+    student => student._studentId._id === user._id
+  );
 
-        const data = await response.json();
-        if (response.ok) {
-          setCurrentBooking(data);
+  const isMissed = (booking, student) => {
+    const bookingTime = new Date(booking._date);
+    const [hours, minutes] = booking._timeSlot.startTime
+      .match(/(\d+):(\d+) (AM|PM)/)
+      .slice(1);
+    
+    let bookingHour = parseInt(hours);
+    const bookingMinutes = parseInt(minutes);
+    const isPM = booking._timeSlot.startTime.includes('PM');
+
+    if (isPM && bookingHour !== 12) bookingHour += 12;
+    else if (!isPM && bookingHour === 12) bookingHour = 0;
+
+    bookingTime.setHours(bookingHour, bookingMinutes + 15, 0); // Add 15 minutes grace period
+    
+    return new Date() > bookingTime && !student._timedIn && !student._timedOut;
+  };
+
+  // Add useEffect to check for missed bookings
+  useEffect(() => {
+    const checkMissedSchedule = async () => {
+      if (currentBooking && currentStudent && isMissed(currentBooking, currentStudent)) {
+        try {
+          const response = await fetch('http://localhost:5000/api/bookings/check-missed', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+
+          if (response.ok) {
+            // Refresh the booking data
+            await fetchCurrentBooking(user._id);
+          }
+        } catch (error) {
+          console.error("Error checking missed bookings:", error);
         }
-      } catch (error) {
-        console.error("Error fetching current booking:", error);
+      }
+    };
+
+    checkMissedSchedule();
+  }, [currentBooking, currentStudent, user._id, fetchCurrentBooking]);
+
+  useEffect(() => {
+    if (user?._id) {
+      fetchCurrentBooking(user._id).catch((error) => {
         toast({
           title: "Error",
-          description: "Failed to fetch booking information",
+          description: error.message || "Failed to fetch booking information",
           status: "error",
           duration: 3000,
           isClosable: true,
         });
-      }
-    };
-
-    if (user?._id) {
-      fetchCurrentBooking();
+      });
     }
-  }, [user?._id, toast]);
+  }, [user?._id, fetchCurrentBooking, toast]);
+
+  // Add a message if the booking is not for today
+  const isToday = (date) => {
+    const today = new Date();
+    const bookingDate = new Date(date);
+    return (
+      bookingDate.getDate() === today.getDate() &&
+      bookingDate.getMonth() === today.getMonth() &&
+      bookingDate.getFullYear() === today.getFullYear()
+    );
+  };
+
 
   const handleTimeIn = async () => {
-    // Implement time in logic
+    try {
+      const response = await fetch(`http://localhost:5000/api/bookings/${currentBooking._id}/timeIn`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          studentId: user._id,
+          timeIn: new Date(),
+        }),
+      });
+
+      if (response.ok) {
+        await fetchCurrentBooking(user._id);
+        toast({
+          title: "Time In Recorded",
+          description: "Your time in has been successfully recorded.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to record time in.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
   const handleTimeOut = async () => {
-    // Implement time out logic
+    try {
+      const response = await fetch(`http://localhost:5000/api/bookings/${currentBooking._id}/timeOut`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          studentId: user._id,
+          timeOut: new Date(),
+        }),
+      });
+
+      if (response.ok) {
+        await fetchCurrentBooking(user._id);
+        toast({
+          title: "Time Out Recorded",
+          description: "Your time out has been successfully recorded.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to record time out.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleLogOptCancel  = () => {
+    setShowTimeInOut(false);
+    setShowLogin(true);
+  }
+
+  // Update the booking status display
+  const getBookingStatus = (student) => {
+    if (student?._timedOut) {
+      return `Timed Out at ${new Date(student._timedOut).toLocaleTimeString()}`;
+    }
+    if (student?._timedIn) {
+      return `Timed In at ${new Date(student._timedIn).toLocaleTimeString()}`;
+    }
+    return "Awaiting Arrival";
+  };
+
+  const isTimeInAllowed = () => {
+    if (!currentBooking?._timeSlot?.startTime || !currentBooking?._timeSlot?.endTime) return false;
+  
+    const now = new Date();
+    
+    // Parse start time
+    const [startHours, startMinutes] = currentBooking._timeSlot.startTime
+      .match(/(\d+):(\d+) (AM|PM)/)
+      .slice(1);
+    
+    let startHour = parseInt(startHours);
+    const startMinute = parseInt(startMinutes);
+    const isStartPM = currentBooking._timeSlot.startTime.includes('PM');
+  
+    // Convert start time to 24-hour format
+    if (isStartPM && startHour !== 12) startHour += 12;
+    else if (!isStartPM && startHour === 12) startHour = 0;
+  
+    // Parse end time
+    const [endHours, endMinutes] = currentBooking._timeSlot.endTime
+      .match(/(\d+):(\d+) (AM|PM)/)
+      .slice(1);
+    
+    let endHour = parseInt(endHours);
+    const endMinute = parseInt(endMinutes);
+    const isEndPM = currentBooking._timeSlot.endTime.includes('PM');
+  
+    // Convert end time to 24-hour format
+    if (isEndPM && endHour !== 12) endHour += 12;
+    else if (!isEndPM && endHour === 12) endHour = 0;
+  
+    // Create Date objects for comparison
+    const startTime = new Date();
+    startTime.setHours(startHour, startMinute, 0, 0);
+  
+    const endTime = new Date();
+    endTime.setHours(endHour, endMinute, 0, 0);
+  
+    // Allow time in from start time until end time
+    return now >= startTime && now < endTime;
   };
 
   if (!currentBooking) {
@@ -72,69 +234,105 @@ const WalkinTimeInOut = () => {
 
   return (
     <Box p={8} minW="full" maxW="4xl">
-      <Card bg="white" boxShadow="lg">
-        <CardBody>
-          <VStack spacing={6} align="stretch">
-            <HStack justifyContent="space-between">
-              <VStack align="start" spacing={1}>
-                <Heading size="lg">
-                  {`${currentBooking._timeSlot.startTime} - ${currentBooking._timeSlot.endTime}`}
-                </Heading>
-                <Text fontSize="md" color="gray.600">
-                  {format(new Date(currentBooking._date), 'EEEE - MMMM d')}
-                </Text>
-              </VStack>
-              <Text fontSize="xl" fontWeight="bold" color="gray.700">
-                #{currentBooking._arId?._code || "000000"}
+    <Card bg="white" boxShadow="lg" mb={4}>
+      <CardBody>
+        <VStack spacing={6} align="stretch">
+          <HStack justifyContent="space-between">
+            <VStack align="start" spacing={1} pr={4}>
+              <Heading size="lg">
+                {`${currentBooking._timeSlot.startTime} - ${currentBooking._timeSlot.endTime}`}
+              </Heading>
+              <Text fontSize="md" color="gray.600" >
+                {format(new Date(currentBooking._date), 'EEEE - MMMM d')}
               </Text>
-            </HStack>
-            
-            <Divider />
-            
-            <VStack spacing={4}>
-              <Text fontSize="md" fontWeight="semibold" color="gray.600">
-                Status: {currentBooking._bookingStatus}
-              </Text>
-              {currentBooking._timedIn ? (
-                <Text fontSize="sm" color="gray.500">
-                  Timed In: {new Date(currentBooking._timedIn).toLocaleTimeString()}
-                </Text>
-              ) : null}
-              {currentBooking._timedOut ? (
-                <Text fontSize="sm" color="gray.500">
-                  Timed Out: {new Date(currentBooking._timedOut).toLocaleTimeString()}
-                </Text>
-              ) : null}
             </VStack>
-
-            <HStack spacing={4} justify="center">
-              <Button
-                bgColor="white"
-                color="#FE7654"
-                border="2px"
-                borderColor="#FE7654"
-                _hover={{ bg: '#FE7654', color: 'white' }}
-                _active={{ bg: '#cc4a2d' }}
-                isDisabled={!!currentBooking._timedIn}
-                onClick={handleTimeIn}
-              >
-                Time In
-              </Button>
-              <Button
-                bgColor="#FE7654"
-                color="white"
-                _hover={{ bg: '#e65c3b' }}
-                _active={{ bg: '#cc4a2d' }}
-                isDisabled={!currentBooking._timedIn || !!currentBooking._timedOut}
-                onClick={handleTimeOut}
-              >
-                Time Out
-              </Button>
-            </HStack>
+            <Text fontSize="xl" fontWeight="bold" color="gray.700" borderLeft={"2px solid rgb(171, 171, 171)"} pl={4} padding={4}>
+              #{currentStudent?._arID?._code || "000000"}
+            </Text>
+          </HStack>
+          
+          <Divider />
+          
+          <VStack spacing={2}>
+            <Text fontSize="md" fontWeight="semibold" color="gray.600">
+              Booking Status: {currentStudent?._bookingStatus || "N/A"}
+            </Text>
+            {currentStudent?._timedIn && (
+              <Text fontSize="sm" color="gray.500">
+                Timed In: {new Date(currentStudent._timedIn).toLocaleTimeString()}
+              </Text>
+            )}
+            {currentStudent?._timedOut && (
+              <Text fontSize="sm" color="gray.500">
+                Timed Out: {new Date(currentStudent._timedOut).toLocaleTimeString()}
+              </Text>
+            )}
           </VStack>
-        </CardBody>
-      </Card>
-    </Box>
+
+          <HStack spacing={4} justify="center">
+            <Button
+              bgColor="#FE7654"
+              color="white"
+              _hover={{ bg: '#e65c3b' }}
+              _active={{ bg: '#cc4a2d' }}
+              isDisabled={!!currentStudent?._timedIn || !isTimeInAllowed()}
+              onClick={handleTimeIn}
+            >
+              Time In
+            </Button>
+            <Button
+              bgColor="#FE7654"
+              color="white"
+              _hover={{ bg: '#e65c3b' }}
+              _active={{ bg: '#cc4a2d' }}
+              isDisabled={!currentStudent?._timedIn || !!currentStudent?._timedOut}
+              onClick={handleTimeOut}
+            >
+              Time Out
+            </Button>
+          </HStack>
+
+          {/* Compact Helper Messages */}
+          {((!isToday(currentBooking._date) || 
+            (!currentStudent?._timedIn && !isTimeInAllowed()) || 
+            currentStudent?._bookingStatus === "Not Attended") && (
+            <Box borderRadius="md" bg="gray.50" p={3} fontSize="sm">
+              {!isToday(currentBooking._date) && (
+                <Text color="orange.500" mb={2}>
+                  Note: This is your next scheduled booking.
+                </Text>
+              )}
+              {!currentStudent?._timedIn && !isTimeInAllowed() && (
+                <Text color="orange.500" mb={2}>
+                  Time in available ±15 mins from {currentBooking._timeSlot.startTime}
+                </Text>
+              )}
+              {currentStudent?._bookingStatus === "Not Attended" && (
+                <Text color="red.500">
+                  Missed booking - affects priority score and no-shows.
+                </Text>
+              )}
+            </Box>
+          ))}
+        </VStack>
+      </CardBody>
+    </Card>
+
+    {/* Logout Button */}
+    <HStack spacing={4} justify="normal">
+      <Button
+        bgColor="white"
+        color="#FE7654"
+        border="2px"
+        borderColor="#FE7654"
+        _hover={{ bg: '#FE7654', color: 'white' }}
+        _active={{ bg: '#cc4a2d' }}
+        onClick={handleLogOptCancel}
+      >
+        Log out
+      </Button>
+    </HStack>
+  </Box>
   );
 };
 

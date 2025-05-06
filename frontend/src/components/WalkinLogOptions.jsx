@@ -67,7 +67,7 @@ const WalkinLogOptions = () => {
                         h="100px"
                         whiteSpace="wrap"
                         onClick={handleOptLogin}>
-                        I want to time in/time out of my session.
+                        I want to time in or time out of my session.
                     </Button>
                 </VStack>
             </Flex>

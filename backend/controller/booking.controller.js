@@ -1,4 +1,5 @@
 import Booking from "../models/booking.model.js";
+import { updateStudentMetrics } from './student.controller.js';
 
 // Function to fetch all bookings for the current month
 export const fetchCurrentMonthBookings = async (req, res) => {
@@ -113,32 +114,139 @@ export const getCurrentBooking = async (req, res) => {
   try {
     const { studentId } = req.params;
     const currentDate = new Date();
-    
-    // Find the most recent or upcoming booking for the student
-    const booking = await Booking.findOne({
-      'students._studentId': studentId,
-      '_date': {
-        $gte: new Date(currentDate.setHours(0, 0, 0, 0))
-      }
-    })
-    .populate('students._arId')
-    .sort({ _date: 1, 'timeSlot.startTime': 1 });
+    const startOfDay = new Date(currentDate.setHours(0, 0, 0, 0));
 
-    if (!booking) {
-      return res.status(404).json({ message: "No current booking found" });
+    console.log("Query Parameters:", {
+      studentId,
+      currentDate: startOfDay,
+    });
+
+    // Convert studentId to ObjectId if necessary
+    const mongoose = await import("mongoose");
+    const studentObjectId = mongoose.Types.ObjectId.isValid(studentId)
+      ? new mongoose.Types.ObjectId(studentId)
+      : studentId;
+
+    // Find all bookings for the student from today onwards
+    const bookings = await Booking.find({
+      'students._studentId': studentObjectId,
+      '_date': {
+        $gte: startOfDay,
+      },
+    })
+      .populate('students._studentId')
+      .populate('students._scheduleId')
+      .populate('students._arID')
+      .sort({ 
+        _date: 1, // Sort by date ascending
+        'timeSlot.startTime': 1 // Then sort by start time ascending
+      });
+
+    // Find the earliest booking that hasn't been completed
+    const currentBooking = bookings.find(booking => {
+      const student = booking.students.find(s => 
+        s._studentId._id.toString() === studentId.toString()
+      );
+      return student && student._bookingStatus !== "Completed";
+    });
+
+    if (!currentBooking) {
+      return res.status(404).json({
+        message: "No current booking found",
+        debug: {
+          studentId,
+          currentDate: startOfDay,
+        },
+      });
     }
 
-    res.status(200).json(booking);
+    res.status(200).json(currentBooking);
   } catch (error) {
     console.error("Error fetching current booking:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-export default {
-  fetchCurrentMonthBookings,
-  fetchBookings,
-  getBookingById,
-  deleteBooking,
-  updateBookingStatus
+export const timeIn = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const { studentId, timeIn } = req.body;
+
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    const student = booking.students.find(s => s._studentId.toString() === studentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found in booking" });
+    }
+
+    student._timedIn = timeIn;
+    student._bookingStatus = "Checked-In";
+    await booking.save();
+
+    res.status(200).json({ message: "Time in recorded successfully" });
+  } catch (error) {
+    console.error("Error recording time in:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const timeOut = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const { studentId, timeOut } = req.body;
+
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    const student = booking.students.find(s => s._studentId.toString() === studentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found in booking" });
+    }
+
+    student._timedOut = timeOut;
+    student._bookingStatus = "Completed";
+    await booking.save();
+
+    res.status(200).json({ message: "Time out recorded successfully" });
+  } catch (error) {
+    console.error("Error recording time out:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const checkMissedBookings = async () => {
+  try {
+    const now = new Date();
+    // Find bookings that are in the past and haven't been timed in
+    const missedBookings = await Booking.find({
+      '_date': { $lt: now },
+      'students': {
+        $elemMatch: {
+          '_bookingStatus': 'Awaiting Arrival',
+          '_timedIn': null,
+          '_timedOut': null
+        }
+      }
+    }).populate('students._studentId');
+
+    for (const booking of missedBookings) {
+      for (const student of booking.students) {
+        if (student._bookingStatus === 'Awaiting Arrival' && !student._timedIn && !student._timedOut) {
+          // Update booking status to "Not Attended"
+          student._bookingStatus = 'Not Attended';
+          
+          // Update student metrics (increase no-shows)
+          await updateStudentMetrics(student._studentId._id, 'noShow');
+        }
+      }
+      await booking.save();
+    }
+  } catch (error) {
+    console.error("Error checking missed bookings:", error);
+  }
 };

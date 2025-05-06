@@ -5,7 +5,10 @@ import {
   getBookingById,
   deleteBooking,
   updateBookingStatus,
-  getCurrentBooking
+  getCurrentBooking,
+  timeIn,
+  timeOut, 
+  checkMissedBookings
 } from "../controller/booking.controller.js";
 
 const router = express.Router();
@@ -26,6 +29,12 @@ router.delete("/:id", deleteBooking);
 router.patch("/:id/status", updateBookingStatus);
 
 router.get("/current/:studentId", getCurrentBooking);
+
+router.post('/:bookingId/timeIn', timeIn);
+
+router.post('/:bookingId/timeOut', timeOut);
+
+router.post('/check-missed', checkMissedBookings);
 
 const bookingRoutes = router;
 
