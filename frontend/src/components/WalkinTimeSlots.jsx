@@ -31,7 +31,10 @@ const ScheduleTimeSlots = () => {
 
     const handleTimeClick = (slot) => {
         setSelectedSlot(slot); // Set the selected slot data
-        setSelectedTime(slot._startTime); // Optionally store the start time
+        setSelectedTime({
+            startTime: slot.startTime || slot._startTime,
+            endTime: slot.endTime || slot._endTime
+        });
         setSelectedTimeSlot(slot); // Store the entire slot object
         console.log("Selected Slot Data:", slot); // Log the selected slot data
     };
@@ -46,18 +49,15 @@ const ScheduleTimeSlots = () => {
             </Flex>
 
             {!buttonClicked && !showButtons && (
-                <Box p={4} flex="1">
-                    <Flex direction="row" flexWrap="wrap" justify="space-between" height="100%">
-                        <VStack
-                            w='50%'
-                            gap={6}
-                            alignItems="center"
-                        >
-                            <FaCalendarTimes size={80} />
-                            <Text>No time slots created yet</Text>
-                        </VStack>
-                        {/* Repeat for additional empty slots */}
-                    </Flex>
+                <Box p={4} flex="1" display="flex" justifyContent="center" alignItems="center">
+                    <VStack
+                        spacing={6}
+                        alignItems="center"
+                        justifyContent="center"
+                    >
+                        <FaCalendarTimes size={80} color="#071434" />
+                        <Text fontSize="lg" color="#071434">No time slots created yet</Text>
+                    </VStack>
                 </Box>
             )}
 
@@ -68,8 +68,8 @@ const ScheduleTimeSlots = () => {
                             <Button
                                 key={slot._startTime}
                                 w='48%'
-                                bg={selectedTime === slot._startTime ? "white" : "white"}
-                                border={selectedTime === slot._startTime ? "2px solid #FE7654" : "2px solid transparent"} 
+                                bg={selectedSlot?._startTime === slot._startTime ? "white" : "white"}
+                                border={selectedSlot?._startTime === slot._startTime ? "2px solid #FE7654" : "2px solid transparent"} 
                                 onClick={() => handleTimeClick(slot)}
                                 height="40%"
                                 boxShadow="lg"

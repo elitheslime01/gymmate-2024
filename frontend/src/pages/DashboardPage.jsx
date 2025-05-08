@@ -77,7 +77,7 @@ const DashboardPage = () => {
           </SimpleGrid>
 
           <Box mt={4}>
-            <DashboardTable /> 
+            {/* <DashboardTable />  */}
           </Box>
         </Box>
       </VStack>

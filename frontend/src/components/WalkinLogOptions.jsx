@@ -12,6 +12,7 @@ const WalkinLogOptions = () => {
         setShowTimeInOut,
         setShowLogin
     } = useWalkinStore();
+    const { logout } = useStudentStore();
 
     const handleOptLogin = () => {
         setShowTimeInOut(true);
@@ -23,10 +24,28 @@ const WalkinLogOptions = () => {
         setShowLogOptions(false);
     }
 
-    const handleLogOptCancel  = () => {
-        setShowLogOptions(false);
-        setShowLogin(true);
-    }
+    const handleLogOptCancel = async () => {
+        try {
+            await logout(); // Call logout function
+            setShowLogOptions(false);
+            setShowLogin(true);
+            toast({
+            title: "Logged out",
+            description: "You have successfully logged out.",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+            });
+        } catch (error) {
+            toast({
+            title: "Error",
+            description: "Failed to log out.",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+            });
+        }
+    };
 
 
     return (

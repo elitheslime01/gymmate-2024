@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import useBookingStore from "../store/booking";
 
 const BookingTable = () => {
-  const { bookings, setDate, setTimeSlot, fetchBookingsByDate, clearBookings, fetchBookings, fetchAllCurrentMonthBookings } = useBookingStore();
+  const { bookings, refreshBookingData, setDate, setTimeSlot, fetchBookingsByDate, clearBookings, fetchBookings, fetchAllCurrentMonthBookings } = useBookingStore();
   const [date, setDateState] = useState("");
   const [timeSlot, setTimeSlotState] = useState({ startTime: "", endTime: "" });
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -30,11 +30,11 @@ const BookingTable = () => {
     setTimeSlot({ startTime: "", endTime: "" });
     
     if (!e.target.value) {
-      fetchAllCurrentMonthBookings();
+        fetchAllCurrentMonthBookings();
     } else {
-      fetchBookingsByDate(e.target.value);
+        fetchBookingsByDate(e.target.value);
     }
-  };
+};
 
   // const handleTimeSlotChange = (e) => {
   //   const { name, value } = e.target;
@@ -76,10 +76,17 @@ const BookingTable = () => {
       
       // If both date and time slot are selected, fetch filtered data
       if (date && value) {
-        fetchBookings(date, { startTime: value, endTime });
-      }
+        fetchBookings(date, { startTime: value, endTime }).then(() => {
+            refreshBookingData();
+        });
+    }
     }
   };
+
+  const handleModalClose = () => {
+    refreshBookingData();
+    onClose();
+};
 
   return (
     <Box mb={0}>
@@ -168,7 +175,7 @@ const BookingTable = () => {
       </TableContainer>
 
       {/* Details Modal */}
-      <Modal isOpen={isOpen} onClose={onClose} isCentered size="2xl">
+      <Modal isOpen={isOpen} onClose={handleModalClose} isCentered size="2xl">
         <ModalOverlay />
         <ModalContent bg="white" boxShadow="lg" rounded="md">
           <ModalHeader bg="#071434" color="white" roundedTop="md">Student Booking Details</ModalHeader>
@@ -311,7 +318,7 @@ const BookingTable = () => {
                       isReadOnly
                     />
                   </Box>
-                  <Box>
+                  {/* <Box>
                     <Text mb={2} color="gray.700">Priority Score</Text>
                     <Input
                       value={selectedStudent._priorityScore}
@@ -319,7 +326,7 @@ const BookingTable = () => {
                       boxShadow="lg"
                       isReadOnly
                     />
-                  </Box>
+                  </Box> */}
                   <Box>
                     <Text mb={2} color="gray.700">Timed-In</Text>
                     <Input
@@ -351,7 +358,7 @@ const BookingTable = () => {
               px={6} 
               py={2} 
               rounded="md"
-              onClick={onClose}
+              onClick={handleModalClose}
             >
               Close
             </Button>

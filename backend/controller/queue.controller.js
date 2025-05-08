@@ -34,15 +34,22 @@ export const addStudentToQueue = async (req, res) => {
     });
   }
 
-  // // Validate date
-  // if (new Date(_date) < new Date()) {
-  //   return res.status(400).json({
-  //     success: false,
-  //     message: "Cannot queue for past dates"
-  //   });
-  // }
-
   try {
+    // Check for existing booking first
+    const existingBooking = await Booking.findOne({
+      '_date': new Date(_date),
+      '_timeSlot.startTime': _timeSlot.startTime,
+      '_timeSlot.endTime': _timeSlot.endTime,
+      'students._studentId': _studentId
+    });
+
+    if (existingBooking) {
+      return res.status(400).json({
+        success: false,
+        message: "You already have a booking for this time slot"
+      });
+    }
+
     // Check if the student exists
     const student = await Student.findById(req.body._studentId);
     if (!student) {
@@ -107,7 +114,10 @@ export const addStudentToQueue = async (req, res) => {
     });
   } catch (error) {
     console.error("Error adding student to queue:", error.message);
-    return res.status(500).json({ success: false, message: "Server error." });
+    res.status(500).json({ 
+      success: false, 
+      message: "Server error while adding to queue" 
+    });
   }
 };
 
@@ -206,31 +216,32 @@ export const allocateStudentsToBooking = async (req, res) => {
         const student = maxHeap.extractMax();
         
         const existingBooking = await Booking.findOne({
-          _date: queue._date,
-          "_timeSlot.startTime": queue._timeSlot.startTime,
-          "_timeSlot.endTime": queue._timeSlot.endTime,
+            _date: queue._date,
+            "_timeSlot.startTime": queue._timeSlot.startTime,
+            "_timeSlot.endTime": queue._timeSlot.endTime,
         });
-
+    
         if (!existingBooking?.students.some(s => s._studentId.toString() === student._studentId.toString())) {
-          await updateStudentMetrics(student._studentId, 'attended');
-
-          if (existingBooking) {
-            existingBooking.students.push(student);
-            await existingBooking.save();
-          } else {
-            const newBooking = new Booking({
-              _date: queue._date,
-              _timeSlot: queue._timeSlot,
-              students: [student],
-            });
-            await newBooking.save();
-          }
-
-          schedule.timeSlots[timeSlotIndex]._availableSlots -= 1;
-          allocatedStudents.push(student);
+            // Remove the updateStudentMetrics call here
+            student._bookingStatus = "Awaiting Arrival"; // Set initial status
+    
+            if (existingBooking) {
+                existingBooking.students.push(student);
+                await existingBooking.save();
+            } else {
+                const newBooking = new Booking({
+                    _date: queue._date,
+                    _timeSlot: queue._timeSlot,
+                    students: [student],
+                });
+                await newBooking.save();
+            }
+            
+            schedule.timeSlots[timeSlotIndex]._availableSlots -= 1;
+            allocatedStudents.push(student);
         }
-      }
-
+    }
+    
       // Handle remaining unallocated waiting students
       while (maxHeap.size() > 0) {
         const student = maxHeap.extractMax();

@@ -30,30 +30,23 @@ const useBookingStore = create((set) => ({
   },
 
   fetchBookings: async (date, timeSlot) => {
-    try {
-      set({ bookings: [] });
-  
-      const response = await fetch(`http://localhost:5000/api/bookings/get?date=${date}&startTime=${timeSlot.startTime}&endTime=${timeSlot.endTime}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-  
-      const data = await response.json();
-      
-      if (data && Array.isArray(data)) {
-        // Filter bookings by both date and time slot
-        const filteredBookings = data.filter(booking => 
-          new Date(booking._date).toISOString().split('T')[0] === date &&
-          booking._timeSlot.startTime === timeSlot.startTime
-        );
-        set({ bookings: filteredBookings });
+      try {
+          set({ bookings: [] });
+          const response = await fetch(`http://localhost:5000/api/bookings/get?date=${date}&startTime=${timeSlot.startTime}&endTime=${timeSlot.endTime}`, {
+              method: 'GET',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+          });
+
+          const data = await response.json();
+          if (data && Array.isArray(data)) {
+              set({ bookings: data });
+          }
+      } catch (error) {
+          console.error("Error fetching bookings:", error);
+          set({ bookings: [] });
       }
-    } catch (error) {
-      console.error("Error fetching bookings:", error.message);
-      set({ bookings: [] });
-    }
   },
 
   fetchBookingsByDate: async (date) => {
@@ -82,15 +75,28 @@ const useBookingStore = create((set) => ({
   },
 
   refreshBookingData: async () => {
-    const state = useBookingStore.getState();
-    if (state.date && state.timeSlot.startTime) {
-      await state.fetchBookings(state.date, state.timeSlot);
-    } else if (state.date) {
-      await state.fetchBookingsByDate(state.date);
-    } else {
-      await state.fetchAllCurrentMonthBookings();
+    const state = get();
+    try {
+        // Check for missed bookings and update statuses
+        const response = await fetch('http://localhost:5000/api/bookings/check-missed', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (response.ok) {
+            // Immediately fetch fresh data based on current view
+            if (state.date && state.timeSlot.startTime) {
+                await state.fetchBookings(state.date, state.timeSlot);
+            } else {
+                await state.fetchAllCurrentMonthBookings();
+            }
+        }
+    } catch (error) {
+        console.error('Error refreshing booking data:', error);
     }
-  }
+},
 }));
 
 export default useBookingStore;

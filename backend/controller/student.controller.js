@@ -74,59 +74,40 @@ export const loginStudent = async (req, res) => {
   // Function to update student metrics
   export const updateStudentMetrics = async (studentId, status) => {
     try {
-      const student = await Student.findById(studentId);
-      if (!student) {
-        console.error('Student not found:', studentId);
-        return;
-      }
-  
-      switch(status) {
-        case 'unsuccessful':
-          student._unsuccessfulAttempts += 1;
-          break;
-        case 'noShow':
-          student._noShows += 1;
-          // Reset unsuccessful attempts when marked as no-show
-          student._unsuccessfulAttempts = 0;
-          break;
-        case 'attended':
-          student._attendedSlots += 1;
-          // Reset unsuccessful attempts when attended
-          student._unsuccessfulAttempts = 0;
-          // Reset no-shows for every 3 attended slots
-          if (student._attendedSlots % 3 === 0 && student._noShows > 0) {
-            student._noShows -= 1;
-          }
-          break;
-        default:
-          console.warn('Unknown status:', status);
-          return;
-      }
-  
-      // Calculate priority score
-      // Higher score = lower priority
-      // Formula: unsuccessful attempts + attended slots - (no-shows / 2)
-      student._priorityScore = 
-        student._unsuccessfulAttempts + 
-        student._attendedSlots - 
-        Math.floor(student._noShows / 2);
-  
-      // Save the updated student record
-      const updatedStudent = await student.save();
-      console.log('Updated student metrics:', {
-        studentId: updatedStudent._id,
-        unsuccessfulAttempts: updatedStudent._unsuccessfulAttempts,
-        noShows: updatedStudent._noShows,
-        attendedSlots: updatedStudent._attendedSlots,
-        priorityScore: updatedStudent._priorityScore
-      });
-  
-      return updatedStudent;
+        const student = await Student.findById(studentId);
+        if (!student) return;
+
+        switch (status) {
+            case 'attended':
+                student._attendedSlots += 1;
+                student._unsuccessfulAttempts = 0;
+                // If student has 3 attended sessions, reduce no-shows by 1 (if any)
+                if (student._attendedSlots % 3 === 0 && student._noShows > 0) {
+                    student._noShows -= 1;
+                }
+                break;
+            case 'noShow':
+                // Increment no-shows by 1 (not 2)
+                student._noShows += 1;
+                break;
+            case 'unsuccessful':
+                student._unsuccessfulAttempts += 1;
+                break;
+        }
+
+        // Recalculate priority score
+        student._priorityScore = 
+            student._unsuccessfulAttempts + 
+            student._attendedSlots - 
+            Math.floor(student._noShows / 2);
+
+        await student.save();
+        return student;
     } catch (error) {
-      console.error('Error updating student metrics:', error);
-      throw error;
+        console.error('Error updating student metrics:', error);
+        throw error;
     }
-  };
+};
   
   export const logoutStudent = async (req, res) => {
     const { userId } = req.body;

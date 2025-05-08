@@ -61,9 +61,13 @@ export  const useStudentStore = create((set, get) => ({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
             });
+    
             const data = await response.json();
     
             if (response.ok) {
+                // Store user data and userId in localStorage
+                localStorage.setItem('userId', data.user._id);
+                localStorage.setItem('userData', JSON.stringify(data.user));
                 set({ user: data.user, isLoggedIn: true, isLoading: false }); 
                 return { success: true, message: "Login successful." };
             } else {
@@ -77,25 +81,31 @@ export  const useStudentStore = create((set, get) => ({
     },
     
     logout: async () => {
-      const userId = get().user?.id; 
-      if (!userId) {
-          console.error("User ID not found.");
-          return; 
-      }
+        const { user } = get();
+        if (!user?._id) {
+            console.error("User ID not found.");
+            return false;
+        }
     
-      try {
-          const response = await fetch('http://localhost:5000/api/students/logout', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ userId }),
-          });
+        try {
+            const response = await fetch('http://localhost:5000/api/students/logout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user._id }),
+            });
     
-          if (response.ok) {
-              set({ user: null, isLoggedIn: false });
-          }
-      } catch (error) {
-          console.error("Error during logout: ", error);
-      }
+            if (response.ok) {
+                // Clear localStorage
+                localStorage.removeItem('userId');
+                localStorage.removeItem('userData');
+                set({ user: null, isLoggedIn: false });
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error("Error during logout:", error);
+            return false;
+        }
     },
     
     clearError: () => {

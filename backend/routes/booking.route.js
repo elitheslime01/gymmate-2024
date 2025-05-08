@@ -8,7 +8,8 @@ import {
   getCurrentBooking,
   timeIn,
   timeOut, 
-  checkMissedBookings
+  checkMissedBookings,
+  checkExistingBooking,
 } from "../controller/booking.controller.js";
 
 const router = express.Router();
@@ -16,8 +17,12 @@ const router = express.Router();
 // Route for fetching all current month bookings
 router.get("/currentMonth", fetchCurrentMonthBookings);
 
+router.get("/check-existing", checkExistingBooking);
+
 // Route for fetching bookings with optional date and time slot filters
 router.get("/get", fetchBookings);
+
+router.get("/current/:studentId", getCurrentBooking);
 
 // Route for getting a specific booking
 router.get("/:id", getBookingById);
@@ -28,13 +33,14 @@ router.delete("/:id", deleteBooking);
 // Route for updating booking status
 router.patch("/:id/status", updateBookingStatus);
 
-router.get("/current/:studentId", getCurrentBooking);
-
 router.post('/:bookingId/timeIn', timeIn);
 
 router.post('/:bookingId/timeOut', timeOut);
 
 router.post('/check-missed', checkMissedBookings);
+
+
+
 
 const bookingRoutes = router;
 

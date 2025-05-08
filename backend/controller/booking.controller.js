@@ -113,50 +113,50 @@ export const updateBookingStatus = async (req, res) => {
 export const getCurrentBooking = async (req, res) => {
   try {
     const { studentId } = req.params;
-    const currentDate = new Date();
-    const startOfDay = new Date(currentDate.setHours(0, 0, 0, 0));
-
-    console.log("Query Parameters:", {
-      studentId,
-      currentDate: startOfDay,
-    });
+    const now = new Date();
+    const startOfDay = new Date(now.setHours(0, 0, 0, 0));
 
     // Convert studentId to ObjectId if necessary
     const mongoose = await import("mongoose");
-    const studentObjectId = mongoose.Types.ObjectId.isValid(studentId)
+    const studentObjectId = mongoose.Types.ObjectId.isValid(studentId) 
       ? new mongoose.Types.ObjectId(studentId)
       : studentId;
 
-    // Find all bookings for the student from today onwards
+    // Find all bookings for the student that are either today or in the future
     const bookings = await Booking.find({
       'students._studentId': studentObjectId,
-      '_date': {
-        $gte: startOfDay,
-      },
+      $or: [
+        // Future bookings
+        { '_date': { $gt: startOfDay } },
+        // Today's bookings that aren't completed
+        {
+          '_date': startOfDay,
+          'students': {
+            $elemMatch: {
+              '_studentId': studentObjectId,
+              '_bookingStatus': { $ne: 'Completed' }
+            }
+          }
+        }
+      ]
     })
-      .populate('students._studentId')
-      .populate('students._scheduleId')
-      .populate('students._arID')
-      .sort({ 
-        _date: 1, // Sort by date ascending
-        'timeSlot.startTime': 1 // Then sort by start time ascending
-      });
+    .populate('students._studentId')
+    .populate('students._scheduleId')
+    .populate('students._arID')
+    .sort({ '_date': 1, '_timeSlot.startTime': 1 });
 
-    // Find the earliest booking that hasn't been completed
+    // Get the earliest non-completed booking
     const currentBooking = bookings.find(booking => {
       const student = booking.students.find(s => 
-        s._studentId._id.toString() === studentId.toString()
+        s._studentId._id.toString() === studentId.toString() &&
+        s._bookingStatus !== 'Completed'
       );
-      return student && student._bookingStatus !== "Completed";
+      return student;
     });
 
     if (!currentBooking) {
       return res.status(404).json({
-        message: "No current booking found",
-        debug: {
-          studentId,
-          currentDate: startOfDay,
-        },
+        message: "No current booking found"
       });
     }
 
@@ -219,34 +219,112 @@ export const timeOut = async (req, res) => {
   }
 };
 
-export const checkMissedBookings = async () => {
-  try {
-    const now = new Date();
-    // Find bookings that are in the past and haven't been timed in
-    const missedBookings = await Booking.find({
-      '_date': { $lt: now },
-      'students': {
-        $elemMatch: {
-          '_bookingStatus': 'Awaiting Arrival',
-          '_timedIn': null,
-          '_timedOut': null
-        }
-      }
-    }).populate('students._studentId');
+export const checkMissedBookings = async (req, res) => {
+    try {
+        const now = new Date();
+        const missedBookings = await Booking.find({
+            '_date': { $lte: now },
+            'students': {
+                $elemMatch: {
+                    '_bookingStatus': 'Awaiting Arrival',
+                    '_timedIn': null,
+                    '_timedOut': null
+                }
+            }
+        }).populate('students._studentId');
 
-    for (const booking of missedBookings) {
-      for (const student of booking.students) {
-        if (student._bookingStatus === 'Awaiting Arrival' && !student._timedIn && !student._timedOut) {
-          // Update booking status to "Not Attended"
-          student._bookingStatus = 'Not Attended';
-          
-          // Update student metrics (increase no-shows)
-          await updateStudentMetrics(student._studentId._id, 'noShow');
+        const updatedStudents = [];
+
+        for (const booking of missedBookings) {
+            for (const student of booking.students) {
+                if (student._bookingStatus === 'Awaiting Arrival' && !student._timedIn && !student._timedOut) {
+                    const [hours, minutes] = booking._timeSlot.endTime.match(/(\d+):(\d+) (AM|PM)/).slice(1);
+                    let endHour = parseInt(hours);
+                    const endMinutes = parseInt(minutes);
+                    const isPM = booking._timeSlot.endTime.includes('PM');
+
+                    if (isPM && endHour !== 12) endHour += 12;
+                    else if (!isPM && endHour === 12) endHour = 0;
+
+                    const bookingEndTime = new Date(booking._date);
+                    bookingEndTime.setHours(endHour, endMinutes, 0, 0);
+
+                    if (now > bookingEndTime) {
+                        student._bookingStatus = 'Not Attended';
+                        // Update student metrics immediately
+                        await updateStudentMetrics(student._studentId._id, 'noShow');
+                        updatedStudents.push(student._studentId._id);
+                    }
+                }
+            }
+            await booking.save();
         }
-      }
-      await booking.save();
+
+        // Fetch updated priority scores for affected students
+        const updatedScores = await Promise.all(
+            updatedStudents.map(async (studentId) => {
+                const updatedStudent = await Student.findById(studentId);
+                return {
+                    studentId,
+                    priorityScore: updatedStudent._priorityScore
+                };
+            })
+        );
+
+        res.status(200).json({ 
+            success: true, 
+            message: "Missed bookings updated successfully.",
+            updatedScores 
+        });
+    } catch (error) {
+        console.error("Error checking missed bookings:", error);
+        res.status(500).json({ success: false, message: "Server error." });
     }
-  } catch (error) {
-    console.error("Error checking missed bookings:", error);
-  }
+};
+
+export const checkExistingBooking = async (req, res) => {
+    try {
+        const { studentId, date, startTime, endTime } = req.query;
+
+        // Validate required parameters
+        if (!studentId || !date || !startTime || !endTime) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required query parameters",
+                params: { studentId, date, startTime, endTime }
+            });
+        }
+
+        // Convert date string to Date object and set to start of day
+        const queryDate = new Date(date);
+        queryDate.setHours(0, 0, 0, 0);
+
+        // Debug log
+        console.log('Checking booking with criteria:', {
+            studentId,
+            date: queryDate,
+            startTime: decodeURIComponent(startTime),
+            endTime: decodeURIComponent(endTime)
+        });
+
+        const booking = await Booking.findOne({
+            'students._studentId': studentId,
+            '_timeSlot.startTime': decodeURIComponent(startTime),
+            '_timeSlot.endTime': decodeURIComponent(endTime)
+        }).where('_date').gte(queryDate).lt(new Date(queryDate.getTime() + 24 * 60 * 60 * 1000));
+
+        console.log('Found booking:', booking);
+
+        return res.status(200).json({ 
+            exists: !!booking,
+            message: booking ? "Student already has a booking for this time slot" : "No existing booking found"
+        });
+    } catch (error) {
+        console.error("Error checking existing booking:", error);
+        return res.status(500).json({ 
+            success: false, 
+            message: "Server error checking existing booking",
+            error: error.message 
+        });
+    }
 };
