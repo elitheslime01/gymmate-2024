@@ -1,10 +1,12 @@
-import { Box, Button, Divider, Flex, Heading, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Divider, Flex, Heading, Text, VStack, useToast } from "@chakra-ui/react"
 import useWalkinStore from "../store/walkin"
 import { useStudentStore } from "../store/student" 
 
 const WalkinLogOptions = () => {
 
     const {user} = useStudentStore();
+
+    const toast = useToast();
 
     const {
         setShowBooking,
@@ -36,7 +38,7 @@ const WalkinLogOptions = () => {
             duration: 3000,
             isClosable: true,
             });
-        } catch (error) {
+        } catch {
             toast({
             title: "Error",
             description: "Failed to log out.",
