@@ -16,18 +16,15 @@ import useWalkinStore from "../store/walkin";
 import { format } from 'date-fns';
 
 const WalkinTimeInOut = () => {
-  const { user } = useStudentStore();
+  const { user, logout } = useStudentStore();
   const {
     currentBooking, 
     upcomingBookings,
     fetchCurrentBooking,
     fetchUpcomingBookings,
-    setShowLogin, 
-    setShowTimeInOut,
     clearCurrentBooking,
     resetState 
 } = useWalkinStore();
-  const { logout } = useStudentStore();
   const toast = useToast();
 
   useEffect(() => {
@@ -61,27 +58,26 @@ const WalkinTimeInOut = () => {
     return new Date() > bookingTime && !student._timedIn && !student._timedOut;
   };
 
-    useEffect(() => {
-      const checkMissedBookings = async () => {
-          try {
-              const response = await fetch('http://localhost:5000/api/bookings/check-missed', {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json',
-                  },
-              });
-  
-              if (response.ok) {
-                  console.log("Missed bookings updated successfully.");
-                  await fetchCurrentBooking(user._id);
-                  await fetchUpcomingBookings(user._id);
-              }
-          } catch (error) {
-              console.error("Error checking missed bookings:", error);
+  useEffect(() => {
+    const checkMissedBookings = async () => {
+      try {
+          const response = await fetch('http://localhost:5000/api/bookings/check-missed', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+          });
+
+          if (response.ok) {
+              console.log("Missed bookings updated successfully.");
+              await fetchCurrentBooking(user._id);
+              await fetchUpcomingBookings(user._id);
           }
-      };
-  
-      checkMissedBookings();
+      } catch (error) {
+          console.error("Error checking missed bookings:", error);
+    }
+  };
+    checkMissedBookings();
   }, [user?._id, fetchCurrentBooking, fetchUpcomingBookings]);
 
   // Add useEffect to check for missed bookings

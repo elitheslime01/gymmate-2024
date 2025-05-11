@@ -10,6 +10,7 @@ import {
   timeOut, 
   checkMissedBookings,
   checkExistingBooking,
+  updateLapsedBookings,
 } from "../controller/booking.controller.js";
 
 const router = express.Router();
@@ -39,7 +40,7 @@ router.post('/:bookingId/timeOut', timeOut);
 
 router.post('/check-missed', checkMissedBookings);
 
-
+router.post('/update-lapsed', updateLapsedBookings);
 
 
 const bookingRoutes = router;
