@@ -345,6 +345,7 @@ const useWalkinStore = create((set, get) => ({
             isBooked: false
         });
     },
+
     checkExistingBooking: async (studentId, date, timeSlot) => {
         try {
             // Validate inputs before making request
@@ -395,6 +396,81 @@ const useWalkinStore = create((set, get) => ({
                 exists: false,
                 message: "Failed to check existing booking"
             };
+        }
+    },
+
+    checkMissedBookings: async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/bookings/check-missed', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                const state = get();
+                const userId = state.user?._id;
+                if (userId) {
+                    await state.fetchCurrentBooking(userId);
+                    await state.fetchUpcomingBookings(userId);
+                }
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error("Error checking missed bookings:", error);
+            return false;
+        }
+    },
+
+    // Update existing timeIn function
+    timeIn: async (bookingId, studentId) => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/timeIn`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    studentId,
+                    timeIn: new Date(),
+                }),
+            });
+
+            if (response.ok) {
+                await get().fetchCurrentBooking(studentId);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error("Error recording time in:", error);
+            return false;
+        }
+    },
+
+    // Update existing timeOut function
+    timeOut: async (bookingId, studentId) => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/timeOut`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    studentId,
+                    timeOut: new Date(),
+                }),
+            });
+
+            if (response.ok) {
+                await get().fetchCurrentBooking(studentId);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error("Error recording time out:", error);
+            return false;
         }
     }
 }));

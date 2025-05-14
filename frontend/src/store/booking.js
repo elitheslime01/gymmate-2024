@@ -76,27 +76,50 @@ const useBookingStore = create((set) => ({
 
   refreshBookingData: async () => {
     const state = get();
+      try {
+          // Check for missed bookings and update statuses
+          const response = await fetch('http://localhost:5000/api/bookings/check-missed', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+          });
+
+          if (response.ok) {
+              // Immediately fetch fresh data based on current view
+              if (state.date && state.timeSlot.startTime) {
+                  await state.fetchBookings(state.date, state.timeSlot);
+              } else {
+                  await state.fetchAllCurrentMonthBookings();
+              }
+          }
+      } catch (error) {
+          console.error('Error refreshing booking data:', error);
+      }
+  },
+
+  checkLapsedBookings: async () => {
     try {
-        // Check for missed bookings and update statuses
-        const response = await fetch('http://localhost:5000/api/bookings/check-missed', {
+        const response = await fetch('http://localhost:5000/api/bookings/update-lapsed', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-            },
+            }
         });
 
         if (response.ok) {
-            // Immediately fetch fresh data based on current view
-            if (state.date && state.timeSlot.startTime) {
+            // Refresh bookings after update
+            const state = get();
+            if (state.date && state.timeSlot) {
                 await state.fetchBookings(state.date, state.timeSlot);
             } else {
                 await state.fetchAllCurrentMonthBookings();
             }
         }
     } catch (error) {
-        console.error('Error refreshing booking data:', error);
+        console.error('Error checking lapsed bookings:', error);
     }
-},
+  }
 }));
 
 export default useBookingStore;

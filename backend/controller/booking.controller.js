@@ -329,3 +329,62 @@ export const checkExistingBooking = async (req, res) => {
         });
     }
 };
+
+export const updateLapsedBookings = async (req, res) => {
+    try {
+        const now = new Date();
+        
+        // Find bookings that are in the past or current with "Awaiting Arrival" status
+        const bookings = await Booking.find({
+            'students': {
+                $elemMatch: {
+                    '_bookingStatus': 'Awaiting Arrival',
+                    '_timedIn': null
+                }
+            }
+        }).populate('students._studentId');
+
+        const updatedBookings = [];
+
+        for (const booking of bookings) {
+            const bookingDate = new Date(booking._date);
+            
+            // Parse the end time
+            const [hours, minutes] = booking._timeSlot.endTime.match(/(\d+):(\d+) (AM|PM)/).slice(1);
+            let endHour = parseInt(hours);
+            const endMinutes = parseInt(minutes);
+            const isPM = booking._timeSlot.endTime.includes('PM');
+
+            // Convert to 24-hour format
+            if (isPM && endHour !== 12) endHour += 12;
+            else if (!isPM && endHour === 12) endHour = 0;
+
+            // Set booking end time
+            bookingDate.setHours(endHour, endMinutes, 0, 0);
+
+            // Check if booking time has passed
+            if (now > bookingDate) {
+                for (const student of booking.students) {
+                    if (student._bookingStatus === 'Awaiting Arrival' && !student._timedIn) {
+                        student._bookingStatus = 'Not Attended';
+                        await updateStudentMetrics(student._studentId._id, 'noShow');
+                        updatedBookings.push(booking._id);
+                    }
+                }
+                await booking.save();
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Lapsed bookings updated successfully",
+            updatedBookings
+        });
+    } catch (error) {
+        console.error("Error updating lapsed bookings:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Error updating lapsed bookings"
+        });
+    }
+};

@@ -8,20 +8,19 @@ import { useState, useEffect } from 'react';
 import useBookingStore from "../store/booking";
 
 const BookingTable = () => {
-  const { bookings, refreshBookingData, setDate, setTimeSlot, fetchBookingsByDate, clearBookings, fetchBookings, fetchAllCurrentMonthBookings } = useBookingStore();
+  const { bookings, refreshBookingData, setDate, setTimeSlot, checkLapsedBookings, fetchBookingsByDate, clearBookings, fetchBookings, fetchAllCurrentMonthBookings } = useBookingStore();
   const [date, setDateState] = useState("");
   const [timeSlot, setTimeSlotState] = useState({ startTime: "", endTime: "" });
   const [selectedStudent, setSelectedStudent] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const handleViewDetails = (student, bookingInfo) => {
-    setSelectedStudent({ ...student, bookingInfo });
-    onOpen();
-  };
-
   useEffect(() => {
+    checkLapsedBookings();
     fetchAllCurrentMonthBookings();
-  }, [fetchAllCurrentMonthBookings]);
+    if (date && timeSlot.startTime && timeSlot.endTime) {
+      fetchBookings(date, timeSlot);
+    }
+  }, [checkLapsedBookings], [fetchAllCurrentMonthBookings], [date], [timeSlot], [fetchBookings]);
 
   const handleDateChange = (e) => {
     setDateState(e.target.value);
@@ -34,30 +33,7 @@ const BookingTable = () => {
     } else {
         fetchBookingsByDate(e.target.value);
     }
-};
-
-  // const handleTimeSlotChange = (e) => {
-  //   const { name, value } = e.target;
-  //   if (name === "startTime") {
-  //     clearBookings();
-  //     let endTime;
-  //     switch(value) {
-  //       case "08:00 AM": endTime = "10:00 AM"; break;
-  //       case "10:00 AM": endTime = "12:00 PM"; break;
-  //       case "12:00 PM": endTime = "02:00 PM"; break;
-  //       case "02:00 PM": endTime = "04:00 PM"; break;
-  //       default: endTime = "";
-  //     }
-  //     setTimeSlotState({ startTime: value, endTime });
-  //     setTimeSlot({ startTime: value, endTime });
-  //   }
-  // };
-
-  useEffect(() => {
-    if (date && timeSlot.startTime && timeSlot.endTime) {
-      fetchBookings(date, timeSlot);
-    }
-  }, [date, timeSlot, fetchBookings]);
+  };
   
   const handleTimeSlotChange = (e) => {
     const { name, value } = e.target;
@@ -83,10 +59,15 @@ const BookingTable = () => {
     }
   };
 
+  const handleViewDetails = (student, bookingInfo) => {
+    setSelectedStudent({ ...student, bookingInfo });
+    onOpen();
+  };
+
   const handleModalClose = () => {
     refreshBookingData();
     onClose();
-};
+  };
 
   return (
     <Box mb={0}>
@@ -145,7 +126,7 @@ const BookingTable = () => {
                   <Td textAlign="center">{`${item._timeSlot.startTime} - ${item._timeSlot.endTime}`.toUpperCase()}</Td>
                   <Td textAlign="center">{student._studentId._fName.toUpperCase()}</Td>
                   <Td textAlign="center">{student._studentId._lName.toUpperCase()}</Td>
-                  <Td textAlign="center">{student._bookingStatus}</Td>
+                  <Td textAlign="center">{student._bookingStatus.toUpperCase()}</Td>
                   <Td textAlign="center">
                     {student._timedIn ? new Date(student._timedIn).toLocaleTimeString() : '--'}
                   </Td>
