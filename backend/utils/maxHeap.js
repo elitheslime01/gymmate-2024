@@ -107,6 +107,7 @@ class MaxHeap {
         }
         return this.heap[0];
     }
+
 }
 
 export default MaxHeap;

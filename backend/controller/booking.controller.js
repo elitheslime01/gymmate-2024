@@ -1,4 +1,5 @@
 import Booking from "../models/booking.model.js";
+import Student from "../models/student.model.js"; 
 import { updateStudentMetrics } from './student.controller.js';
 
 // Function to fetch all bookings for the current month
