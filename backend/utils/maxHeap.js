@@ -1,7 +1,7 @@
 // maxHeap.js
 class MaxHeap {
     constructor() {
-        this.heap = [];
+        this.heap= [];
     }
 
     // Insert a new element into the max heap

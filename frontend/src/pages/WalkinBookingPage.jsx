@@ -148,7 +148,7 @@ const WalkinBookingPage = () => {
                     <Flex justify="center" align="center">
                         <Box p={8} w="full" maxW="4xl" display={isBooked ? 'block' : 'none'}>
                             <Center mb={6}><PiConfettiFill color='#FE7654' size={120}/></Center>
-                            <Heading as="h1" size="md" mb={6}>Your selected session has been successfully booked!</Heading>
+                            <Heading as="h1" size="md" mb={6}>Your selected session has been successfully queued!</Heading>
                             <Center mt={20}>
                                 <Text>Returning in... {countdown}</Text>
                             </Center>
