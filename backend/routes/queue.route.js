@@ -1,6 +1,6 @@
 import express from "express";
 import { addStudentToQueue, fetchQueues, allocateStudentsToBooking, fetchCurrentMonthQueues} from "../controller/queue.controller.js";
-import upload from "../utils/multer.js";
+
 
 const router = express.Router();
 

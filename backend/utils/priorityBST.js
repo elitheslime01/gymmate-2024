@@ -3,7 +3,7 @@ class BSTNode {
         this.student = student;
         this.left = null;
         this.right = null;
-        this.height = 1;
+        // Remove height property since no balancing needed
     }
 }
 
@@ -31,72 +31,17 @@ class PriorityBST {
             node.right = this._insert(node.right, student);
         }
 
-        node.height = 1 + Math.max(
-            this._getHeight(node.left),
-            this._getHeight(node.right)
-        );
-
-        return this._balance(node);
+        return node; // Simply return the node without balancing
     }
 
-    extractMax() {
-        const startTime = performance.now();
-        
-        if (!this.root) {
-            return {
-                time: performance.now() - startTime,
-                result: null
-            };
-        }
-
-        // Find the rightmost node (max value)
-        let current = this.root;
-        let parent = null;
-        
-        while (current.right) {
-            parent = current;
-            current = current.right;
-        }
-
-        // Store the max value
-        const maxStudent = current.student;
-
-        // Remove the node
-        if (!parent) {
-            // Root is the max
-            this.root = current.left;
-        } else {
-            parent.right = current.left;
-        }
-
-        this.size--;
-
-        return {
-            time: performance.now() - startTime,
-            result: maxStudent
-        };
-    }
-
-    // Add the missing comparison method
     _compareStudents(studentA, studentB) {
-        // First compare by priority score
         if (studentA._priorityScore !== studentB._priorityScore) {
             return studentB._priorityScore - studentA._priorityScore;
         }
         
-        // If priority scores are equal, compare by queue time
         const timeA = new Date(studentA._queuedAt).getTime();
         const timeB = new Date(studentB._queuedAt).getTime();
         return timeA - timeB;
-    }
-
-    _getHeight(node) {
-        return node ? node.height : 0;
-    }
-
-    _balance(node) {
-        // Add balancing logic if needed
-        return node;
     }
 }
 

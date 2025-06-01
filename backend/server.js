@@ -10,7 +10,6 @@ import queueRoutes from "./routes/queue.route.js";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path'
 import path from 'path';
-import multer from './utils/multer.js';
 import arImageRoutes from "./routes/arImage.route.js";
 import bookingRoutes from "./routes/booking.route.js";
 
@@ -22,7 +21,6 @@ const PORT = process.env.PORT || 5000
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(multer.single('_arImage')); 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -49,6 +47,3 @@ app.use("/api/students", studentsRoutes);
 app.use("/api/ARCodes", arRoutes);
 app.use("/api/queues", queueRoutes);
 app.use("/api/bookings", bookingRoutes);
-//app.use("/api/arImage", arImageRoutes);
-
-app.use("/api/arImage", multer.single('_arImage'), arImageRoutes);
