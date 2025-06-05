@@ -31,12 +31,15 @@ class PriorityBST {
                 this._insert(node.left, student);
             }
         } else {
-            if (!node.right) {
-                node.right = new BSTNode(student);
-            } else {
-                this._insert(node.right, student);
-            }
+            node.right = this._insert(node.right, student);
         }
+
+        node.height = 1 + Math.max(
+            this._getHeight(node.left),
+            this._getHeight(node.right)
+        );
+
+        return this._balance(node);
     }
 
     extractMax() {
@@ -49,19 +52,21 @@ class PriorityBST {
             };
         }
 
+        // Find the rightmost node (max value)
         let current = this.root;
         let parent = null;
         
-        // Find the rightmost node
         while (current.right) {
             parent = current;
             current = current.right;
         }
 
+        // Store the max value
         const maxStudent = current.student;
 
         // Remove the node
         if (!parent) {
+            // Root is the max
             this.root = current.left;
         } else {
             parent.right = current.left;
@@ -75,6 +80,7 @@ class PriorityBST {
         };
     }
 
+    // Add the missing comparison method
     _compareStudents(studentA, studentB) {
         if (studentA._priorityScore !== studentB._priorityScore) {
             return studentB._priorityScore - studentA._priorityScore;
