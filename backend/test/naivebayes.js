@@ -110,8 +110,8 @@ class NaiveBayes {
 }
 
 // --- Load CSV Dataset and Train Model ---
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const csvPath = path.join(__dirname, "sample_feedback.csv");
+// const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const csvPath = "C:\\Users\\L.go\\Downloads\\gymmate_feedback_dataset_extended(Sheet1).csv";
 
 let vectorizer, nb;
 async function trainModelFromCSV() {
@@ -121,9 +121,10 @@ async function trainModelFromCSV() {
     fs.createReadStream(csvPath)
       .pipe(csv())
       .on("data", (row) => {
-        if (row.text && row.label) {
-          docs.push(preprocess(row.text));
-          labels.push(row.label);
+        // Use correct column names from your CSV
+        if (row.Feedback && row.Sentiment) {
+          docs.push(preprocess(row.Feedback));
+          labels.push(row.Sentiment.charAt(0).toUpperCase() + row.Sentiment.slice(1).toLowerCase()); // Capitalize for consistency
         }
       })
       .on("end", () => {
@@ -153,11 +154,9 @@ async function main() {
     await trainModelFromCSV();
     
     // Example texts to classify
-    const examples = [
-      "Great workout session today!",
-      "The equipment is always broken",
-      "Amazing trainer, very helpful",
-      "Terrible customer service"
+      const examples = [
+      "Hindi ako makapasok sa gymmate, lagi akong nasa queue",
+      "Hindi ako makapagbook ng slot sa gymmate"
     ];
 
     // Classify each example
