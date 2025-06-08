@@ -17,6 +17,7 @@ const Feedback = mongoose.model("Feedback", feedbackSchema);
 
 // --- Stopwords ---
 const STOPWORDS = new Set([
+  // English stopwords
   "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours",
   "yourself", "yourselves", "he", "him", "his", "himself", "she", "her", "hers",
   "herself", "it", "its", "itself", "they", "them", "their", "theirs", "themselves",
@@ -28,7 +29,15 @@ const STOPWORDS = new Set([
   "in", "out", "on", "off", "over", "under", "again", "further", "then", "once", "here",
   "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more",
   "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so",
-  "than", "too", "very", "can", "will", "just", "don", "should", "now"
+  "than", "too", "very", "can", "will", "just", "don", "should", "now",
+  // Tagalog stopwords
+  "ako", "ikaw", "siya", "kami", "kayo", "sila", "tayo", "niya", "nila", "namin", "natin",
+  "ninyo", "kanila", "amin", "atin", "iyo", "inyo", "ito", "iyan", "iyon", "doon", "dito",
+  "diyan", "roon", "rin", "din", "nga", "pa", "na", "ng", "nang", "sa", "ni", "kay", "para",
+  "pero", "at", "o", "kung", "habang", "kapag", "pag", "kasi", "dahil", "upang", "ngunit",
+  "subalit", "sapagkat", "palibhasa", "bago", "pagkatapos", "mula", "hanggang", "lamang",
+  "lang", "mga", "may", "wala", "meron", "mayroon", "ba", "eh", "ho", "po", "si", "ang",
+  "yung", "yong", "yung", "yung", "yong", "yung", "yong", "yung", "yong", "yung", "yong"
 ]);
 
 function preprocess(text) {
@@ -111,7 +120,7 @@ class NaiveBayes {
 
 // --- Load CSV Dataset and Train Model ---
 // const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const csvPath = "C:\\Users\\L.go\\Downloads\\gymmate_feedback_dataset_extended(Sheet1).csv";
+const csvPath = "../dataset/gymmate_feedback_dataset_extended.csv";
 
 let vectorizer, nb;
 async function trainModelFromCSV() {
