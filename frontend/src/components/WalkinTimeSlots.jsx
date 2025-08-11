@@ -5,7 +5,7 @@ import { FaCalendarTimes } from "react-icons/fa";
 import useWalkinStore from '../store/walkin.js';
 
 const ScheduleTimeSlots = () => {
-    const { setSelectedTimeSlot, selectedDay, scheduleData, selectedTime, setSelectedTime, fetchScheduleByDate } = useWalkinStore();
+    const { setSelectedTimeSlot, selectedDay, scheduleData, setSelectedTime, fetchScheduleByDate } = useWalkinStore();
     const [showButtons, setShowButtons] = useState(false);
     const [buttonClicked, setButtonClicked] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);

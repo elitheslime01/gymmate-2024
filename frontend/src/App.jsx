@@ -7,6 +7,7 @@ import SchedulePage from "./pages/SchedulePage";
 import WalkinBookingPage from "./pages/WalkinBookingPage";
 import QueueManPage from "./pages/QueueManPage";
 import BookingManPage from "./pages/BookingManPage";
+import FeedbackManPage from "./pages/FeedbackManPage";
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <Route path="/walkin" element={<WalkinBookingPage />} />
         <Route path="/queue" element={<QueueManPage />} />
         <Route path="/booking" element={<BookingManPage />} />
+        <Route path="/feedback" element={<FeedbackManPage />} />
       </Routes>
     </Flex>
   );

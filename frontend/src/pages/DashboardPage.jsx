@@ -6,7 +6,7 @@ import { ImTable } from "react-icons/im";
 import { FaUsersBetweenLines } from "react-icons/fa6";
 import { RiFeedbackLine } from "react-icons/ri";
 import DashboardButtons from '../components/DashboardButtons.jsx';
-import DashboardTable from "../components/DashboardTable.jsx";
+// import DashboardTable from "../components/DashboardTable.jsx";
 import { useNavigate } from "react-router-dom";
 
 
@@ -72,6 +72,7 @@ const DashboardPage = () => {
             />
             <DashboardButtons 
               text="Feedback Management" 
+              onClick={() => navigate('/feedback')}
               icon={RiFeedbackLine} 
             />
           </SimpleGrid>
