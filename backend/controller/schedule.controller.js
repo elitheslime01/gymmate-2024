@@ -69,3 +69,25 @@ export const updateSchedule = async (req, res) => {
         res.status(500).json({ success: false, message: "Server error." });
     }
 };
+
+// Function to delete a schedule and its time slots
+export const deleteSchedule = async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({ success: false, message: "Schedule ID is required." });
+    }
+
+    try {
+        const deletedSchedule = await Schedule.findByIdAndDelete(id);
+
+        if (!deletedSchedule) {
+            return res.status(404).json({ success: false, message: "Schedule not found." });
+        }
+
+        res.status(200).json({ success: true, message: "Schedule deleted successfully.", data: deletedSchedule });
+    } catch (error) {
+        console.error("Error deleting schedule:", error.message);
+        res.status(500).json({ success: false, message: "Server error." });
+    }
+};

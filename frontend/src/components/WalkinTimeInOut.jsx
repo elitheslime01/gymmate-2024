@@ -10,7 +10,7 @@ import {
   Button,
   useToast
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useStudentStore } from "../store/student";
 import useWalkinStore from "../store/walkin";
 import { format } from 'date-fns';
@@ -162,6 +162,7 @@ const WalkinTimeInOut = () => {
         });
       }
     } catch (error) {
+      console.error("Failed to record time in:", error);
       toast({
         title: "Error",
         description: "Failed to record time in.",
@@ -196,6 +197,7 @@ const WalkinTimeInOut = () => {
         });
       }
     } catch (error) {
+      console.error("Failed to record time out:", error);
       toast({
         title: "Error",
         description: "Failed to record time out.",
@@ -223,6 +225,7 @@ const WalkinTimeInOut = () => {
         throw new Error("Logout failed");
       }
     } catch (error) {
+      console.error("Failed to log out:", error);
       toast({
         title: "Error",
         description: "Failed to log out.",
@@ -239,36 +242,6 @@ const WalkinTimeInOut = () => {
       clearCurrentBooking();
     };
   }, [clearCurrentBooking]);
-
-  // Update the booking status display
-  // filepath: c:\Users\L.go\Documents\Github\gymmate-2024\frontend\src\components\WalkinTimeInOut.jsx
-const getBookingStatus = (student, booking) => {
-  const now = new Date();
-
-  // Parse the end time of the booking
-  const [hours, minutes] = booking._timeSlot.endTime.match(/(\d+):(\d+) (AM|PM)/).slice(1);
-  let endHour = parseInt(hours);
-  const endMinutes = parseInt(minutes);
-  const isPM = booking._timeSlot.endTime.includes('PM');
-
-  if (isPM && endHour !== 12) endHour += 12;
-  else if (!isPM && endHour === 12) endHour = 0;
-
-  const bookingEndTime = new Date(booking._date);
-  bookingEndTime.setHours(endHour, endMinutes, 0, 0);
-
-  // Determine the status
-  if (student._timedOut) {
-      return `Timed Out at ${new Date(student._timedOut).toLocaleTimeString()}`;
-  }
-  if (student._timedIn) {
-      return `Timed In at ${new Date(student._timedIn).toLocaleTimeString()}`;
-  }
-  if (now > bookingEndTime) {
-      return "Not Attended";
-  }
-  return "Awaiting Arrival";
-};
 
   const isTimeInAllowed = () => {
     if (!currentBooking?._timeSlot?.startTime || !currentBooking?._timeSlot?.endTime) return false;
@@ -314,7 +287,7 @@ const getBookingStatus = (student, booking) => {
 
   if (!currentBooking) {
     return (
-      <Box p={8} minW="2xl" maxW="4xl">
+      <Box px={{ base: 4, md: 8 }} py={{ base: 6, md: 8 }} w="full" maxW="4xl" mx="auto">
         <HStack spacing={4} justify="normal">
           <Button
             bgColor="white"
@@ -342,7 +315,7 @@ const getBookingStatus = (student, booking) => {
 
   if (!user) {
     return (
-      <Box p={8} minW="2xl" maxW="4xl">
+      <Box px={{ base: 4, md: 8 }} py={{ base: 6, md: 8 }} w="full" maxW="4xl" mx="auto">
         <Card bg="white" boxShadow="lg">
           <CardBody>
             <Text textAlign="center">Please log in to view bookings</Text>
@@ -353,25 +326,18 @@ const getBookingStatus = (student, booking) => {
   }
 
   return (
-    <Box p={4} 
-    w="100%" 
-    h="calc(100vh - 100px)" // Adjust height to account for any headers/margins
-    overflowY="auto" // Enable vertical scrolling for the container
-    sx={{
-      '&::-webkit-scrollbar': {
-        width: '4px',
-      },
-      '&::-webkit-scrollbar-track': {
-        width: '6px',
-      },
-      '&::-webkit-scrollbar-thumb': {
-        background: '#gray.300',
-        borderRadius: '24px',
-      },
-    }}>
+    <Box
+      px={{ base: 4, md: 6 }}
+      py={{ base: 6, md: 8 }}
+      w="full"
+      maxW="4xl"
+      mx="auto"
+      h="auto"
+      overflowY="visible"
+    >
     {/* Logout Button */}
-    <Box minW="2xl" maxW="4xl" mx="auto"> 
-    <HStack spacing={4} justify="normal">
+    <Box w="full">
+    <HStack spacing={4} justify="normal" mb={{ base: 4, md: 0 }}>
       <Button
         bgColor="white"
         color="#FE7654"
@@ -388,8 +354,13 @@ const getBookingStatus = (student, booking) => {
     <Card bg="white" boxShadow="lg" mb={4}>
       <CardBody>
         <VStack spacing={6} align="center">
-          <HStack justifyContent="space-between">
-            <VStack align="start" spacing={1} pr={4}>
+          <HStack
+            justifyContent="space-between"
+            w="full"
+            flexWrap={{ base: "wrap", md: "nowrap" }}
+            gap={{ base: 4, md: 0 }}
+          >
+            <VStack align="start" spacing={1} pr={{ base: 0, md: 4 }} w="full">
               <Heading size="lg">
                 {`${currentBooking._timeSlot.startTime} - ${currentBooking._timeSlot.endTime}`}
               </Heading>
@@ -397,7 +368,17 @@ const getBookingStatus = (student, booking) => {
                 {format(new Date(currentBooking._date), 'EEEE - MMMM d')}
               </Text>
             </VStack>
-            <Text fontSize="xl" fontWeight="bold" color="gray.700" borderLeft={"2px solid"} borderColor="gray.200"  pl={4} padding={4}>
+            <Text
+              fontSize={{ base: "lg", md: "xl" }}
+              fontWeight="bold"
+              color="gray.700"
+              borderLeft={{ base: "none", md: "2px solid" }}
+              borderColor="gray.200"
+              pl={{ base: 0, md: 4 }}
+              py={{ base: 2, md: 0 }}
+              w={{ base: "full", md: "auto" }}
+              textAlign="center"
+            >
               #{currentStudent?._arID?._code || "000000"}
             </Text>
           </HStack>
@@ -420,7 +401,12 @@ const getBookingStatus = (student, booking) => {
             )}
           </VStack>
 
-          <HStack spacing={4} justify="center">
+          <HStack
+            spacing={{ base: 3, md: 4 }}
+            justify="center"
+            flexWrap={{ base: "wrap", md: "nowrap" }}
+            w="full"
+          >
             <Button
               bgColor="#FE7654"
               color="white"
@@ -447,7 +433,7 @@ const getBookingStatus = (student, booking) => {
           {((!isToday(currentBooking._date) || 
             (!currentStudent?._timedIn && !isTimeInAllowed()) || 
             currentStudent?._bookingStatus === "Not Attended") && (
-            <Box borderRadius="md" bg="gray.50" p={3} fontSize="sm">
+            <Box borderRadius="md" bg="gray.50" p={3} fontSize="sm" w="full">
               {!isToday(currentBooking._date) && (
                 <Text color="orange.500" mb={2} textAlign={"center"}>
                   Note: This is your next scheduled booking.
@@ -504,8 +490,12 @@ const getBookingStatus = (student, booking) => {
                               w="100%"
                           >
                               <CardBody>
-                                  <HStack justifyContent="center">
-                                      <VStack align="start" spacing={1} pr={4}>
+                  <HStack
+                    justifyContent="center"
+                    flexWrap={{ base: "wrap", md: "nowrap" }}
+                    gap={{ base: 4, md: 0 }}
+                  >
+                    <VStack align="start" spacing={1} pr={{ base: 0, md: 4 }}>
                                           <Heading size="md">
                                               {`${booking._timeSlot.startTime} - ${booking._timeSlot.endTime}`}
                                           </Heading>
@@ -513,13 +503,15 @@ const getBookingStatus = (student, booking) => {
                                               {format(new Date(booking._date), 'EEEE - MMMM d')}
                                           </Text>
                                       </VStack>
-                                      <Text 
-                                          fontSize="lg" 
-                                          fontWeight="bold" 
-                                          color="gray.700" 
-                                          borderLeft="2px solid" 
-                                          borderColor="gray.200" 
-                                          pl={4}
+                    <Text 
+                      fontSize={{ base: "md", md: "lg" }}
+                      fontWeight="bold" 
+                      color="gray.700" 
+                      borderLeft={{ base: "none", md: "2px solid" }}
+                      borderColor="gray.200" 
+                      pl={{ base: 0, md: 4 }}
+                      textAlign="center"
+                      w={{ base: "full", md: "auto" }}
                                       >
                                           #{student?._arID?._code || "000000"}
                                       </Text>

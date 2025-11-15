@@ -1,4 +1,4 @@
-import { useToast, Button, Center, Flex, HStack, Input, InputGroup, InputLeftElement, InputRightElement, Text, VStack } from "@chakra-ui/react";
+import { useToast, Box, Button, Center, Flex, Input, InputGroup, InputLeftElement, InputRightElement, Text, VStack } from "@chakra-ui/react";
 import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedImage } from '@cloudinary/react';
 import { MdEmail } from "react-icons/md";
@@ -47,58 +47,95 @@ const LoginPage = () => {
     }
   };
   
-  return (
-    <Flex color='white'>
-        <Center w='50vw' h='100vh' m='0' p='0'>
-            <AdvancedImage
-                draggable={false}
-                cldImg={cld.image('bg-01_bcoz28').format('auto').quality('auto')}
-                style={{ width: '100%', height: '100%', objectFit: 'fill' }}
-            />
-        </Center>
-        <Center w='50vw' h='100vh' bg='gray.300' m='0' p='0'>
-            <VStack w='100%' spacing='10'>
-                <Center m='0' p='0'>
-                    <AdvancedImage
-                        draggable={false}
-                        cldImg={cld.image('clipboard-image-1729707349_e6xxhf').format('auto').quality('auto')}
-                        style={{ width: '50%', height: '50%' }}
-                    />
-                </Center>
-                <VStack w='50%' justify="center" mb={6} spacing={5}>
-                    <InputField
-                        placeholder='Email'
-                        icon={<MdEmail />}
-                        value={email}
-                        onChange={handleInputChange(setEmail)}
-                    />
-                    <InputField
-                        placeholder='Password'
-                        icon={<RiLockPasswordFill />}
-                        value={password}
-                        type={showPassword ? 'text' : 'password'}
-                        onChange={handleInputChange(setPassword)}
-                        toggleVisibility={() => setShowPassword(prev => !prev)}
-                        showPassword={showPassword}
-                    />
+    return (
+        <Flex
+            minH="100vh"
+            direction={{ base: "column", md: "row" }}
+            bg="gray.300"
+            color="#071434"
+        >
+            <Box
+                flex="1"
+                display={{ base: "none", md: "block" }}
+                position="relative"
+                minH={{ base: "40vh", md: "100vh" }}
+            >
+                <AdvancedImage
+                    draggable={false}
+                    cldImg={cld.image('bg-01_bcoz28').format('auto').quality('auto')}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+            </Box>
+
+            <Flex
+                flex="1"
+                align="center"
+                justify="center"
+                py={{ base: 10, md: 0 }}
+                px={{ base: 6, md: 12 }}
+            >
+                <VStack w="full" maxW={{ base: 'md', lg: 'lg' }} spacing={8}>
+                    <Center>
+                        <AdvancedImage
+                            draggable={false}
+                            cldImg={cld.image('clipboard-image-1729707349_e6xxhf').format('auto').quality('auto')}
+                            style={{ width: '200px', height: 'auto' }}
+                        />
+                    </Center>
+
+                    <VStack w="full" spacing={5}>
+                        <InputField
+                            placeholder='Email'
+                            icon={<MdEmail />}
+                            value={email}
+                            onChange={handleInputChange(setEmail)}
+                        />
+                        <InputField
+                            placeholder='Password'
+                            icon={<RiLockPasswordFill />}
+                            value={password}
+                            type={showPassword ? 'text' : 'password'}
+                            onChange={handleInputChange(setPassword)}
+                            toggleVisibility={() => setShowPassword(prev => !prev)}
+                            showPassword={showPassword}
+                        />
+                    </VStack>
+
+                    <Button
+                        w="full"
+                        h='50px'
+                        bgColor='#FE7654'
+                        color='white'
+                        _hover={{ bg: '#e65c3b' }}
+                        _active={{ bg: '#cc4a2d' }}
+                        onClick={handleLogin}
+                    >
+                        Log In
+                    </Button>
+
+                    <VStack w="full" spacing={2}>
+                        <Text
+                            onClick={() => console.log("Forgot Password clicked")}
+                            color="#071434"
+                            cursor="pointer"
+                            fontSize='sm'
+                            textAlign="center"
+                        >
+                            Forgot password?
+                        </Text>
+                        <Text
+                            onClick={() => console.log("Register clicked")}
+                            color="#071434"
+                            cursor="pointer"
+                            fontSize='sm'
+                            textAlign="center"
+                        >
+                            Register an account?
+                        </Text>
+                    </VStack>
                 </VStack>
-                <Button
-                    w='50%'
-                    h='50px'
-                    bgColor='#FE7654'
-                    color='white'
-                    _hover={{ bg: '#e65c3b' }}
-                    _active={{ bg: '#cc4a2d' }}
-                    onClick={handleLogin}>
-                    Log In
-                </Button>
-                <HStack spacing='2' w='50%' justifyContent='space-between'>
-                    <Text onClick={() => console.log("Forgot Password clicked")} color="#071434" cursor="pointer" fontSize='sm'>Forgot password?</Text>
-                    <Text onClick={() => console.log("Register clicked")} color="#071434" cursor="pointer" fontSize='sm'>Register an account?</Text>
-                </HStack>
-            </VStack>
-        </Center>
-      </Flex>
+            </Flex>
+        </Flex>
     );
 };
 

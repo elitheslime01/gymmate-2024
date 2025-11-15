@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-const useBookingStore = create((set) => ({
+const useBookingStore = create((set, get) => ({
   bookings: [],
   setBookings: (bookings) => set({ bookings }),
   date: "",

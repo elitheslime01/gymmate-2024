@@ -60,8 +60,14 @@ const WalkinLogin = () => {
     }
 
     return (
-        <Box p={8} w="full" maxW="4xl" display={isRegistered ? 'none' : 'block'}>
-            <Heading as="h1" size="md" mb={20} align="center">Log in a GymMate account</Heading>
+        <Box
+            px={{ base: 4, md: 8 }}
+            py={{ base: 6, md: 8 }}
+            w="full"
+            maxW="3xl"
+            display={isRegistered ? 'none' : 'block'}
+        >
+            <Heading as="h1" size="md" mb={{ base: 6, md: 12 }} textAlign="center">Log in a GymMate account</Heading>
             <VStack w='100%' justify="center" mb={6} spacing={5}>
                 {/* Email Input */}
                 <InputGroup w='100%'>
@@ -124,9 +130,9 @@ const WalkinLogin = () => {
                 </InputGroup>
             </VStack>
 
-            <Flex justify="space-between" mt={20}>
-                <Button bgColor="white" color="#FE7654" border="2px" borderColor="#FE7654" _hover={{ bg: '#FE7654', color: 'white' }} _active={{ bg: '#cc4a2d' }} px={6} py={2} rounded="md" onClick={handleLogCancel}>Cancel</Button>
-                <Button bgColor='#FE7654' color='white' _hover={{ bg: '#e65c3b' }} _active={{ bg: '#cc4a2d' }} px={6} py={2} rounded="md" onClick={handleLogLogin}>Log In</Button>
+            <Flex direction={{ base: 'column', sm: 'row' }} justify="space-between" mt={{ base: 10, md: 16 }} gap={4}>
+                <Button bgColor="white" color="#FE7654" border="2px" borderColor="#FE7654" _hover={{ bg: '#FE7654', color: 'white' }} _active={{ bg: '#cc4a2d' }} px={6} py={2} rounded="md" onClick={handleLogCancel} w={{ base: '100%', sm: 'auto' }}>Cancel</Button>
+                <Button bgColor='#FE7654' color='white' _hover={{ bg: '#e65c3b' }} _active={{ bg: '#cc4a2d' }} px={6} py={2} rounded="md" onClick={handleLogLogin} w={{ base: '100%', sm: 'auto' }}>Log In</Button>
             </Flex>
         </Box>
   )

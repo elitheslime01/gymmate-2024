@@ -1,12 +1,28 @@
 import { create } from 'zustand';
 
-const useQueueStore = create((set) => ({
+const DEFAULT_AUTO_ALLOCATION_MINUTES = Number(
+  import.meta.env.VITE_QUEUE_AUTO_ALLOCATION_MINUTES ?? 30
+);
+
+const sanitizeMinutes = (minutes) => {
+  const parsed = Number(minutes);
+  if (Number.isFinite(parsed) && parsed > 0) {
+    return parsed;
+  }
+  return DEFAULT_AUTO_ALLOCATION_MINUTES;
+};
+
+const useQueueStore = create((set, get) => ({
   queues: [],
   setQueues: (queues) => set({ queues }),
   date: "",
   setDate: (date) => set({ date }),
   timeSlot: { startTime: "", endTime: "" },
   setTimeSlot: (timeSlot) => set({ timeSlot }),
+  autoAllocationIntervalMinutes: sanitizeMinutes(DEFAULT_AUTO_ALLOCATION_MINUTES),
+  setAutoAllocationIntervalMinutes: (minutes) =>
+    set({ autoAllocationIntervalMinutes: sanitizeMinutes(minutes) }),
+  getAutoAllocationIntervalMs: () => get().autoAllocationIntervalMinutes * 60 * 1000,
   
   clearQueues: () => set({ queues: [], date: "", timeSlot: { startTime: "", endTime: "" } }),
 
@@ -118,15 +134,12 @@ const useQueueStore = create((set) => ({
 
   // Modify the existing refreshQueueData function
   refreshQueueData: async () => {
-    const state = useQueueStore.getState();
+    const state = get();
     if (state.date && state.timeSlot.startTime) {
-      // If both date and timeslot are selected
       await state.fetchQueues(state.date, state.timeSlot);
     } else if (state.date) {
-      // If only date is selected
       await state.fetchQueuesByDate(state.date);
     } else {
-      // If nothing is selected, show current month
       await state.fetchAllCurrentMonthQueues();
     }
   }

@@ -1,23 +1,110 @@
-import { 
-  Table, Thead, Tbody, Tr, Th, Td, TableContainer, Box, Flex, Input, 
-  Select, useToast, IconButton, Spinner, Button, Modal, ModalOverlay, 
-  ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Text, Grid
+import {
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  TableContainer,
+  Box,
+  Input,
+  Select,
+  useToast,
+  IconButton,
+  Spinner,
+  Button,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+  Text,
+  Grid,
+  Image,
+  Center,
+  VStack,
+  Stack,
 } from "@chakra-ui/react";
 import { RepeatIcon, InfoIcon } from "@chakra-ui/icons";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import useQueueStore from "../store/queue";
+import ArImageViewer from "./ArImageViewer";
 
 const QueueTable = () => {
-  const { queues, setDate, setTimeSlot, fetchQueues, fetchQueuesByDate, clearQueues, allocateStudents, fetchAllCurrentMonthQueues } = useQueueStore();  const [date, setDateState] = useState("");
+  const {
+    queues,
+    setDate,
+    setTimeSlot,
+    fetchQueues,
+    fetchQueuesByDate,
+    clearQueues,
+    allocateStudents,
+    fetchAllCurrentMonthQueues,
+    refreshQueueData,
+    autoAllocationIntervalMinutes,
+  } = useQueueStore();
+  const [date, setDateState] = useState("");
   const toast = useToast();
   const [timeSlot, setTimeSlotState] = useState({ startTime: "", endTime: "" });
   const [isAllocating, setIsAllocating] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [arImageData, setArImageData] = useState(null);
+  const [isArImageLoading, setIsArImageLoading] = useState(false);
+  const [arImageError, setArImageError] = useState(null);
+  const detailsDisclosure = useDisclosure();
+  const imageDisclosure = useDisclosure();
+  const { isOpen, onOpen, onClose } = detailsDisclosure;
+  const {
+    isOpen: isViewerOpen,
+    onOpen: onViewerOpen,
+    onClose: onViewerClose,
+  } = imageDisclosure;
+  const allocationInProgressRef = useRef(false);
+
+  const fetchArImage = async (studentId) => {
+    setIsArImageLoading(true);
+    setArImageError(null);
+    try {
+      const response = await fetch(`http://localhost:5000/api/arImage/${studentId}`);
+      const result = await response.json().catch(() => null);
+
+      if (response.ok && result?.success && result?.data?._dataUrl) {
+        setArImageData(result.data);
+      } else {
+        const message = result?.message || "No AR image available.";
+        setArImageData(null);
+        setArImageError(message);
+      }
+    } catch (error) {
+      console.error("Error fetching AR image:", error.message);
+      setArImageError("Unable to load AR image.");
+      setArImageData(null);
+    } finally {
+      setIsArImageLoading(false);
+    }
+  };
 
   const handleViewDetails = (student, queueInfo) => {
-    setSelectedStudent({ ...student, queueInfo });
+  onViewerClose();
+  const studentDetails = { ...student, queueInfo };
+    setSelectedStudent(studentDetails);
+    setArImageData(null);
+    setArImageError(null);
     onOpen();
+
+    if (studentDetails?._studentId?._id) {
+      fetchArImage(studentDetails._studentId._id);
+    }
+  };
+
+  const handleModalClose = () => {
+    setSelectedStudent(null);
+    setArImageData(null);
+    setArImageError(null);
+    onViewerClose();
+    onClose();
   };
   // // Clear data when component unmounts
   // useEffect(() => {
@@ -91,35 +178,84 @@ const QueueTable = () => {
     }
   };
 
-  const handleAllocate = async () => {
-    setIsAllocating(true);
-    try {
-      const result = await allocateStudents();
-      
-      if (result.success) {
-        toast({
-          title: "Allocation Complete",
-          description: `Successfully allocated ${result.data.totalAllocated} students`,
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
-        
-        // Refresh the queue data after allocation
-        fetchAllCurrentMonthQueues();
-      } else {
-        toast({
-          title: "Allocation Failed",
-          description: result.error || "Failed to allocate students",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
+  const runAllocation = useCallback(
+    async (trigger = "manual") => {
+      if (allocationInProgressRef.current) {
+        return;
       }
-    } finally {
-      setIsAllocating(false);
-    }
+
+      allocationInProgressRef.current = true;
+
+      if (trigger === "manual") {
+        setIsAllocating(true);
+      }
+
+      try {
+        const result = await allocateStudents();
+
+        if (result?.success) {
+          if (trigger === "manual") {
+            toast({
+              title: "Allocation Complete",
+              description: `Successfully allocated ${result.data.totalAllocated} students`,
+              status: "success",
+              duration: 3000,
+              isClosable: true,
+            });
+          }
+
+          await refreshQueueData();
+        } else {
+          if (trigger === "manual") {
+            toast({
+              title: "Allocation Failed",
+              description: result?.error || result?.message || "Failed to allocate students",
+              status: "error",
+              duration: 3000,
+              isClosable: true,
+            });
+          } else {
+            console.warn("Automatic allocation attempt did not succeed.", result);
+          }
+        }
+      } catch (error) {
+        console.error("Error allocating students:", error);
+        if (trigger === "manual") {
+          toast({
+            title: "Allocation Error",
+            description: error.message || "Unexpected error during allocation.",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        }
+      } finally {
+        if (trigger === "manual") {
+          setIsAllocating(false);
+        }
+        allocationInProgressRef.current = false;
+      }
+    },
+    [allocateStudents, refreshQueueData, toast]
+  );
+
+  const handleAllocate = () => {
+    void runAllocation("manual");
   };
+
+  useEffect(() => {
+    const intervalMinutes = autoAllocationIntervalMinutes;
+    if (!intervalMinutes || intervalMinutes <= 0) {
+      return undefined;
+    }
+
+    const intervalMs = intervalMinutes * 60 * 1000;
+    const intervalId = setInterval(() => {
+      void runAllocation("auto");
+    }, intervalMs);
+
+    return () => clearInterval(intervalId);
+  }, [autoAllocationIntervalMinutes, runAllocation]);
 
   useEffect(() => {
     if (date && timeSlot.startTime && timeSlot.endTime) {
@@ -133,20 +269,34 @@ const QueueTable = () => {
 
   return (
     <Box mb={0}>
-      <Flex gap={4} mb={8} justifyContent="space-between">
-        <Flex gap={2}>
+      <Stack
+        direction={{ base: "column", xl: "row" }}
+        spacing={{ base: 4, md: 6 }}
+        mb={{ base: 6, md: 8 }}
+        justify="space-between"
+        align={{ base: "stretch", xl: "center" }}
+      >
+        <Stack
+          direction={{ base: "column", md: "row" }}
+          spacing={{ base: 3, md: 4 }}
+          w={{ base: "100%", xl: "auto" }}
+        >
           <Input
             type="date"
             value={date}
             onChange={handleDateChange}
             placeholder="Select Date (yyyy-mm-dd)"
-            bg="white" boxShadow="lg" 
+            bg="white"
+            boxShadow="lg"
+            maxW={{ base: "100%", md: "220px" }}
           />
           <Select
-            bg="white" boxShadow="lg" 
+            bg="white"
+            boxShadow="lg"
             name="startTime"
             value={timeSlot.startTime}
             onChange={handleTimeSlotChange}
+            maxW={{ base: "100%", md: "220px" }}
           >
             <option value="">Select Time Slot</option>
             <option value="08:00 AM">08:00 AM - 10:00 AM</option>
@@ -154,25 +304,32 @@ const QueueTable = () => {
             <option value="12:00 PM">12:00 PM - 02:00 PM</option>
             <option value="02:00 PM">02:00 PM - 04:00 PM</option>
           </Select>
-        </Flex>
-        <Flex gap={2}>
-          <Select w="70%" bg="white" boxShadow="lg">
+        </Stack>
+        <Stack
+          direction={{ base: "column", md: "row" }}
+          spacing={{ base: 3, md: 4 }}
+          w={{ base: "100%", xl: "auto" }}
+          align={{ base: "stretch", md: "center" }}
+        >
+          <Select bg="white" boxShadow="lg" maxW={{ base: "100%", md: "220px" }}>
             <option value="option1">Student ID</option>
             <option value="option2">Umak Email</option>
           </Select>
-          <Input bg="white" boxShadow="lg" placeholder="Search" />
+          <Input bg="white" boxShadow="lg" placeholder="Search" maxW={{ base: "100%", md: "220px" }} />
           <IconButton
             icon={isAllocating ? <Spinner size="sm" /> : <RepeatIcon />}
             aria-label="Allocate Students"
             bg="#FE7654"
             color="white"
-            _hover={{ bg: '#e65c3b' }}
+            _hover={{ bg: "#e65c3b" }}
             onClick={handleAllocate}
             isLoading={isAllocating}
+            alignSelf={{ base: "flex-start", md: "center" }}
+            minW={{ base: "100%", md: "auto" }}
           />
-        </Flex>
-      </Flex>
-      <TableContainer>
+        </Stack>
+      </Stack>
+      <TableContainer overflowX="auto">
         <Table bg="white" size="sm">
           <Thead bg="#071434" position="sticky" top={0} zIndex={1}>
             <Tr>
@@ -219,16 +376,16 @@ const QueueTable = () => {
       </TableContainer>
 
       {/* Details Modal */}
-      <Modal isOpen={isOpen} onClose={onClose} isCentered size="2xl">
+      <Modal isOpen={isOpen} onClose={handleModalClose} isCentered size="2xl">
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent mx={{ base: 4, md: 0 }} maxW={{ base: "100%", md: "2xl" }}>
           <ModalHeader bg="#071434" color="white" roundedTop="md">Student Queue Details</ModalHeader>
           <ModalBody p={8}>
             {selectedStudent && (
               <Box>
                 {/* Student Information Section */}
                 <Text fontSize="lg" fontWeight="bold" mb={4} color="#071434">Student Information</Text>
-                <Grid templateColumns="repeat(2, 1fr)" gap={6} mb={8}>
+                <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6} mb={8}>
                   <Box>
                     <Text mb={2} color="gray.700">Name</Text>
                     <Input
@@ -301,8 +458,8 @@ const QueueTable = () => {
                       isReadOnly
                     />
                   </Box>
-                  <Box gridColumn="span 2">
-                    <Grid templateColumns="repeat(3, 1fr)" gap={4}>
+                  <Box gridColumn={{ base: "span 1", md: "span 2" }}>
+                    <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(3, 1fr)" }} gap={4}>
                       <Box>
                         <Text mb={2} color="gray.700">Attended</Text>
                         <Input
@@ -333,10 +490,10 @@ const QueueTable = () => {
                     </Grid>
                   </Box>
                 </Grid>
-      
+
                 {/* Queue Information Section */}
                 <Text fontSize="lg" fontWeight="bold" mb={4} color="#071434">Queue Information</Text>
-                <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+                <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6}>
                   <Box>
                     <Text mb={2} color="gray.700">Queue Date</Text>
                     <Input
@@ -383,6 +540,47 @@ const QueueTable = () => {
                     />
                   </Box>
                 </Grid>
+
+                {/* AR Image Section */}
+                <Text fontSize="lg" fontWeight="bold" mb={4} mt={6} color="#071434">Acknowledgement Receipt</Text>
+                <Box mb={8} bg="gray.50" borderRadius="md" borderWidth="1px" borderColor="gray.200" p={4}>
+                  {isArImageLoading ? (
+                    <Center py={10}>
+                      <Spinner size="lg" color="#FE7654" />
+                    </Center>
+                  ) : arImageData ? (
+                    <VStack spacing={4}>
+                      <Image
+                        src={arImageData._dataUrl}
+                        alt="Uploaded acknowledgement receipt"
+                        maxH="320px"
+                        objectFit="contain"
+                        borderRadius="md"
+                        boxShadow="md"
+                        bg="white"
+                      />
+                      <Button
+                        size="sm"
+                        bgColor="#FE7654"
+                        color="white"
+                        _hover={{ bg: "#e65c3b" }}
+                        _active={{ bg: "#cc4a2d" }}
+                        onClick={onViewerOpen}
+                      >
+                        View full size
+                      </Button>
+                      {arImageData._contentType && (
+                        <Text fontSize="sm" color="gray.600">
+                          Format: {arImageData._contentType}
+                        </Text>
+                      )}
+                    </VStack>
+                  ) : (
+                    <Text textAlign="center" color="gray.600">
+                      {arImageError || "No AR image uploaded for this student."}
+                    </Text>
+                  )}
+                </Box>
               </Box>
             )}
           </ModalBody>
@@ -395,13 +593,20 @@ const QueueTable = () => {
               px={6} 
               py={2} 
               rounded="md"
-              onClick={onClose}
+              onClick={handleModalClose}
             >
               Close
             </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
+      <ArImageViewer
+        isOpen={isViewerOpen}
+        onClose={onViewerClose}
+        imageSrc={arImageData?._dataUrl}
+        contentType={arImageData?._contentType}
+        title={selectedStudent ? `${selectedStudent._studentId._fName} ${selectedStudent._studentId._lName} - Acknowledgement Receipt` : undefined}
+      />
     </Box>
   );
 };

@@ -24,6 +24,8 @@ const useWalkinStore = create((set, get) => ({
     showPassword: { password: false, confirmPassword: false },
     currentBooking: null,
     upcomingBookings: [],
+    arImage: null,
+    uploadedARImage: null,
 
     setCurrentDate: (date) => set({ currentDate: date }),
     setSelectedDay: (day) => set({ selectedDay: day }),
@@ -47,7 +49,7 @@ const useWalkinStore = create((set, get) => ({
 
     setARImage: (arImage) => {
         console.log('arImage:', arImage);
-        set({ arImage });
+        set({ arImage, uploadedARImage: null });
     },
 
     resetState: () => set({
@@ -249,47 +251,68 @@ const useWalkinStore = create((set, get) => ({
         }
     },
 
-    uploadARImage: async (arImage, studentId) => {
-        try {
-            if (!arImage || typeof arImage !== 'object' || !arImage.size) {
-                console.error('Error: arImage is not a file object');
-                return;
-              }
-            
-          const formData = new FormData();
-          formData.append('_arImage', arImage);
-          formData.append('_studentId', studentId);
+        uploadARImage: async (arImage, studentId) => {
+                if (!arImage || typeof arImage !== 'object' || !arImage.size) {
+                        const message = 'A valid AR image file is required.';
+                        console.error(message);
+                        return { success: false, message };
+                }
+
+                if (!studentId) {
+                        const message = 'Student ID is required to upload AR image.';
+                        console.error(message);
+                        return { success: false, message };
+                }
+
+                const formData = new FormData();
+                formData.append('_arImage', arImage);
+                formData.append('_studentId', studentId);
+
+                try {
+                        const response = await fetch('http://localhost:5000/api/arImage/upload', {
+                                method: 'POST',
+                                body: formData,
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok && result.success) {
+                                set({ uploadedARImage: result.data });
+                                return { success: true, data: result.data };
+                        }
+
+                        const message = result?.message || 'Failed to upload AR image.';
+                        console.error('Error uploading AR image:', message);
+                        return { success: false, message };
+                } catch (error) {
+                        console.error('Error uploading AR image:', error.message);
+                        return { success: false, message: 'Unexpected error uploading AR image.' };
+                }
+            },
     
-          const response = await fetch('http://localhost:5000/api/arImage/upload', {
-            method: 'POST',
-            body: formData,
-          });
-    
-          if (response.ok) {
-            const data = await response.json();
-            set({ arImage: data });
-          } else {
-            console.error('Error uploading AR image:', response.statusText);
-          }
-        } catch (error) {
-          console.error('Error uploading AR image:', error.message);
-        }
-      },
-    
-      getARImage: async (studentID) => {
-        try {
-          const response = await fetch(`http://localhost:5000/api/arImage/${studentID}`);
-    
-          if (response.ok) {
-            const data = await response.json();
-            set({ arImage: data });
-          } else {
-            console.error('Error getting AR image:', response.statusText);
-          }
-        } catch (error) {
-          console.error('Error getting AR image:', error.message);
-        }
-      },
+            getARImage: async (studentId) => {
+                if (!studentId) {
+                        console.error('Student ID is required to fetch AR image.');
+                        return { success: false, message: 'Student ID is required.' };
+                }
+
+                try {
+                    const response = await fetch(`http://localhost:5000/api/arImage/${studentId}`);
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
+                        set({ uploadedARImage: result.data });
+                        return { success: true, data: result.data };
+                    }
+
+                    const message = result?.message || 'Failed to retrieve AR image.';
+                    console.error('Error getting AR image:', message);
+                    return { success: false, message };
+                } catch (error) {
+                    console.error('Error getting AR image:', error.message);
+                    return { success: false, message: 'Unexpected error retrieving AR image.' };
+                }
+            },
 
     // Navigation functions
     navigateTo: (view) => {

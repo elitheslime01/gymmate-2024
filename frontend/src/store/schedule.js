@@ -132,6 +132,33 @@ const useScheduleStore = create((set) => ({
             return { success: false, message: "An error occurred while updating the schedule." }; 
         }
     },
+
+    deleteSchedule: async (scheduleId) => {
+        if (!scheduleId) {
+            return { success: false, message: "Schedule ID is required." };
+        }
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/schedules/${scheduleId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                set({ scheduleData: null, scheduleId: null });
+                return { success: true };
+            }
+
+            return { success: false, message: data.message || "Failed to delete schedule." };
+        } catch (error) {
+            console.error("Error deleting schedule:", error);
+            return { success: false, message: "An error occurred while deleting the schedule." };
+        }
+    },
     
 }));
 

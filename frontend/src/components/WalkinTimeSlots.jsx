@@ -1,14 +1,37 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, Flex, Heading, Text, Tooltip, VStack } from "@chakra-ui/react";
+import {
+    Box,
+    Button,
+    Flex,
+    Heading,
+    Text,
+    Tooltip,
+    VStack,
+    Card,
+    CardHeader,
+    CardBody,
+    SimpleGrid,
+    HStack,
+    Tag,
+    TagLabel,
+    Center,
+    Icon
+} from "@chakra-ui/react";
 import { QuestionIcon } from "@chakra-ui/icons";
 import { FaCalendarTimes } from "react-icons/fa";
 import useWalkinStore from '../store/walkin.js';
 
-const ScheduleTimeSlots = () => {
+const WalkinTimeSlots = () => {
     const { setSelectedTimeSlot, selectedDay, scheduleData, setSelectedTime, fetchScheduleByDate } = useWalkinStore();
-    const [showButtons, setShowButtons] = useState(false);
-    const [buttonClicked, setButtonClicked] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);
+
+    const statusColorMap = {
+        "Available": "green",
+        "Fully Booked": "red",
+        "Under Maintenance": "orange",
+        "Reserved": "purple",
+        "Unavailable": "gray"
+    };
 
     useEffect(() => {
         const fetchSchedule = async () => {
@@ -19,15 +42,6 @@ const ScheduleTimeSlots = () => {
         };
         fetchSchedule();
     }, [selectedDay, fetchScheduleByDate]);
-
-    useEffect(() => {
-        if (scheduleData) {
-            setShowButtons(true);
-        } else {
-            setShowButtons(false);
-            setButtonClicked(false);
-        }
-    }, [scheduleData]);
 
     const handleTimeClick = (slot) => {
         setSelectedSlot(slot); // Set the selected slot data
@@ -40,54 +54,97 @@ const ScheduleTimeSlots = () => {
     };
 
     return (
-        <Box width="100%" height="25.5em" display="flex" flexDirection="column">
-            <Flex color="#071434" p={4} justify="space-between" align="center">
-                <Text fontSize="lg" fontWeight="semibold">Time Slots</Text>
-                <Tooltip label="Help" aria-label="A tooltip">
-                    <QuestionIcon />
-                </Tooltip>
-            </Flex>
+        <Card
+            w="full"
+            minH={{ base: "auto", md: "24rem" }}
+            bg="white"
+            borderRadius="xl"
+            boxShadow="2xl"
+            borderWidth="1px"
+            borderColor="gray.100"
+            overflow="hidden"
+        >
+            <CardHeader pb={0}>
+                <Flex
+                    color="#071434"
+                    px={{ base: 0, md: 1 }}
+                    py={{ base: 0, md: 1 }}
+                    justify="space-between"
+                    align={{ base: "flex-start", sm: "center" }}
+                    direction={{ base: "column", sm: "row" }}
+                    gap={3}
+                >
+                    <Box>
+                        <Text fontSize="lg" fontWeight="semibold">Time Slots</Text>
+                        <Text fontSize="sm" color="gray.500">Pick an available window to complete your walk-in booking.</Text>
+                    </Box>
+                    <Tooltip label="Need help?" aria-label="Time slots help tooltip">
+                        <Button
+                            variant="ghost"
+                            colorScheme="orange"
+                            size="sm"
+                            leftIcon={<QuestionIcon />}
+                        >
+                            Help
+                        </Button>
+                    </Tooltip>
+                </Flex>
+            </CardHeader>
 
-            {!buttonClicked && !showButtons && (
-                <Box p={4} flex="1" display="flex" justifyContent="center" alignItems="center">
-                    <VStack
-                        spacing={6}
-                        alignItems="center"
-                        justifyContent="center"
-                    >
-                        <FaCalendarTimes size={80} color="#071434" />
-                        <Text fontSize="lg" color="#071434">No time slots created yet</Text>
-                    </VStack>
-                </Box>
-            )}
-
-            {showButtons && scheduleData && scheduleData.timeSlots && (
-                 <Box p={4} flex="1">
-                    <Flex direction="row" flexWrap="wrap" justify="space-between" height="100%">
-                        {scheduleData.timeSlots.map((slot) => (
-                            <Button
-                                key={slot._startTime}
-                                w='48%'
-                                bg={selectedSlot?._startTime === slot._startTime ? "white" : "white"}
-                                border={selectedSlot?._startTime === slot._startTime ? "2px solid #FE7654" : "2px solid transparent"} 
-                                onClick={() => handleTimeClick(slot)}
-                                height="40%"
-                                boxShadow="lg"
-                                mb={2}
-                                _hover={{ bg: selectedSlot === slot ? "gray.300" : "white" }} 
-                            >
-                                <VStack spacing={5} align="center">
-                                    <Heading fontSize='sm'>{`${slot._startTime} - ${slot._endTime}`}</Heading>
-                                    <Text fontSize='sm'>Available Slot/s: {slot._availableSlots}</Text>
-                                    <Text fontSize='xs' fontWeight='extrabold'>Status: {slot._status}</Text>
-                                </VStack>
-                            </Button>
-                        ))}
-                    </Flex>
-                </Box>
-            )}
-        </Box>
+            <CardBody px={{ base: 4, md: 6 }} pb={{ base: 6, md: 8 }}>
+                {(!scheduleData || !scheduleData.timeSlots || scheduleData.timeSlots.length === 0) ? (
+                    <Center py={10} px={{ base: 4, md: 6 }} textAlign="center">
+                        <VStack spacing={4} maxW="sm">
+                            <Icon as={FaCalendarTimes} boxSize={12} color="#071434" />
+                            <Heading fontSize="lg">No time slots available</Heading>
+                            <Text fontSize="sm" color="gray.500">
+                                Choose another date from the calendar to view walk-in time slots.
+                            </Text>
+                        </VStack>
+                    </Center>
+                ) : (
+                    <SimpleGrid columns={{ base: 1, md: 2 }} spacing={{ base: 4, md: 6 }}>
+                        {scheduleData.timeSlots.map((slot) => {
+                            const isSelected = selectedSlot?._startTime === slot._startTime;
+                            const statusColor = statusColorMap[slot._status] || "gray";
+                            return (
+                                <Button
+                                    key={slot._startTime}
+                                    onClick={() => handleTimeClick(slot)}
+                                    variant="outline"
+                                    borderColor={isSelected ? '#FE7654' : 'gray.200'}
+                                    bg="white"
+                                    _hover={{ borderColor: '#FE7654', boxShadow: 'md' }}
+                                    _active={{ borderColor: '#cc4a2d' }}
+                                    borderRadius="lg"
+                                    py={{ base: 5, md: 6 }}
+                                    px={4}
+                                    h="auto"
+                                    justifyContent="flex-start"
+                                    alignItems="flex-start"
+                                    textAlign="left"
+                                >
+                                    <VStack align="flex-start" spacing={3} w="full">
+                                        <Heading fontSize={{ base: 'md', md: 'lg' }}>
+                                            {`${slot._startTime} - ${slot._endTime}`}
+                                        </Heading>
+                                        <HStack spacing={3} flexWrap="wrap" w="full">
+                                            <Tag colorScheme="gray" variant="subtle">
+                                                <TagLabel>Available: {slot._availableSlots}</TagLabel>
+                                            </Tag>
+                                            <Tag colorScheme={statusColor} variant="solid">
+                                                <TagLabel>{slot._status}</TagLabel>
+                                            </Tag>
+                                        </HStack>
+                                    </VStack>
+                                </Button>
+                            );
+                        })}
+                    </SimpleGrid>
+                )}
+            </CardBody>
+        </Card>
     );
 }
 
-export default ScheduleTimeSlots;
+export default WalkinTimeSlots;

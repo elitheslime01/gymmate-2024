@@ -59,6 +59,63 @@ User056,I love the design and layout!,positive
 User057,Too many bugs during peak hours.,negative
 User058,Real-time updates are very accurate.,positive
 User059,Feedback form doesn't always work.,negative
+AutoPos001,Ang dali na pag-book ng slots kahit peak hours!,positive
+AutoPos002,Ang dali na queue updates legit na improvement!,positive
+AutoPos003,Ang dali na confirmation email madali na mag-monitor ng progress.,positive
+AutoPos004,Ang dali na AR image quality kahit peak hours!,positive
+AutoPos005,Astig ang bagong layout legit na improvement!,positive
+AutoPos006,"Hands down, notifications madali na mag-monitor ng progress.",positive
+AutoPos007,"Hands down, confirmation email sobrang convenient na.",positive
+AutoPos008,"Hands down, dashboard summary legit na improvement!",positive
+AutoPos009,"Hands down, dashboard summary kahit peak hours!",positive
+AutoPos010,Solid ang confirmation email best update so far!,positive
+AutoNeut001,As expected ang queue refresh wala namang naging problema.,neutral
+AutoNeut002,Average lang ang UI sa tablet wala namang naging problema.,neutral
+AutoNeut003,So far ang booking flow wala namang naging problema.,neutral
+AutoNeut004,Steady lang ang paggamit ng AR upload wala namang naging problema.,neutral
+AutoNeut005,Ayos lang ang queue refresh wala namang naging problema.,neutral
+AutoNeut006,Normal naman ang queue refresh wala namang naging problema.,neutral
+AutoNeut007,As expected ang notifications wala namang naging problema.,neutral
+AutoNeut008,Same pa rin ang queue refresh wala namang naging problema.,neutral
+AutoNeg001,Sobrang bagal time-in button kaya na-miss ko ang slot ko.,negative
+AutoNeg002,Hindi gumagana queue refresh hindi talaga usable ngayong araw.,negative
+AutoNeg003,Di ako makapag-time in sa account update kahit ilang beses kong subukan.,negative
+AutoNeg004,Di ako makapag-time in sa notification system grabe kasi nakakaperwisyo.,negative
+AutoNeg005,Di ako makapag-time in sa time-in button grabe kasi nakakaperwisyo.,negative
+AutoNeg006,Di ako makapag-time in sa queue refresh grabe kasi nakakaperwisyo.,negative
+AutoNeg007,Hindi gumagana calendar schedule kaya napipilitan akong mag manual.,negative
+AutoNeg008,Di ako makapag-time in sa AR upload lagi akong naiiwan sa queue.,negative
+AutoNeg009,Di ako makapag-time in sa booking confirmation kaya na-miss ko ang slot ko.,negative
+AutoNeg010,Hindi gumagana mobile view kahit ilang beses kong subukan.,negative
+AutoNeg011,Di ako makapag-time in sa mobile view kaya na-miss ko ang slot ko.,negative
+AutoNeg012,Hindi gumagana AR upload kaya na-miss ko ang slot ko.,negative
+AutoNeg013,"Nagha-hang ang app pag nag-switch ako mula bookings papuntang feedback.",negative
+AutoNeg014,"Nag-e-error pa rin kapag dalawang araw ang gusto kong i-book.",negative
+AutoNeg015,"Hindi nasasave ang bagong contact number ko kahit ilang ulit kong sinubukan.",negative
+AutoNeg016,"Naipit ako sa lumang queue status at hindi ito nag-refresh.",negative
+AutoNeg017,"Still seeing occasional slot conflicts when multiple students book.",negative
+AutoNeg018,"Updating some profile fields took several attempts before saving.",negative
+AutoNeg019,"App stuttered during peak hours on my older Android device.",negative
+AutoNeg020,"Queue status froze earlier today, had to refresh the page manually.",negative
+AutoNeg021,"Minsan biglang nawawala ang slot kahit kakaselect ko lang.",negative
+AutoNeg022,"Navigation lags whenever I switch tabs quickly; feels sluggish.",negative
+AutoNeg023,"One of my AR uploads failed without an error message, confusing.",negative
+AutoNeg024,"Nag-e-error ang profile update ko kapag sabay-sabay ang edits.",negative
+AutoNeg025,"Hindi natuloy ang upload ko at walang lumabas na babala.",negative
+AutoPos011,Thanks for the summary stats in booking history—they keep me organized.,positive
+AutoPos012,Ayos ang notifications—hindi na ako nalalate sa schedule ko.,positive
+AutoPos013,"Madaling baguhin ang profile ngayon, halatang inayos ang proseso.",positive
+AutoPos014,"Isang tap lang tapos na ang time out, kaya nakakabalik ako sa klase agad.",positive
+AutoPos015,"Clocking in works fine for me, just takes an extra second to confirm.",positive
+AutoPos016,"Saved time slots make bookings effortless. Huge productivity boost!",positive
+AutoPos017,"Time-in flow is seamless now. Great job ironing out the details.",positive
+AutoPos018,"Ang smart filters ay agad nakakahanap ng oras na swak sa sched ko. Astig!",positive
+AutoPos019,"Responsive ang app kahit naka-data lang ako. Good job!",positive
+AutoPos020,"The redesigned account page is so clean and easy to navigate.",positive
+AutoPos021,"Scrolling feels buttery smooth on my phone. Nicely done!",positive
+AutoPos022,"Sobrang helpful ng multi-day view, nakakapag-plan ako nang maaga.",positive
+AutoPos023,"Line updates ping my phone right when I need to head over. Great timing!",positive
+AutoPos024,"Malinaw at mabilis ang upload, galing ng pagkakagawa!",positive
 User060,The interface is user-friendly and clean.,positive
 User061,Booking is fast and seamless.,positive
 User062,The system keeps crashing randomly.,negative
@@ -299,3 +356,72 @@ User296,Gusto ko yung kulay at design!,positive
 User297,Maraming error kapag marami ang gumagamit.,negative
 User298,Accurate ang updates sa oras.,positive
 User299,Hindi gumagana yung feedback form.,negative
+User300,Ayos lang naman ang sistema, wala akong gaanong napansin.,neutral
+User301,Okay lang ang booking process, sakto lang sa inaasahan.,neutral
+User302,Walang problema sa pag-time in, steady lang ang experience.,neutral
+User303,Normal lang ang daily queue ko, parehong routine pa rin.,neutral
+User304,The latest update feels fine, nothing really changed for me.,neutral
+User305,Interface looks the same as before and that is alright.,neutral
+User306,Support responses are acceptable, hindi naman mabilis o mabagal.,neutral
+User307,Workout slots are usually available, pero minsan puno lang.,neutral
+User308,Notifications arrive as expected, walang kakaibang nangyari.,neutral
+User309,The dashboard feels ordinary, just the usual layout.,neutral
+User310,Ayos lang ang bagong features, hindi masyadong kapansin-pansin.,neutral
+User311,Scheduling feels average most days, walang special.,neutral
+User312,The app is usable, normal lang naman ang takbo.,neutral
+DBFix001,The equipment is dirty. You should clean it every time after it was used.,negative
+DBFix002,Poor staff service.,negative
+DBFix003,Hindi ko makita yung booking ko. Di ko din makita ng maayos yung AR Receipt ko.,negative
+DBFix004,Ang laggy ng interface.,negative
+DBFix006,The interface feels laggy whenever I open the calendar.,negative
+DBFix005,Ang bagal ng loading even though mabilis naman internet namin.,negative
+DBFix007,The equipment stays dirty after each use.,negative
+DBFix008,They never clean the equipment properly so it remains dirty.,negative
+DBFix009,Ang laggy pa rin ang interface kahit na-update.,negative
+DBFix010,Interface feels sluggish and laggy during queue checks.,negative
+DBFix011,Ang interface sobrang laggy lalo na pag marami naka-login.,negative
+DBFix012,Interface lag ruins the experience when booking slots.,negative
+User313,I can do what I need to do, nothing stands out either way.,neutral
+User314,Steady lang ang proseso ng booking, hindi exciting pero ok.,neutral
+User315,Feedback submission works as usual, walang naging problema.,neutral
+User316,Notifications are fine, minsan late pero okay lang.,neutral
+User317,The queue length seems typical, neither short nor long.,neutral
+User318,Average lang ang cleanliness ng gym, sakto lang.,neutral
+User319,The AR feature is usable, pero wala pang wow factor.,neutral
+User320,Overall experience remains steady, walang malaking pagbabago.,neutral
+User321,Hindi ako makapasok sa gym dahil laging nagha-hang ang app.,negative
+User322,Lagi akong nasa queue kahit maaga akong nag-login.,negative
+User323,Nagsi-crash ang booking page kapag peak hours.,negative
+User324,Masyadong mabagal mag-load ang dashboard ngayon.,negative
+User325,The queue keeps growing and the system never catches up.,negative
+User326,Walk-in registration freezes halfway through.,negative
+User327,Hindi lumalabas ang AR code kahit ilang beses ko i-refresh.,negative
+User328,Booking confirmation fails every other time.,negative
+User329,Notifications are always delayed and confusing.,negative
+User330,Sobrang bagal ng pag-approve ng schedule ngayon.,negative
+User331,Hindi naka-center ang ilang buttons kapag ginagamit ko ang phone ko.,neutral
+User332,The layout looks off on mobile but everything still works.,neutral
+User333,Some icons overlap on smaller screens but I can still navigate.,neutral
+User334,The time in button stays disabled when I arrive at the facility.,negative
+User335,Cannot time in because the button remains greyed out on mobile.,negative
+User336,I can't submit attendance because the confirm button never enables.,negative
+User337,Appreciate how easy it is to review my profile info from the account page.,positive
+User338,Salamat sa mabilis na pag-update ng queue, hindi na ako nagaalala sa pila.,positive
+User339,The mobile experience feels snappy and responsive on my phone now.,positive
+User340,Gusto ko ang calendar view, mas madali nang pumili ng available slot.,positive
+User341,Uploaded AR images look crisp after the recent update. Kudos to the team!,positive
+User342,Ang dali na mag-book ng slot—ganda ng bagong disenyo!,positive
+User343,Great job team! GymMate keeps getting better every release.,positive
+User344,The new booking flow is smooth—confirmation arrives instantly now. Great work!,positive
+User345,Maayos na ang time-out process—isang click na lang tapos agad.,positive
+User346,Hindi tumutugma ang napiling oras sa schedule na ipinapakita sa kalendaryo.,negative
+User347,Nag-double book ang reservation ko kahit isang beses lang ako nag-submit.,negative
+User348,Unable to secure a slot for tomorrow even though slots appear available.,negative
+User349,Hindi ko ma-edit ang ilang detalye sa account ko tulad ng course at year.,negative
+User350,Malabo ang kuhang AR image kahit malinaw naman ang orihinal na file.,negative
+User351,Password reset email never arrives in my inbox.,negative
+User352,Opening the booking page on my phone is very slow compared to desktop.,negative
+User353,Notifications arrive as expected, walang kakaiba.,neutral
+User354,Notifications arrive instantly after each update, great job!,positive
+User355,Notification timing is steady—exactly what I expect.,neutral
+User356,Happy that reminders pop up right on schedule now.,positive

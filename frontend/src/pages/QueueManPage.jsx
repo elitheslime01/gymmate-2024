@@ -1,46 +1,22 @@
-import { Box, Flex, Heading, VStack } from "@chakra-ui/react"
-import QueueTable from "../components/QueueTable"
+import PropTypes from "prop-types";
+import { Box, Flex } from "@chakra-ui/react";
+import QueueTable from "../components/QueueTable";
+import PageContainer from "../components/PageContainer";
 
-const QueueManPage = () => {
-
+const QueueManPage = ({ onOpenMenu }) => {
     return (
-        <Box 
-            bg='gray.300'
-            w='80vw' 
-            h='100vh'
-            position='relative'>
-            <VStack>
-                <Box 
-                    bg='white' 
-                    w='80vw' 
-                    h='10vh'
-                    boxShadow='lg' 
-                    position='fixed'
-                    top={0}
-                    zIndex={1}
-                    alignContent='center'
-                    paddingLeft='5%'>
-                    <Heading as='h3' size='lg' >Queue Management</Heading>
+        <PageContainer title="Queue Management" onOpenMenu={onOpenMenu}>
+            <Flex direction="column" gap={{ base: 4, md: 6 }}>
+                <Box bg="white" borderRadius="lg" boxShadow="md" p={{ base: 4, md: 6 }}>
+                    <QueueTable />
                 </Box>
+            </Flex>
+        </PageContainer>
+    );
+};
 
-                <Box
-                    bg='gray.100' 
-                    w='80vw' 
-                    h='90vh'
-                    position='absolute' 
-                    top='10vh' 
-                    bottom={0}
-                    p='5%'>
+QueueManPage.propTypes = {
+    onOpenMenu: PropTypes.func,
+};
 
-                    <Flex justify="center" align="center" >
-                        <Box w="full" maxW="full">
-                            <QueueTable />
-                        </Box> 
-                    </Flex>
-                </Box>
-            </VStack>
-        </Box>
-    )
-}
-
-export default QueueManPage
+export default QueueManPage;

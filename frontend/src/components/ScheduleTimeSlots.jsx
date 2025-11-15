@@ -1,19 +1,53 @@
 import { useEffect, useState } from 'react';
-import { Box, useToast, Button, Flex, Heading, Text, Tooltip, VStack, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Select } from "@chakra-ui/react";
+import {
+    Box,
+    useToast,
+    Button,
+    Flex,
+    Heading,
+    Text,
+    Tooltip,
+    VStack,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    useDisclosure,
+    Select,
+    SimpleGrid,
+    Card,
+    CardHeader,
+    CardBody,
+    Center,
+    HStack,
+    Tag,
+    TagLabel,
+    Icon
+} from "@chakra-ui/react";
 import { QuestionIcon } from "@chakra-ui/icons";
 import useScheduleStore from '../store/schedule.js';
-import { FaCalendarPlus } from "react-icons/fa";
+import { FaCalendarPlus, FaTrashAlt } from "react-icons/fa";
 
 const ScheduleTimeSlots = () => {
-    const { selectedDay,formattedDate, scheduleData, createSchedule, fetchScheduleByDate, updateSchedule } = useScheduleStore();
-    const [showButtons, setShowButtons] = useState(false);
-    const [buttonClicked, setButtonClicked] = useState(false);
+    const { selectedDay,formattedDate, scheduleData, createSchedule, fetchScheduleByDate, updateSchedule, deleteSchedule } = useScheduleStore();
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [status, setStatus] = useState(""); 
     const [availableSlots, setAvailableSlots] = useState(0); 
     const { isOpen: isConfirmOpen, onOpen: onConfirmOpen, onClose: onConfirmClose } = useDisclosure();
+    const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
     const { isOpen: isDetailsOpen, onOpen: onDetailsOpen, onClose: onDetailsClose } = useDisclosure();
     const toast = useToast();
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const statusColorMap = {
+        "Available": "green",
+        "Fully Booked": "red",
+        "Under Maintenance": "orange",
+        "Reserved": "purple",
+        "Unavailable": "gray"
+    };
 
     useEffect(() => {
         const fetchSchedule = async () => {
@@ -25,26 +59,12 @@ const ScheduleTimeSlots = () => {
         fetchSchedule();
     }, [selectedDay, fetchScheduleByDate]);
 
-    useEffect(() => {
-        if (scheduleData) {
-            setShowButtons(true);
-        } else {
-            setShowButtons(false);
-            setButtonClicked(false);
-        }
-    }, [scheduleData]);
-
     const handleTimeClick = (slot) => {
         setSelectedSlot(slot); // Set the selected slot data
         setStatus(slot._status || ""); // Set the current status of the slot if available
         setAvailableSlots(slot._availableSlots); // Set the available slots for the selected slot
         onDetailsOpen(); // Open the modal
     };
-
-    // const handleCreateSchedulesClick = () => {
-    //     setShowButtons(true);
-    //     setButtonClicked(true);
-    // };
 
     const handleCreateSchedulesClick = () => {
         // Check if a date is selected
@@ -78,6 +98,59 @@ const ScheduleTimeSlots = () => {
     const incrementSlots = () => {
         if (availableSlots < 99) {
             setAvailableSlots(prev => prev + 1);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!scheduleData?._id) {
+            toast({
+                title: "No schedule found",
+                description: "There's nothing to delete for the selected date.",
+                status: "warning",
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
+
+        try {
+            setIsDeleting(true);
+            const response = await deleteSchedule(scheduleData._id);
+            setIsDeleting(false);
+
+            if (response.success) {
+                toast({
+                    title: "Time slots deleted",
+                    description: "All time slots for this date have been removed.",
+                    status: "success",
+                    duration: 3000,
+                    isClosable: true,
+                });
+                onDeleteClose();
+
+                if (formattedDate) {
+                    await fetchScheduleByDate(formattedDate);
+                }
+            } else {
+                toast({
+                    title: "Failed to delete",
+                    description: response.message || "Unable to delete time slots.",
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
+            }
+        } catch (error) {
+            console.error("Error deleting schedule:", error);
+            toast({
+                title: "Failed to delete",
+                description: "An unexpected error occurred.",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -125,64 +198,125 @@ const ScheduleTimeSlots = () => {
     
 
     return (
-        <Box width="100%" height="25.5em" display="flex" flexDirection="column">
-            <Flex color="#071434" p={4} justify="space-between" align="center">
-                <Text fontSize="lg" fontWeight="semibold">Time Slots</Text>
-                <Tooltip label="Help" aria-label="A tooltip">
-                    <QuestionIcon />
-                </Tooltip>
-            </Flex>
-
-            {!buttonClicked && !showButtons && (
-                <Flex height="100vh" justifyContent="center" alignItems="center">
-                    <Button 
-                        onClick={handleCreateSchedulesClick} 
-                        bgColor='#FE7654' 
-                        color='white'
-                        _hover={{ bg: '#e65c3b' }}
-                        _active={{ bg: '#cc4a2d' }}
-                        w='50%'
-                        h='50%'
-                    >
-                        <VStack gap={6}>
-                            <FaCalendarPlus size={80} />
-                            <Text>Create Time Slots</Text>
-                        </VStack>
-                    </Button>
-                </Flex>
-            )}
-
-            {showButtons && scheduleData && scheduleData.timeSlots &&(
-                <Box p={4} flex="1">
-                    <Flex direction="row" flexWrap="wrap" justify="space-between" height="100%">
-                        {scheduleData.timeSlots.map((slot) => (
+        <Card
+            w="full"
+            minH={{ base: "auto", md: "24rem" }}
+            bg="white"
+            borderRadius="xl"
+            boxShadow="2xl"
+            borderWidth="1px"
+            borderColor="gray.100"
+            overflow="hidden"
+        >
+            <CardHeader pb={0}>
+                <Flex
+                    color="#071434"
+                    px={{ base: 0, md: 1 }}
+                    py={{ base: 0, md: 1 }}
+                    justify="space-between"
+                    align={{ base: "flex-start", sm: "center" }}
+                    direction={{ base: "column", sm: "row" }}
+                    gap={3}
+                >
+                    <Box>
+                        <Text fontSize="lg" fontWeight="semibold">Time Slots</Text>
+                        <Text fontSize="sm" color="gray.500">Review capacity and status for each booking window.</Text>
+                    </Box>
+                    <HStack spacing={2} flexWrap="wrap" justify={{ base: "flex-start", sm: "flex-end" }}>
+                        <Tooltip label="Need help?" aria-label="Time slots help tooltip">
                             <Button
-                                key={slot._startTime}
-                                w='48%'
-                                bg="white"
-                                onClick={() => handleTimeClick(slot)} // Pass the slot data
-                                height="40%"
-                                boxShadow="lg"
-                                mb={2}
+                                variant="ghost"
+                                colorScheme="orange"
+                                size="sm"
+                                leftIcon={<QuestionIcon />}
                             >
-                                <VStack spacing={5} align="center">
-                                    <Heading fontSize='sm'>{`${slot._startTime} - ${slot._endTime}`}</Heading>
-                                    <Text fontSize='sm'>Available Slot/s: {slot._availableSlots}</Text>
-                                    <Text fontSize='xs' fontWeight='extrabold' >Status: {slot._status}</Text>
-                                </VStack>
+                                Help
                             </Button>
-                        ))}
-                    </Flex>
-                </Box>
-            )}
+                        </Tooltip>
+                        {scheduleData?._id ? (
+                            <Button
+                                onClick={onDeleteOpen}
+                                colorScheme="red"
+                                variant="outline"
+                                size="sm"
+                                leftIcon={<Icon as={FaTrashAlt} />}
+                            >
+                                Delete Slots
+                            </Button>
+                        ) : null}
+                    </HStack>
+                </Flex>
+            </CardHeader>
+
+            <CardBody px={{ base: 4, md: 6 }} pb={{ base: 6, md: 8 }}>
+                {(!scheduleData || !scheduleData.timeSlots || scheduleData.timeSlots.length === 0) ? (
+                    <Center py={10} px={{ base: 4, md: 6 }} textAlign="center">
+                        <VStack spacing={4} maxW="sm">
+                            <Icon as={FaCalendarPlus} boxSize={12} color="#FE7654" />
+                            <Heading fontSize="lg">No time slots yet</Heading>
+                            <Text fontSize="sm" color="gray.500">
+                                Select a date in the calendar and create time slots to manage gym availability.
+                            </Text>
+                            <Button
+                                onClick={handleCreateSchedulesClick}
+                                bgColor="#FE7654"
+                                color="white"
+                                _hover={{ bg: '#e65c3b' }}
+                                _active={{ bg: '#cc4a2d' }}
+                                w="full"
+                            >
+                                Create Time Slots
+                            </Button>
+                        </VStack>
+                    </Center>
+                ) : (
+                    <SimpleGrid columns={{ base: 1, md: 2 }} spacing={{ base: 4, md: 6 }}>
+                        {scheduleData.timeSlots.map((slot) => {
+                            const statusColor = statusColorMap[slot._status] || "gray";
+
+                            return (
+                                <Button
+                                    key={slot._startTime}
+                                    onClick={() => handleTimeClick(slot)}
+                                    variant="outline"
+                                    borderColor="gray.200"
+                                    bg="white"
+                                    _hover={{ borderColor: '#FE7654', boxShadow: 'md' }}
+                                    _active={{ borderColor: '#cc4a2d' }}
+                                    borderRadius="lg"
+                                    py={{ base: 5, md: 6 }}
+                                    px={4}
+                                    h="auto"
+                                    justifyContent="flex-start"
+                                    alignItems="flex-start"
+                                    textAlign="left"
+                                >
+                                    <VStack align="flex-start" spacing={3} w="full">
+                                        <Heading fontSize={{ base: 'md', md: 'lg' }}>
+                                            {`${slot._startTime} - ${slot._endTime}`}
+                                        </Heading>
+                                        <HStack spacing={3} flexWrap="wrap" w="full">
+                                            <Tag colorScheme="gray" variant="subtle">
+                                                <TagLabel>Available: {slot._availableSlots}</TagLabel>
+                                            </Tag>
+                                            <Tag colorScheme={statusColor} variant="solid">
+                                                <TagLabel>{slot._status}</TagLabel>
+                                            </Tag>
+                                        </HStack>
+                                    </VStack>
+                                </Button>
+                            );
+                        })}
+                    </SimpleGrid>
+                )}
+            </CardBody>
 
             {/* Modal for displaying selected time slot details */}
             <Modal isOpen={isDetailsOpen} onClose={onDetailsClose} isCentered>
                 <ModalOverlay />
-                <Flex justifyContent="center" alignItems="center">
-                    <ModalContent>
-                        <ModalHeader>Update Time Slot Details</ModalHeader>
-                        <ModalBody my={5}>
+                <ModalContent mx={{ base: 4, md: 0 }} maxW={{ base: "100%", md: "lg" }}>
+                    <ModalHeader>Update Time Slot Details</ModalHeader>
+                    <ModalBody my={5}>
                             {selectedSlot && (
                                 <VStack spacing={4} >
                                     <Text fontWeight="bold">{`${selectedSlot._startTime} - ${selectedSlot._endTime}`}</Text>
@@ -212,43 +346,71 @@ const ScheduleTimeSlots = () => {
                                     </Flex>
                                 </VStack>
                             )}
-                        </ModalBody>
-                        <ModalFooter display="flex" justifyContent="space-between">
-                            <Button onClick={onDetailsClose} bgColor="white" color="#FE7654" border="2px" borderColor="#FE7654" _hover={{ bg: '#FE7654', color: 'white' }} _active={{ bg: '#cc4a2d' }} w="40" px={4} py={2} rounded="md" display="flex" alignItems="center">
-                                Cancel
-                            </Button>
-                            <Button bgColor='#FE7654' color='white' _hover={{ bg: '#e65c3b' }} _active={{ bg: '#cc4a2d' }} w="40" px={4} py={2} rounded="md" display="flex" alignItems="center" onClick={handleUpdate}>
-                                Update
-                            </Button>
-                        </ModalFooter>
-                    </ModalContent>
-                </Flex>
+                    </ModalBody>
+                    <ModalFooter display="flex" flexWrap="wrap" justifyContent="flex-end" gap={3}>
+                        <Button onClick={onDetailsClose} bgColor="white" color="#FE7654" border="2px" borderColor="#FE7654" _hover={{ bg: '#FE7654', color: 'white' }} _active={{ bg: '#cc4a2d' }} minW="32" px={4} py={2} rounded="md" display="flex" alignItems="center">
+                            Cancel
+                        </Button>
+                        <Button bgColor='#FE7654' color='white' _hover={{ bg: '#e65c3b' }} _active={{ bg: '#cc4a2d' }} minW="32" px={4} py={2} rounded="md" display="flex" alignItems="center" onClick={handleUpdate}>
+                            Update
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
             </Modal>
 
             {/* Confirmation Modal */}
             <Modal isOpen={isConfirmOpen} onClose={onConfirmClose} isCentered>
                 <ModalOverlay />
-                <Flex justifyContent="center" alignItems="center">
-                    <ModalContent>
-                        <ModalHeader>Confirm Schedule Creation</ModalHeader>
-                        <ModalBody my={5}>
-                            <Text as="ul" listStyleType="disc" ml={4}>
-                                <li>Are you sure you want to create time slots for the selected date?</li>
-                            </Text>
-                        </ModalBody>
-                        <ModalFooter display="flex" justifyContent="space-between">
-                            <Button onClick={onConfirmClose} bgColor="white" color="#FE7654" border="2px" borderColor="#FE7654" _hover={{ bg: '#FE7654', color: 'white' }} _active={{ bg: '#cc4a2d' }} w="40" px={4} py={2} rounded="md" display="flex" alignItems="center">
-                                Cancel
-                            </Button>
-                            <Button bgColor='#FE7654' color='white' _hover={{ bg: '#e65c3b' }} _active={{ bg: '#cc4a2d' }} w="40" px={4} py={2} rounded="md" display="flex" alignItems="center" onClick={handleConfirm}>
-                                Confirm
-                            </Button>                        
-                        </ModalFooter>
-                    </ModalContent>
-                </Flex>
+                <ModalContent mx={{ base: 4, md: 0 }} maxW={{ base: "100%", md: "md" }}>
+                    <ModalHeader>Confirm Schedule Creation</ModalHeader>
+                    <ModalBody my={5}>
+                        <Text as="ul" listStyleType="disc" ml={4}>
+                            <li>Are you sure you want to create time slots for the selected date?</li>
+                        </Text>
+                    </ModalBody>
+                    <ModalFooter display="flex" flexWrap="wrap" justifyContent="flex-end" gap={3}>
+                        <Button onClick={onConfirmClose} bgColor="white" color="#FE7654" border="2px" borderColor="#FE7654" _hover={{ bg: '#FE7654', color: 'white' }} _active={{ bg: '#cc4a2d' }} minW="32" px={4} py={2} rounded="md" display="flex" alignItems="center">
+                            Cancel
+                        </Button>
+                        <Button bgColor='#FE7654' color='white' _hover={{ bg: '#e65c3b' }} _active={{ bg: '#cc4a2d' }} minW="32" px={4} py={2} rounded="md" display="flex" alignItems="center" onClick={handleConfirm}>
+                            Confirm
+                        </Button>                        
+                    </ModalFooter>
+                </ModalContent>
             </Modal>
 
-        </Box>
+            {/* Delete Confirmation Modal */}
+            <Modal isOpen={isDeleteOpen} onClose={onDeleteClose} isCentered>
+                <ModalOverlay />
+                <ModalContent mx={{ base: 4, md: 0 }} maxW={{ base: "100%", md: "md" }}>
+                    <ModalHeader>Delete Time Slots</ModalHeader>
+                    <ModalBody my={5}>
+                        <Text fontSize="sm" color="gray.600">
+                            This will remove all time slots for the selected date. Any existing bookings tied to these slots will no longer have a schedule reference.
+                        </Text>
+                    </ModalBody>
+                    <ModalFooter display="flex" flexWrap="wrap" justifyContent="flex-end" gap={3}>
+                        <Button onClick={onDeleteClose} bgColor="white" color="#FE7654" border="2px" borderColor="#FE7654" _hover={{ bg: '#FE7654', color: 'white' }} _active={{ bg: '#cc4a2d' }} minW="32" px={4} py={2} rounded="md" display="flex" alignItems="center">
+                            Cancel
+                        </Button>
+                        <Button
+                            colorScheme="red"
+                            minW="32"
+                            px={4}
+                            py={2}
+                            rounded="md"
+                            display="flex"
+                            alignItems="center"
+                            onClick={handleDelete}
+                            isLoading={isDeleting}
+                        >
+                            Delete
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+        </Card>
     );
 }
 

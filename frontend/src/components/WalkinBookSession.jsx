@@ -93,23 +93,22 @@ const WalkinBookSession = () => {
     
     return (
         <Box 
-            h="calc(100vh - 10vh)"
-            w="100%"
-            maxW="1200px" // Added max width for better scaling
-            mx="auto" // Center the container
-            p={4}
+            w="full"
+            maxW="1200px"
+            mx="auto"
+            px={{ base: 4, md: 6 }}
+            py={{ base: 6, md: 8 }}
             display="flex"
             flexDirection="column"
+            gap={{ base: 8, md: 10 }}
         >
-            <Heading as="h1" size="md" mb={6}>Book a session</Heading>
+            <Heading as="h1" size="md" mb={{ base: 8, md: 10 }}>Book a session</Heading>
             
             <Flex 
                 direction={{ base: "column", md: "row" }}
-                gap={8} // Increased gap
+                gap={{ base: 8, md: 12 }}
                 flex="1"
-                mb={6}
-                h="calc(100% - 120px)"
-                justify="center" // Center content
+                justify="center"
                 align="stretch"
             >
                 <Box 
@@ -121,6 +120,7 @@ const WalkinBookSession = () => {
                     overflow="auto"
                     bg="white"
                     borderRadius="lg"
+                    p={{ base: 4, md: 6 }}
                 >
                     <WalkinCalendar />
                 </Box>
@@ -132,14 +132,18 @@ const WalkinBookSession = () => {
                     maxH="100%"
                     overflow="auto"
                     borderRadius="lg"
+                    p={{ base: 4, md: 6 }}
+                    bg="white"
                 >
                     <WalkinTimeSlots />
                 </Box>
             </Flex>
 
             <Flex 
+                direction={{ base: "column", sm: "row" }}
                 justify="space-between"
-                mt="auto"
+                align="center"
+                gap={4}
                 pt={4}
                 borderTop="1px solid"
                 borderColor="gray.200"
@@ -155,6 +159,7 @@ const WalkinBookSession = () => {
                     py={2}
                     rounded="md"
                     onClick={handleBkCancel}
+                    w={{ base: "100%", sm: "auto" }}
                 >
                     Cancel
                 </Button>
@@ -167,6 +172,7 @@ const WalkinBookSession = () => {
                     py={2}
                     rounded="md"
                     onClick={handleBkProceed}
+                    w={{ base: "100%", sm: "auto" }}
                 >
                     Proceed
                 </Button>

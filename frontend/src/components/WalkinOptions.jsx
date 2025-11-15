@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, VStack, Button, Text, Divider } from "@chakra-ui/react"
+import { Box, Flex, Heading, VStack, Button, Text } from "@chakra-ui/react"
 import useWalkinStore from "../store/walkin";
 
 const WalkinOptions = () => {
@@ -16,15 +16,18 @@ const WalkinOptions = () => {
     }
 
     return (
-        <Box p={8} minW="full" maxW="4xl">
-            <Flex alignSelf="center" mb={6} justify="space-between">
-                <Heading as="h1" size="md" color="gray.800" textAlign="center" flex="1">
-                    Do you have an existing GymMate Account?
-                </Heading>
-            </Flex>
-            <Flex justify="space-between" align="center">
-                <VStack flex="1" textAlign="center" whiteSpace="nowrap">
-                    <Text color="gray.600" mb={4}>
+        <Box px={{ base: 4, md: 8 }} py={{ base: 6, md: 8 }} minW="full" maxW="4xl">
+            <Heading as="h1" size="md" color="gray.800" textAlign="center" mb={{ base: 6, md: 8 }}>
+                Do you have an existing GymMate Account?
+            </Heading>
+            <Flex
+                direction={{ base: 'column', lg: 'row' }}
+                justify="space-between"
+                align="center"
+                gap={{ base: 6, lg: 8 }}
+            >
+                <VStack flex="1" textAlign="center" spacing={4}>
+                    <Text color="gray.600">
                         No, I don’t have a GymMate account.
                     </Text>
                     <Button
@@ -32,20 +35,48 @@ const WalkinOptions = () => {
                         color='white'
                         _hover={{ bg: '#e65c3b' }} 
                         _active={{ bg: '#cc4a2d' }}
-                        size="lg" w="full"
-                        onClick={handleOptRegister}>
+                        size="lg"
+                        w={{ base: '100%', lg: 'full' }}
+                        onClick={handleOptRegister}
+                    >
                         Register
                     </Button>
                 </VStack>
-                <Flex flexDir="column" align="center" mx={4}>
-                    <Divider orientation="vertical" height="16" borderColor="gray.500" />
-                    <Text color="gray.500" my={2}>
-                        OR
-                    </Text>
-                    <Divider orientation="vertical" height="16" borderColor="gray.500" />
+                <Flex
+                    flexDir={{ base: 'row', lg: 'column' }}
+                    align="center"
+                    justify="center"
+                    gap={3}
+                    minW={{ base: 'auto', lg: '12' }}
+                >
+                    <Box
+                        h="1px"
+                        w="40%"
+                        bg="gray.400"
+                        display={{ base: 'block', lg: 'none' }}
+                    />
+                    <Box
+                        w="1px"
+                        h="16"
+                        bg="gray.400"
+                        display={{ base: 'none', lg: 'block' }}
+                    />
+                    <Text color="gray.500">OR</Text>
+                    <Box
+                        h="1px"
+                        w="40%"
+                        bg="gray.400"
+                        display={{ base: 'block', lg: 'none' }}
+                    />
+                    <Box
+                        w="1px"
+                        h="16"
+                        bg="gray.400"
+                        display={{ base: 'none', lg: 'block' }}
+                    />
                 </Flex>
-                <VStack flex="1" textAlign="center" >
-                    <Text color="gray.600" mb={4} whiteSpace="nowrap">
+                <VStack flex="1" textAlign="center" spacing={4}>
+                    <Text color="gray.600">
                         Yes, I do have a GymMate account.
                     </Text>
                     <Button 
@@ -53,8 +84,10 @@ const WalkinOptions = () => {
                         color='white'
                         _hover={{ bg: '#e65c3b' }} 
                         _active={{ bg: '#cc4a2d' }}
-                        size="lg" w="full"
-                        onClick={handleOptLogin}>
+                        size="lg"
+                        w={{ base: '100%', lg: 'full' }}
+                        onClick={handleOptLogin}
+                    >
                         Log In
                     </Button>
                 </VStack>

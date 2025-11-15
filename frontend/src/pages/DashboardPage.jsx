@@ -1,88 +1,59 @@
-
-import { Box, SimpleGrid, VStack, Heading} from "@chakra-ui/react";
+import PropTypes from "prop-types";
+import { SimpleGrid, Stack } from "@chakra-ui/react";
 import { GrSchedules } from "react-icons/gr";
 import { AiOutlineSchedule } from "react-icons/ai";
 import { ImTable } from "react-icons/im";
 import { FaUsersBetweenLines } from "react-icons/fa6";
 import { RiFeedbackLine } from "react-icons/ri";
-import DashboardButtons from '../components/DashboardButtons.jsx';
-// import DashboardTable from "../components/DashboardTable.jsx";
 import { useNavigate } from "react-router-dom";
+import DashboardButtons from "../components/DashboardButtons.jsx";
+import PageContainer from "../components/PageContainer.jsx";
 
-
-const DashboardPage = () => {
-
-  const navigate = useNavigate(); 
+const DashboardPage = ({ onOpenMenu }) => {
+  const navigate = useNavigate();
 
   return (
-    <Box 
-      bg='gray.300'
-      w='80vw' 
-      h='100vh'
-      position='relative'
-    >
-      <VStack>
-        <Box 
-          bg='white' 
-          w='80vw' 
-          h='10vh'
-          boxShadow='lg' 
-          position='fixed'
-          top={0}
-          zIndex={1}
-          alignContent='center'
-          paddingLeft='5%'
+    <PageContainer title="Dashboard" onOpenMenu={onOpenMenu}>
+      <Stack spacing={{ base: 6, md: 10 }}>
+        <SimpleGrid
+          columns={{ base: 1, sm: 2, xl: 3 }}
+          spacing={{ base: 4, md: 6, xl: 8 }}
+          w="full"
         >
-          <Heading as='h3' size='lg'>Dashboard</Heading>
-        </Box>
-        
-        <Box
-          bg='gray.100' 
-          w='80vw' 
-          h='90vh'
-          position='absolute' 
-          top='10vh' 
-          bottom={0}
-          p='5%'
-        >
-          <SimpleGrid columns={3} spacing={10}>
-            <DashboardButtons
-              text="Schedule Management" 
-              icon={GrSchedules}
-              onClick={() => navigate('/schedule')}
-            />
-            <DashboardButtons 
-              text="Walk-In Booking" 
-              icon={AiOutlineSchedule} 
-              onClick={() => navigate('/walkin')}
-            />
-            <DashboardButtons 
-              text="Queue Management" 
-              onClick={() => navigate('/queue')}
-              icon={ImTable} 
-            />
-            <DashboardButtons 
-              text="Booking Management" 
-              onClick={() => navigate('/booking')}
-              icon={ImTable} 
-            />
-            <DashboardButtons 
-              text="User Management" 
-              icon={FaUsersBetweenLines} 
-            />
-            <DashboardButtons 
-              text="Feedback Management" 
-              onClick={() => navigate('/feedback')}
-              icon={RiFeedbackLine} 
-            />
-          </SimpleGrid>
-
-          <Box mt={4}>
-            {/* <DashboardTable />  */}
-          </Box>
-        </Box>
-      </VStack>
-    </Box>
+          <DashboardButtons
+            text="Schedule Management"
+            icon={GrSchedules}
+            onClick={() => navigate("/schedule")}
+          />
+          <DashboardButtons
+            text="Walk-In Booking"
+            icon={AiOutlineSchedule}
+            onClick={() => navigate("/walkin")}
+          />
+          <DashboardButtons
+            text="Queue Management"
+            onClick={() => navigate("/queue")}
+            icon={ImTable}
+          />
+          <DashboardButtons
+            text="Booking Management"
+            onClick={() => navigate("/booking")}
+            icon={ImTable}
+          />
+          <DashboardButtons text="User Management" icon={FaUsersBetweenLines} />
+          <DashboardButtons
+            text="Feedback Management"
+            onClick={() => navigate("/feedback")}
+            icon={RiFeedbackLine}
+          />
+        </SimpleGrid>
+      </Stack>
+    </PageContainer>
   );
 };
-export default DashboardPage
+
+export default DashboardPage;
+
+DashboardPage.propTypes = {
+  onOpenMenu: PropTypes.func,
+};

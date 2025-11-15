@@ -62,10 +62,10 @@ const WalkinARInput = () => {
     };
 
     return (
-        <Box p={8} minW="full" maxW="4xl">
-            <Heading as="h1" size="md" textAlign="center" mb={10}>Input Acknowledgement Receipt Number</Heading>
-            <VStack w='100%' gap="10" justify="center" mb={6}>
-                <HStack spacing={8}> 
+        <Box px={{ base: 4, md: 8 }} py={{ base: 6, md: 8 }} minW="full" maxW="4xl">
+            <Heading as="h1" size="md" textAlign="center" mb={{ base: 6, md: 10 }}>Input Acknowledgement Receipt Number</Heading>
+            <VStack w='100%' spacing={{ base: 6, md: 10 }} justify="center" mb={6}>
+                <HStack spacing={{ base: 3, md: 6 }} flexWrap="wrap" justify="center"> 
                     <PinInput size='lg' onChange={(value) => setArCode(value)}>
                         <PinInputField borderWidth="0" bg="white" boxShadow="lg"/>
                         <PinInputField borderWidth="0" bg="white" boxShadow="lg"/>
@@ -76,7 +76,7 @@ const WalkinARInput = () => {
                     </PinInput>
                 </HStack>
                 <Divider orientation="horizontal" borderColor="gray.500"/>
-                <Button as="label" htmlFor="file-input" bg="white" boxShadow='lg' px={4} py={2} rounded="md" alignItems="center" >
+                <Button as="label" htmlFor="file-input" bg="white" boxShadow='lg' px={{ base: 4, md: 6 }} py={3} rounded="md" alignItems="center" w={{ base: '100%', md: 'auto' }} justifyContent="center">
                     <FaUpload style={{ marginRight: '0.5rem' }} /> Upload Acknowledgement Receipt
                     <input
                         id="file-input"
@@ -92,9 +92,9 @@ const WalkinARInput = () => {
                     )}
                 </Button>
             </VStack>
-            <Flex justify="space-between" mt={20}>
-                <Button bgColor="white" color="#FE7654" border="2px" borderColor="#FE7654" _hover={{ bg: '#FE7654', color: 'white' }} _active={{ bg: '#cc4a2d' }} px={6} py={2} rounded="md" onClick={handleARCancel}>Cancel</Button>
-                <Button bgColor='#FE7654' color='white' _hover={{ bg: '#e65c3b' }} _active={{ bg: '#cc4a2d' }} px={6} py={2} rounded="md" onClick={handleARProceed}>Proceed</Button>
+            <Flex direction={{ base: 'column', sm: 'row' }} justify="space-between" align="center" gap={4} mt={{ base: 10, md: 16 }}>
+                <Button bgColor="white" color="#FE7654" border="2px" borderColor="#FE7654" _hover={{ bg: '#FE7654', color: 'white' }} _active={{ bg: '#cc4a2d' }} px={6} py={2} rounded="md" onClick={handleARCancel} w={{ base: '100%', sm: 'auto' }}>Cancel</Button>
+                <Button bgColor='#FE7654' color='white' _hover={{ bg: '#e65c3b' }} _active={{ bg: '#cc4a2d' }} px={6} py={2} rounded="md" onClick={handleARProceed} w={{ base: '100%', sm: 'auto' }}>Proceed</Button>
             </Flex>
         </Box>
     )

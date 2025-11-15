@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Grid, Heading, Input, InputGroup, InputRightElement, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Radio, RadioGroup, Select, Stack, Text, useDisclosure, VStack,} from "@chakra-ui/react";
+import { Box, Button, Flex, Grid, Heading, Input, InputGroup, InputRightElement, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Radio, RadioGroup, Select, Stack, Text, useDisclosure, VStack } from "@chakra-ui/react";
 import { FaEye, FaEyeSlash, FaImage, FaUpload, FaUser } from "react-icons/fa";
 import useWalkinStore from "../store/walkin";
 import { useStudentStore } from "../store/student";
@@ -83,32 +83,38 @@ const WalkinRegister = () => {
     };
 
     return (
-        <Box p={8} w="full" maxW="full" display={isRegistered ? 'none' : 'block'}>
-            <Heading as="h1" size="md" mb={10} >Register a GymMate account</Heading>
-            <Grid templateColumns="1fr 2fr">
-                <VStack alignSelf="center" p={0} m={0}>
-                    <Box position="relative" w="40" h="40" bg="white" rounded="md" boxShadow="lg" display="flex" alignItems="center" justifyContent="center" mb={4}>
-                        <FaUser size="6rem" color="gray.400" />
+        <Box
+            px={{ base: 4, md: 8 }}
+            py={{ base: 6, md: 8 }}
+            w="full"
+            maxW="full"
+            display={isRegistered ? 'none' : 'block'}
+        >
+            <Heading as="h1" size="md" mb={{ base: 6, md: 10 }}>Register a GymMate account</Heading>
+            <Grid templateColumns={{ base: '1fr', lg: '1fr 2fr' }} gap={{ base: 6, lg: 10 }} alignItems="flex-start">
+                <VStack alignSelf="center" p={0} m={0} spacing={4}>
+                    <Box position="relative" w={{ base: "32", md: "40" }} h={{ base: "32", md: "40" }} bg="white" rounded="md" boxShadow="lg" display="flex" alignItems="center" justifyContent="center">
+                        <FaUser size="4rem" color="gray.400" />
                         <Button position="absolute" bottom="0" right="0" bg="#071434" color="white" _hover={{ bg: '#071434', color: 'white' }} _active={{ bg: 'gray.100', color: 'white' }} p={2} rounded="md" w="8" h="8" display="flex" alignItems="center" justifyContent="center">
                             <FaImage />
                         </Button>
                     </Box>
-                    <Button bg="white" color="#071434" border="2px" borderColor="#071434" _hover={{ bg: '#071434', color: 'white' }} _active={{ bg: 'gray.100', color: 'white' }} w="40" px={4} py={2} rounded="md" display="flex" alignItems="center" mb={4}>
+                    <Button bg="white" color="#071434" border="2px" borderColor="#071434" _hover={{ bg: '#071434', color: 'white' }} _active={{ bg: 'gray.100', color: 'white' }} w="full" maxW="40" px={4} py={2} rounded="md" display="flex" alignItems="center" justifyContent="center">
                         <FaUpload style={{ marginRight: '0.5rem' }} /> Upload COR
                     </Button>
                 </VStack>
-                <Grid templateColumns="repeat(2, 1fr)" gap={6} colSpan={2}>
+                <Grid templateColumns={{ base: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' }} gap={6} colSpan={2}>
                     <Box>
                         <Text mb={2} color="gray.700">Name</Text>
-                        <Flex direction="row" align="center" gap={2}> 
-                            <Input bg="white" boxShadow="lg" placeholder="ex. Juan" onChange={(e) => setFirstName(e.target.value)}/>
-                            <Input bg="white" boxShadow="lg" placeholder="ex. Dela Cruz" onChange={(e) => setLastName(e.target.value)}/>
+                        <Flex direction={{ base: 'column', md: 'row' }} align="center" gap={2}> 
+                            <Input bg="white" boxShadow="lg" placeholder="ex. Juan" onChange={(e) => setFirstName(e.target.value)} />
+                            <Input bg="white" boxShadow="lg" placeholder="ex. Dela Cruz" onChange={(e) => setLastName(e.target.value)} />
                         </Flex>
                     </Box>
                     <Box>
                         <Text mb={2} color="gray.700">Sex</Text>
                         <RadioGroup onChange={setSex} value={sex}>
-                            <Stack direction="row">
+                            <Stack direction={{ base: 'column', sm: 'row' }} spacing={2}>
                                 <Radio bg="white" boxShadow="lg" value="male">Male</Radio>
                                 <Radio bg="white" boxShadow="lg" value="female">Female</Radio>
                             </Stack>
@@ -116,18 +122,18 @@ const WalkinRegister = () => {
                     </Box>
                     <Box>
                         <Text mb={2} color="gray.700">College & Course</Text>
-                        <Flex direction="row" align="center" gap={2}>
-                            <Input bg="white" boxShadow="lg" w="40%" placeholder="ex. CCIS" onChange={(e) => setCollege(e.target.value)}/>
-                            <Input bg="white" boxShadow="lg" placeholder="ex. Social Computing" onChange={(e) => setCourse(e.target.value)}/>
+                        <Flex direction={{ base: 'column', md: 'row' }} align="center" gap={2}>
+                            <Input bg="white" boxShadow="lg" w={{ base: '100%', md: '40%' }} placeholder="ex. CCIS" onChange={(e) => setCollege(e.target.value)} />
+                            <Input bg="white" boxShadow="lg" placeholder="ex. Social Computing" onChange={(e) => setCourse(e.target.value)} />
                         </Flex>
                     </Box>
                     <Box>
                         <Text mb={2} color="gray.700">Year & Section</Text>
-                        <Flex gap={2}>
+                        <Flex direction={{ base: 'column', md: 'row' }} gap={2}>
                             <Select 
                                 bg="white" 
                                 boxShadow="lg"
-                                w="40%"
+                                w={{ base: '100%', md: '40%' }}
                                 onChange={(e) => setYear(e.target.value)}
                             >
                                 <option value="I">I</option>
@@ -140,11 +146,11 @@ const WalkinRegister = () => {
                     </Box>
                     <Box>
                         <Text mb={2} color="gray.700">UMak Email Address</Text>
-                        <Input bg="white" boxShadow="lg" placeholder="ex. juan.delacruz@umak.edu.ph" onChange={(e) => setEmail(e.target.value)}/>
+                        <Input bg="white" boxShadow="lg" placeholder="ex. juan.delacruz@umak.edu.ph" onChange={(e) => setEmail(e.target.value)} />
                     </Box>
                     <Box>
                         <Text mb={2} color="gray.700">UMak Student ID</Text>
-                        <Input bg="white" boxShadow="lg" placeholder="ex. a12345678" onChange={(e) => setStudentId(e.target.value)}/>
+                        <Input bg="white" boxShadow="lg" placeholder="ex. a12345678" onChange={(e) => setStudentId(e.target.value)} />
                     </Box>
                     <Box>
                         <Text mb={2} color="gray.700">Password</Text>
@@ -166,7 +172,7 @@ const WalkinRegister = () => {
                             </InputRightElement>
                         </InputGroup>
                     </Box>
-                    <Box>
+                    <Box gridColumn={{ base: 'auto', md: 'span 2' }}>
                         <Text mb={2} color="gray.700">Confirm Password</Text>
                         <InputGroup>
                             <Input 
@@ -188,26 +194,26 @@ const WalkinRegister = () => {
                     </Box>
                 </Grid>
             </Grid>
-            <Flex justify="space-between" mt={10}>
-                <Button bgColor="white" color="#FE7654" border="2px" borderColor="#FE7654" _hover={{ bg: '#FE7654', color: 'white' }} _active={{ bg: '#cc4a2d' }} px={6} py={2} rounded="md" onClick={handleRegCancel}>Cancel</Button>
-                <Button bgColor='#FE7654' color='white' _hover={{ bg: '#e65c3b' }} _active={{ bg: '#cc4a2d' }} px={6} py={2} rounded="md" onClick={handleRegRegister}>Register</Button>
+            <Flex direction={{ base: 'column', sm: 'row' }} justify="space-between" mt={10} gap={4}>
+                <Button bgColor="white" color="#FE7654" border="2px" borderColor="#FE7654" _hover={{ bg: '#FE7654', color: 'white' }} _active={{ bg: '#cc4a2d' }} px={6} py={2} rounded="md" onClick={handleRegCancel} w={{ base: '100%', sm: 'auto' }}>Cancel</Button>
+                <Button bgColor='#FE7654' color='white' _hover={{ bg: '#e65c3b' }} _active={{ bg: '#cc4a2d' }} px={6} py={2} rounded="md" onClick={handleRegRegister} w={{ base: '100%', sm: 'auto' }}>Register</Button>
             </Flex>
 
             <Modal isOpen={isOpen} onClose={onClose} isCentered>
                 <ModalOverlay />
-                <Flex justifyContent="center" alignItems="center"> 
-                    <ModalContent>
+                <Flex justifyContent="center" alignItems="center">
+                    <ModalContent mx={{ base: 4, md: 0 }} maxW={{ base: "100%", md: "lg" }}>
                         <ModalHeader>Are you sure your information is correct?</ModalHeader>
                         <ModalBody>
                             <Text as="ul" listStyleType="disc" ml={4}>
                                 <li>If any of the information is incorrect, please go back and update it accordingly.</li>
                             </Text>
                         </ModalBody>
-                        <ModalFooter display="flex" justifyContent="space-between">
-                            <Button onClick={onClose} bgColor="white" color="#FE7654" border="2px" borderColor="#FE7654" _hover={{ bg: '#FE7654', color: 'white' }} _active={{ bg: '#cc4a2d' }} w="40" px={4} py={2} rounded="md" display="flex" alignItems="center">
+                        <ModalFooter display="flex" flexWrap="wrap" justifyContent="flex-end" gap={3}>
+                            <Button onClick={onClose} bgColor="white" color="#FE7654" border="2px" borderColor="#FE7654" _hover={{ bg: '#FE7654', color: 'white' }} _active={{ bg: '#cc4a2d' }} minW="32" px={4} py={2} rounded="md" display="flex" alignItems="center">
                                 Cancel
                             </Button>
-                            <Button bgColor='#FE7654' color='white' _hover={{ bg: '#e65c3b' }} _active={{ bg: '#cc4a2d' }} w="40" px={4} py={2} rounded="md" display="flex" alignItems="center" onClick={handleConfirm}>
+                            <Button bgColor='#FE7654' color='white' _hover={{ bg: '#e65c3b' }} _active={{ bg: '#cc4a2d' }} minW="32" px={4} py={2} rounded="md" display="flex" alignItems="center" onClick={handleConfirm}>
                                 Confirm
                             </Button>
                         </ModalFooter>

@@ -4,29 +4,31 @@ import PropTypes from 'prop-types';
 
 const DashboardButtons = ({ text, icon, ...props }) => {
   return (
-    <Button 
-      bg='white' 
-      h='8em' 
-      borderRadius="lg" 
-      boxShadow="md" 
-      display="flex" 
-      alignItems="center" 
-      p={4} 
-      {...props} 
+    <Button
+      bg="white"
+      h={{ base: "auto", md: "8em" }}
+      borderRadius="lg"
+      boxShadow="md"
+      display="flex"
+      alignItems="center"
+      justifyContent="space-between"
+      p={{ base: 4, md: 6 }}
+      w="full"
+      {...props}
     >
-      <HStack gap='10'>
+      <HStack gap={{ base: 4, md: 10 }} align="center" w="full" justify="space-between">
         <Heading 
           whiteSpace='pre-wrap' 
           textAlign='start' 
-          as='h1' 
-          fontSize={{ base: '0.5rem', md: '1rem', lg: '1.5rem' }} 
+          as='h1'
+          fontSize={{ base: 'md', md: 'lg', lg: 'xl' }}
         >
           {text}
         </Heading>
         <Icon 
           as={icon} 
-          w={{ base: '30px', md: '40px', lg: '50px' }} 
-          h={{ base: '30px', md: '40px', lg: '50px' }} 
+          w={{ base: '28px', md: '40px', lg: '48px' }}
+          h={{ base: '28px', md: '40px', lg: '48px' }}
           mr={2} 
         />
       </HStack>

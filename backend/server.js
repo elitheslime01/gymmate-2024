@@ -12,6 +12,7 @@ import { dirname } from 'path'
 import path from 'path';
 import arImageRoutes from "./routes/arImage.route.js";
 import bookingRoutes from "./routes/booking.route.js";
+import feedbackRoutes from "./routes/feedback.route.js";
 
 dotenv.config()
 
@@ -47,3 +48,5 @@ app.use("/api/students", studentsRoutes);
 app.use("/api/ARCodes", arRoutes);
 app.use("/api/queues", queueRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/arImage", arImageRoutes);
+app.use("/api/feedback", feedbackRoutes);
