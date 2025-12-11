@@ -25,6 +25,60 @@ const STOPWORDS = new Set([
   "yung", "yong"
 ]);
 
+const NON_ENGLISH_MARKERS = new Set([
+  "ako",
+  "ikaw",
+  "siya",
+  "kami",
+  "kayo",
+  "sila",
+  "tayo",
+  "ko",
+  "mo",
+  "niya",
+  "namin",
+  "natin",
+  "ninyo",
+  "kanila",
+  "ito",
+  "iyan",
+  "iyon",
+  "dito",
+  "diyan",
+  "doon",
+  "roon",
+  "hindi",
+  "salamat",
+  "maayos",
+  "pila",
+  "oras",
+  "araw",
+  "ganda",
+  "bagal",
+  "madali",
+  "mag",
+  "nag",
+  "tulong",
+  "paano",
+  "kailan",
+  "wala",
+  "meron",
+  "mayroon",
+  "lang",
+  "lamang",
+  "mga",
+  "ng",
+  "nang",
+  "kay",
+  "kapag",
+  "dahil",
+  "pero",
+  "kasi",
+  "gusto",
+  "mahal",
+]);
+
+
 const SENTIMENTS = ["positive", "neutral", "negative"];
 const ALPHA = 1;
 
@@ -107,11 +161,69 @@ const preprocess = (text) => {
     return [];
   }
 
-  return text
+  const normalized = text.toLowerCase().replace(/[^a-z\s]/g, " ");
+  const words = normalized.split(/\s+/).filter(Boolean);
+  
+  // Create unigrams (single words) and important bigrams (two-word phrases)
+  const tokens = [];
+  
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    
+    // Add unigram if not a stopword
+    if (word && !STOPWORDS.has(word)) {
+      tokens.push(word);
+    }
+    
+    // Add bigrams for important negation patterns
+    if (i < words.length - 1) {
+      const nextWord = words[i + 1];
+      const bigram = `${word}_${nextWord}`;
+      
+      // Keep negation bigrams like "never_misses", "never_fails", "never_crashes"
+      if (word === "never" || word === "not" || word === "no") {
+        if (nextWord && !STOPWORDS.has(nextWord)) {
+          tokens.push(bigram);
+        }
+      }
+      
+      // Keep positive intensifiers like "super_helpful", "really_good"
+      if (word === "super" || word === "really" || word === "very") {
+        if (nextWord && !STOPWORDS.has(nextWord)) {
+          tokens.push(bigram);
+        }
+      }
+    }
+  }
+  
+  return tokens;
+};
+
+const containsNonEnglishLanguage = (text) => {
+  if (!text || typeof text !== "string") {
+    return false;
+  }
+
+  const normalizedWords = text
     .toLowerCase()
     .replace(/[^a-z\s]/g, " ")
     .split(/\s+/)
-    .filter((word) => word && !STOPWORDS.has(word));
+    .filter(Boolean);
+
+  if (!normalizedWords.length) {
+    return false;
+  }
+
+  const markerHits = normalizedWords.filter((word) => NON_ENGLISH_MARKERS.has(word)).length;
+  if (markerHits === 0) {
+    return false;
+  }
+
+  if (normalizedWords.length <= 4) {
+    return true;
+  }
+
+  return markerHits / normalizedWords.length >= 0.2;
 };
 
 const normalizeSentiment = (value) => {
@@ -170,6 +282,10 @@ const readDatasetRows = () => {
           return;
         }
 
+        if (containsNonEnglishLanguage(feedbackText)) {
+          return;
+        }
+
         const tokens = preprocess(feedbackText);
         if (tokens.length === 0) {
           return;
@@ -217,6 +333,11 @@ const ensureModel = async () => {
 export const classifyFeedback = async (text) => {
   if (!text) {
     return "neutral";
+  }
+
+  if (containsNonEnglishLanguage(text)) {
+    await ensureModel();
+    return null;
   }
 
   const tokens = preprocess(text);

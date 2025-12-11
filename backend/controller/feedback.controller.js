@@ -140,11 +140,16 @@ export const listFeedback = async (req, res) => {
     const dataWithSentiment = await Promise.all(
       filtered.map(async (doc) => {
         const base = toClientFeedback(doc);
+
+        if (base.sentiment) {
+          return base;
+        }
+
         try {
           const computedSentiment = await classifyFeedback(base.message || "");
           return {
             ...base,
-            sentiment: computedSentiment || base.sentiment || "neutral",
+            sentiment: computedSentiment || null,
           };
         } catch (classificationError) {
           console.error(
@@ -153,15 +158,18 @@ export const listFeedback = async (req, res) => {
           );
           return {
             ...base,
-            sentiment: base.sentiment || "neutral",
+            sentiment: base.sentiment || null,
           };
         }
       })
     );
 
+    // Filter out non-English feedbacks (where sentiment is null)
+    const englishOnlyData = dataWithSentiment.filter((item) => item.sentiment !== null);
+
     const finalData = sentiment
-      ? dataWithSentiment.filter((item) => item.sentiment === sentiment)
-      : dataWithSentiment;
+      ? englishOnlyData.filter((item) => item.sentiment === sentiment)
+      : englishOnlyData;
 
     if (process.env.NODE_ENV !== "test") {
       finalData.forEach((item) => {
@@ -259,12 +267,17 @@ export const createFeedback = async (req, res) => {
       .map(normalizeAttachmentPayload)
       .filter(Boolean);
 
-    const feedback = await Feedback.create(payload);
-    const populated = await feedback.populate({ path: "student", select: STUDENT_SELECTION });
-
-    let computedSentiment = "neutral";
+    let computedSentiment = null;
     try {
       computedSentiment = await classifyFeedback(payload.message || "");
+      
+      // Reject non-English feedbacks
+      if (computedSentiment === null) {
+        return res.status(400).json({
+          success: false,
+          message: "Only English feedback is accepted. Please provide your feedback in English.",
+        });
+      }
     } catch (classificationError) {
       console.error(
         "Error classifying feedback sentiment on create:",
@@ -272,13 +285,20 @@ export const createFeedback = async (req, res) => {
       );
     }
 
+    payload.sentiment = computedSentiment || null;
+    payload.sentimentSource = computedSentiment ? "model" : null;
+    payload.sentimentUpdatedAt = computedSentiment ? new Date() : null;
+
+    const feedback = await Feedback.create(payload);
+    const populated = await feedback.populate({ path: "student", select: STUDENT_SELECTION });
+
     const base = toClientFeedback(populated);
 
     res.status(201).json({
       success: true,
       data: {
         ...base,
-        sentiment: computedSentiment || base.sentiment || "neutral",
+        sentiment: base.sentiment,
       },
     });
   } catch (error) {
