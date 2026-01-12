@@ -12,7 +12,7 @@ Key Components:
 
 Features:
 - Sentiment analysis for feedback processing (Natural Processing Language)
-- Priority queue implementations (max heap, priority BST)
+- Priority queue implementations (Max Heap)
 
 <img width="1788" height="954" alt="image" src="https://github.com/user-attachments/assets/a43abc7a-ca28-4520-a447-d20024ad0eab" />
 <img width="1788" height="929" alt="image" src="https://github.com/user-attachments/assets/28adf031-ac27-4c53-83cc-291f4b2a8393" />
