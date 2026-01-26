@@ -13,9 +13,17 @@ import feedbackRoutes from "../backend/routes/feedback.route.js";
 
 dotenv.config()
 
+const corsOptions = {
+  origin: [
+    'https://gymmate-2024.vercel.app',
+    'http://localhost:5000'
+  ],
+  credentials: true
+};
+
 const app = express()
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
