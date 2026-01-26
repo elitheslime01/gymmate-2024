@@ -56,24 +56,24 @@ const feedbackSchema = new mongoose.Schema(
       default: "new",
       lowercase: true,
     },
-    sentiment: {
-      type: String,
-      enum: ["positive", "neutral", "negative"],
-      default: null,
-      lowercase: true,
-      trim: true,
-    },
-    sentimentSource: {
-      type: String,
-      enum: ["model", "human", "imported"],
-      default: null,
-      lowercase: true,
-      trim: true,
-    },
-    sentimentUpdatedAt: {
-      type: Date,
-      default: null,
-    },
+    // sentiment: {
+    //   type: String,
+    //   enum: ["positive", "neutral", "negative"],
+    //   default: null,
+    //   lowercase: true,
+    //   trim: true,
+    // },
+    // sentimentSource: {
+    //   type: String,
+    //   enum: ["model", "human", "imported"],
+    //   default: null,
+    //   lowercase: true,
+    //   trim: true,
+    // },
+    // sentimentUpdatedAt: {
+    //   type: Date,
+    //   default: null,
+    // },
   },
   {
     timestamps: true,
@@ -82,7 +82,6 @@ const feedbackSchema = new mongoose.Schema(
 
 feedbackSchema.index({ category: 1, status: 1 });
 feedbackSchema.index({ createdAt: -1 });
-feedbackSchema.index({ sentiment: 1 });
 
 const Feedback = mongoose.model("Feedback", feedbackSchema);
 

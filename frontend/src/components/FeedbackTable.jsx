@@ -132,7 +132,7 @@ const FeedbackTable = () => {
             <option value="in_review">In Review</option>
             <option value="resolved">Resolved</option>
           </Select>
-          <Select
+          {/* <Select
             placeholder="Sentiment"
             value={filters.sentiment}
             onChange={handleFilterChange("sentiment")}
@@ -143,7 +143,7 @@ const FeedbackTable = () => {
             <option value="positive">Positive</option>
             <option value="neutral">Neutral</option>
             <option value="negative">Negative</option>
-          </Select>
+          </Select> */}
           <Input
             bg="white"
             boxShadow="lg"
@@ -157,9 +157,7 @@ const FeedbackTable = () => {
             colorScheme="orange"
             variant="outline"
             onClick={loadFeedback}
-          >
-            Refresh
-          </Button>
+          ></Button>
         </Stack>
       </Stack>
 
@@ -199,9 +197,9 @@ const FeedbackTable = () => {
                 <Th color="white" textAlign="center">
                   Subcategory
                 </Th>
-                <Th color="white" textAlign="center">
+                {/* <Th color="white" textAlign="center">
                   Sentiment
-                </Th>
+                </Th> */}
                 <Th color="white" textAlign="center">
                   Status
                 </Th>
@@ -234,7 +232,7 @@ const FeedbackTable = () => {
                   <Td textAlign="center" textTransform="capitalize">
                     {item.subcategory || "—"}
                   </Td>
-                  <Td textAlign="center">
+                  {/* <Td textAlign="center">
                     <Badge
                       colorScheme={
                         item.sentiment === "positive"
@@ -247,7 +245,7 @@ const FeedbackTable = () => {
                     >
                       {item.sentiment || "neutral"}
                     </Badge>
-                  </Td>
+                  </Td> */}
                   <Td textAlign="center">
                     <Badge
                       variant="subtle"
@@ -337,7 +335,7 @@ const FeedbackTable = () => {
                       {selectedFeedback.subcategory || "—"}
                     </Text>
                   </Box>
-                  <Box>
+                  {/* <Box>
                     <Text fontSize="sm" color="gray.500">
                       Sentiment
                     </Text>
@@ -353,7 +351,7 @@ const FeedbackTable = () => {
                     >
                       {selectedFeedback.sentiment || "neutral"}
                     </Badge>
-                  </Box>
+                  </Box> */}
                 </SimpleGrid>
                 <Box>
                   <Text fontSize="sm" color="gray.500" mb={1}>

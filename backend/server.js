@@ -26,7 +26,8 @@ app.use(express.urlencoded({ extended: true }));
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-app.use('/public', express.static(path.join(__dirname, '../public'))); 
+app.use('/public', express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 app.listen(PORT, () => {
     connectDB();
@@ -50,3 +51,8 @@ app.use("/api/queues", queueRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/arImage", arImageRoutes);
 app.use("/api/feedback", feedbackRoutes);
+
+// Catch-all handler: send back index.html for client-side routing
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+});

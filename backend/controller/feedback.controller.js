@@ -1,5 +1,4 @@
 import Feedback from "../models/feedback.model.js";
-import { classifyFeedback } from "../utils/sentimentAnalyzer.js";
 
 const STUDENT_SELECTION = "_fName _lName _umakEmail _umakID";
 
@@ -51,7 +50,6 @@ const toClientFeedback = (doc) => {
   const attachments = (plain.attachments || []).map(toClientAttachment).filter(Boolean);
 
   const statusValue = (plain.status || plain._status || "new").toString().toLowerCase();
-  const sentimentValue = plain.sentiment || plain._sentiment || null;
 
   return {
     _id: plain._id,
@@ -61,7 +59,6 @@ const toClientFeedback = (doc) => {
     message: plain.message || plain._message || "",
     attachments,
     status: statusValue,
-    sentiment: sentimentValue,
     createdAt: plain.createdAt || plain._submittedAt || plain.created_at,
     updatedAt: plain.updatedAt || plain.updated_at,
   };
@@ -267,39 +264,14 @@ export const createFeedback = async (req, res) => {
       .map(normalizeAttachmentPayload)
       .filter(Boolean);
 
-    let computedSentiment = null;
-    try {
-      computedSentiment = await classifyFeedback(payload.message || "");
-      
-      // Reject non-English feedbacks
-      if (computedSentiment === null) {
-        return res.status(400).json({
-          success: false,
-          message: "Only English feedback is accepted. Please provide your feedback in English.",
-        });
-      }
-    } catch (classificationError) {
-      console.error(
-        "Error classifying feedback sentiment on create:",
-        classificationError.message
-      );
-    }
-
-    payload.sentiment = computedSentiment || null;
-    payload.sentimentSource = computedSentiment ? "model" : null;
-    payload.sentimentUpdatedAt = computedSentiment ? new Date() : null;
-
     const feedback = await Feedback.create(payload);
     const populated = await feedback.populate({ path: "student", select: STUDENT_SELECTION });
 
-    const base = toClientFeedback(populated);
+    const data = toClientFeedback(populated);
 
     res.status(201).json({
       success: true,
-      data: {
-        ...base,
-        sentiment: base.sentiment,
-      },
+      data,
     });
   } catch (error) {
     console.error("Error creating feedback:", error);
