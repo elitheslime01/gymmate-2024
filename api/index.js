@@ -15,20 +15,10 @@ dotenv.config()
 
 const app = express()
 
-// CORS configuration for Vercel
-app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:5173',
-    process.env.FRONTEND_URL || '*'
-  ],
-  credentials: true
-}));
-
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Connect to database
 connectDB();
 
 // API Routes
