@@ -3,7 +3,7 @@
   "buildCommand": "cd frontend && npm run build",
   "functions": {
     "api/index.js": {
-      "runtime": "nodejs20.x",
+      "runtime": "nodejs24.0",
       "memory": 1024,
       "maxDuration": 60
     }
