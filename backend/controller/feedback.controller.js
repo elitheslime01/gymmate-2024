@@ -134,39 +134,13 @@ export const listFeedback = async (req, res) => {
       });
     }
 
-    const dataWithSentiment = await Promise.all(
-      filtered.map(async (doc) => {
-        const base = toClientFeedback(doc);
-
-        if (base.sentiment) {
-          return base;
-        }
-
-        try {
-          const computedSentiment = await classifyFeedback(base.message || "");
-          return {
-            ...base,
-            sentiment: computedSentiment || null,
-          };
-        } catch (classificationError) {
-          console.error(
-            "Error classifying feedback sentiment during list:",
-            classificationError.message
-          );
-          return {
-            ...base,
-            sentiment: base.sentiment || null,
-          };
-        }
-      })
-    );
-
-    // Filter out non-English feedbacks (where sentiment is null)
-    const englishOnlyData = dataWithSentiment.filter((item) => item.sentiment !== null);
-
-    const finalData = sentiment
-      ? englishOnlyData.filter((item) => item.sentiment === sentiment)
-      : englishOnlyData;
+    const finalData = filtered.map((doc) => {
+      const base = toClientFeedback(doc);
+      return {
+        ...base,
+        sentiment: null, // Sentiment analysis removed
+      };
+    });
 
     if (process.env.NODE_ENV !== "test") {
       finalData.forEach((item) => {
