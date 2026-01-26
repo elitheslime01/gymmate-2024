@@ -3,9 +3,9 @@
   "buildCommand": "cd frontend && npm run build",
   "functions": {
     "api/index.js": {
+      "runtime": "nodejs20.x",
       "memory": 1024,
-      "maxDuration": 60,
-      "runtime": "nodejs18.x"
+      "maxDuration": 60
     }
   },
   "routes": [
