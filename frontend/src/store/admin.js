@@ -1,4 +1,5 @@
-import { create } from 'zustand'; 
+import { create } from 'zustand';
+import API_BASE_URL from '../config';
 
 export const useAdminStore = create((set, get) => ({
   user: null,
@@ -13,7 +14,7 @@ export const useAdminStore = create((set, get) => ({
 
     set({ isLoading: true, error: null });
     try {
-        const response = await fetch('http://localhost:5000/api/admins/login', {
+        const response = await fetch(`${API_BASE_URL}/api/admins/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password }),
@@ -41,7 +42,7 @@ logout: async () => {
   }
 
   try {
-      const response = await fetch('http://localhost:5000/api/admins/logout', {
+      const response = await fetch(`${API_BASE_URL}/api/admins/logout`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId }),

@@ -1,29 +1,27 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    },
-    {
-      "src": "backend/server.js",
-      "use": "@vercel/node"
+  "buildCommand": "cd frontend && npm run build",
+  "env": {
+    "MONGO_URI": "@mongo_uri",
+    "PORT": "5000",
+    "ALLOCATION_INTERVAL_TIME": "0",
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "api/index.js": {
+      "memory": 1024,
+      "maxDuration": 60
     }
-  ],
+  },
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/backend/server.js"
+      "dest": "/api/index.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/frontend/$1"
+      "dest": "/frontend/dist/index.html",
+      "status": 200
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }

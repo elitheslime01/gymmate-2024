@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import API_BASE_URL from '../config';
 
 const useFeedbackStore = create((set, get) => ({
   feedback: [],
@@ -30,7 +31,7 @@ const useFeedbackStore = create((set, get) => ({
   set({ isLoading: true, error: null });
 
     try {
-      const response = await fetch(`http://localhost:5000/api/feedback?${params.toString()}`);
+      const response = await fetch(`${API_BASE_URL}/api/feedback?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch feedback");

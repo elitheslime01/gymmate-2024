@@ -1,0 +1,12 @@
+# Ignore local environment files
+.env
+.env.local
+.env.*.local
+
+# Ignore node_modules in root (only build what we need)
+node_modules
+
+# Keep api and frontend
+!api
+!frontend
+!backend

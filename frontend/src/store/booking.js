@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import API_BASE_URL from '../config';
 
 const useBookingStore = create((set, get) => ({
   bookings: [],
@@ -12,7 +13,7 @@ const useBookingStore = create((set, get) => ({
 
   fetchAllCurrentMonthBookings: async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/bookings/currentMonth', {
+      const response = await fetch(`${API_BASE_URL}/api/bookings/currentMonth`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -32,7 +33,7 @@ const useBookingStore = create((set, get) => ({
   fetchBookings: async (date, timeSlot) => {
       try {
           set({ bookings: [] });
-          const response = await fetch(`http://localhost:5000/api/bookings/get?date=${date}&startTime=${timeSlot.startTime}&endTime=${timeSlot.endTime}`, {
+          const response = await fetch(`${API_BASE_URL}/api/bookings/get?date=${date}&startTime=${timeSlot.startTime}&endTime=${timeSlot.endTime}`, {
               method: 'GET',
               headers: {
                   'Content-Type': 'application/json',
@@ -53,7 +54,7 @@ const useBookingStore = create((set, get) => ({
     try {
       set({ bookings: [] });
 
-      const response = await fetch(`http://localhost:5000/api/bookings/get?date=${date}`, {
+      const response = await fetch(`${API_BASE_URL}/api/bookings/get?date=${date}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -78,7 +79,7 @@ const useBookingStore = create((set, get) => ({
     const state = get();
       try {
           // Check for missed bookings and update statuses
-          const response = await fetch('http://localhost:5000/api/bookings/check-missed', {
+          const response = await fetch(`${API_BASE_URL}/api/bookings/check-missed`, {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json',
@@ -100,7 +101,7 @@ const useBookingStore = create((set, get) => ({
 
   checkLapsedBookings: async () => {
     try {
-        const response = await fetch('http://localhost:5000/api/bookings/update-lapsed', {
+        const response = await fetch(`${API_BASE_URL}/api/bookings/update-lapsed`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

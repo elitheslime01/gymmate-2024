@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import API_BASE_URL from '../config';
 
 export  const useStudentStore = create((set, get) => ({
     students: [],
@@ -18,7 +19,7 @@ export  const useStudentStore = create((set, get) => ({
         console.log("Attempting to create a new student:", studentData); 
         set({ isLoading: true, error: null }); 
         try {
-            const response = await fetch('http://localhost:5000/api/students', {
+            const response = await fetch(`${API_BASE_URL}/api/students`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -56,7 +57,7 @@ export  const useStudentStore = create((set, get) => ({
     
         set({ isLoading: true, error: null });
         try {
-            const response = await fetch('http://localhost:5000/api/students/login', {
+            const response = await fetch(`${API_BASE_URL}/api/students/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
@@ -88,7 +89,7 @@ export  const useStudentStore = create((set, get) => ({
         }
     
         try {
-            const response = await fetch('http://localhost:5000/api/students/logout', {
+            const response = await fetch(`${API_BASE_URL}/api/students/logout`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: user._id }),

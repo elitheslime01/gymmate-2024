@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import API_BASE_URL from '../config';
 
 const useWalkinStore = create((set, get) => ({
     navigationStack: ['options'],
@@ -61,7 +62,7 @@ const useWalkinStore = create((set, get) => ({
 
     fetchUpcomingBookings: async (studentId) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/bookings/get?studentId=${studentId}`);
+            const response = await fetch(`${API_BASE_URL}/api/bookings/get?studentId=${studentId}`);
             const data = await response.json();
     
             if (data && Array.isArray(data)) {
@@ -108,7 +109,7 @@ const useWalkinStore = create((set, get) => ({
 
     fetchCurrentBooking: async (studentId) => {
       try {
-        const response = await fetch(`http://localhost:5000/api/bookings/current/${studentId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/bookings/current/${studentId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -137,7 +138,7 @@ const useWalkinStore = create((set, get) => ({
         }
         
         const formattedDate = parsedDate.toISOString().split('T')[0]; // Format date as YYYY-MM-DD
-        const response = await fetch(`http://localhost:5000/api/schedules/${formattedDate}`); 
+        const response = await fetch(`${API_BASE_URL}/api/schedules/${formattedDate}`); 
         const data = await response.json();
     
         if (response.ok) {
@@ -154,7 +155,7 @@ const useWalkinStore = create((set, get) => ({
     },
     addARCode: async (arCode, studentID) => {
         try {
-            const response = await fetch('http://localhost:5000/api/ARCodes/uploadAR', {
+            const response = await fetch(`${API_BASE_URL}/api/ARCodes/uploadAR`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -180,7 +181,7 @@ const useWalkinStore = create((set, get) => ({
     checkARCode: async (arCode) => {
         console.log("Sending AR Code for validation:", arCode); 
         try {
-            const response = await fetch('http://localhost:5000/api/ARCodes/checkAR', {
+            const response = await fetch(`${API_BASE_URL}/api/ARCodes/checkAR`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -219,7 +220,7 @@ const useWalkinStore = create((set, get) => ({
             }
     
             // Continue with existing queue addition logic
-            const response = await fetch('http://localhost:5000/api/queues/add', {
+            const response = await fetch(`${API_BASE_URL}/api/queues/add`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -269,7 +270,7 @@ const useWalkinStore = create((set, get) => ({
                 formData.append('_studentId', studentId);
 
                 try {
-                        const response = await fetch('http://localhost:5000/api/arImage/upload', {
+                        const response = await fetch(`${API_BASE_URL}/api/arImage/upload`, {
                                 method: 'POST',
                                 body: formData,
                         });
@@ -297,7 +298,7 @@ const useWalkinStore = create((set, get) => ({
                 }
 
                 try {
-                    const response = await fetch(`http://localhost:5000/api/arImage/${studentId}`);
+                    const response = await fetch(`${API_BASE_URL}/api/arImage/${studentId}`);
                     const result = await response.json();
 
                     if (response.ok && result.success) {
@@ -391,7 +392,7 @@ const useWalkinStore = create((set, get) => ({
             const encodedEndTime = encodeURIComponent(timeSlot.endTime);
                 
             const response = await fetch(
-                `http://localhost:5000/api/bookings/check-existing?` +
+                `${API_BASE_URL}/api/bookings/check-existing?` +
                 `studentId=${studentId}&` +
                 `date=${formattedDate}&` +
                 `startTime=${encodedStartTime}&` +
@@ -424,7 +425,7 @@ const useWalkinStore = create((set, get) => ({
 
     checkMissedBookings: async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/bookings/check-missed', {
+            const response = await fetch(`${API_BASE_URL}/api/bookings/check-missed`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -450,7 +451,7 @@ const useWalkinStore = create((set, get) => ({
     // Update existing timeIn function
     timeIn: async (bookingId, studentId) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/timeIn`, {
+            const response = await fetch(`${API_BASE_URL}/api/bookings/${bookingId}/timeIn`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -475,7 +476,7 @@ const useWalkinStore = create((set, get) => ({
     // Update existing timeOut function
     timeOut: async (bookingId, studentId) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/timeOut`, {
+            const response = await fetch(`${API_BASE_URL}/api/bookings/${bookingId}/timeOut`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
