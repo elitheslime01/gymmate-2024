@@ -32,14 +32,20 @@ app.use(express.static(path.join(__dirname, '../frontend/dist')));
 connectDB();
 export default app;
 
-// app.use((req, res, next) => {
+// Start the server only in development (not for Vercel)
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
 //     console.log('Request Method:', req.method);
 //     console.log('Request URL:', req.url);
 //     console.log('Request Body:', req.body);
 //     console.log('Request Files:', req.file);
 //     next();
-// });
 
+// API Routes
 app.use(cors());
 app.use("/api/admins", adminsRoutes)
 app.use("/api/schedules", scheduleRoutes);
