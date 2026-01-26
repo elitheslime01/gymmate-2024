@@ -1,3 +1,4 @@
+// Imports
 import express from "express";
 import dotenv from "dotenv";
 import { connectDB } from "../backend/config/db.js";
@@ -11,8 +12,10 @@ import arImageRoutes from "../backend/routes/arImage.route.js";
 import bookingRoutes from "../backend/routes/booking.route.js";
 import feedbackRoutes from "../backend/routes/feedback.route.js";
 
+// Environment Configuration
 dotenv.config()
 
+// CORS Setup
 const corsOptions = {
   origin: [
     'https://gymmate-2024.vercel.app',
@@ -21,12 +24,15 @@ const corsOptions = {
   credentials: true
 };
 
+// App Initialization
 const app = express()
 
+// Middleware Setup
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Database Connection
 connectDB();
 
 // API Routes
@@ -39,11 +45,10 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/arImage", arImageRoutes);
 app.use("/api/feedback", feedbackRoutes);
 
-// Health check endpoint
+// Health Check Endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'Backend is running' });
 });
 
+// Export
 export default app;
-
-//deploy
