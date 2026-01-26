@@ -29,10 +29,8 @@ const __dirname = dirname(__filename);
 app.use('/public', express.static(path.join(__dirname, '../public')));
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
-app.listen(PORT, () => {
-    connectDB();
-    console.log("Server started at http://localhost:" + PORT);
-});
+connectDB();
+export default app;
 
 // app.use((req, res, next) => {
 //     console.log('Request Method:', req.method);
