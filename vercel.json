@@ -1,23 +1,29 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && npm run build",
-  "functions": {
-    "api/index.js": {
-      "memory": 1024,
-      "maxDuration": 60
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
+    {
+      "src": "backend/server.js",
+      "use": "@vercel/node"
     }
-  },
+  ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api"
+      "dest": "/api/index.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html",
-      "status": 200
+      "dest": "/frontend/$1"
     }
   ],
-  "outputDirectory": "frontend/dist",
-  "framework": "vite"
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
