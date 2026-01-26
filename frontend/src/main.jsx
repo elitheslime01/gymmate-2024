@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App'
 import { BrowserRouter } from "react-router-dom";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const theme = extendTheme({
   fonts: {
@@ -17,6 +18,7 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <ChakraProvider theme={theme}>
         <App/>
+        <SpeedInsights/>
       </ChakraProvider>
     </BrowserRouter>
   </StrictMode>
