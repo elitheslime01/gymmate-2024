@@ -10,18 +10,21 @@
   "functions": {
     "api/index.js": {
       "memory": 1024,
-      "maxDuration": 60
+      "maxDuration": 60,
+      "runtime": "nodejs18.x"
     }
   },
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/index.js"
+      "dest": "/api"
     },
     {
       "src": "/(.*)",
-      "dest": "/frontend/dist/index.html",
+      "dest": "/index.html",
       "status": 200
     }
-  ]
+  ],
+  "outputDirectory": "frontend/dist",
+  "framework": "vite"
 }
