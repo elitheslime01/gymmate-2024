@@ -32,7 +32,7 @@ import useBookingStore from "../store/booking";
 import ArImageViewer from "./ArImageViewer";
 
 const BookingTable = () => {
-  const { bookings, refreshBookingData, setDate, setTimeSlot, checkLapsedBookings, fetchBookingsByDate, clearBookings, fetchBookings, fetchAllCurrentMonthBookings } = useBookingStore();
+  const { bookings, setDate, setTimeSlot, checkLapsedBookings, fetchBookingsByDate, fetchBookings, fetchAllCurrentMonthBookings } = useBookingStore();
   const [date, setDateState] = useState("");
   const [timeSlot, setTimeSlotState] = useState({ startTime: "", endTime: "" });
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -47,36 +47,33 @@ const BookingTable = () => {
     onOpen: onViewerOpen,
     onClose: onViewerClose,
   } = imageDisclosure;
+  
 
   useEffect(() => {
     checkLapsedBookings();
-    fetchAllCurrentMonthBookings();
-  }, [checkLapsedBookings, fetchAllCurrentMonthBookings]);
+  }, [checkLapsedBookings]);
 
   useEffect(() => {
     if (date && timeSlot.startTime && timeSlot.endTime) {
       fetchBookings(date, timeSlot);
+    } else if (date) {
+      fetchBookingsByDate(date);
+    } else {
+      fetchAllCurrentMonthBookings();
     }
-  }, [date, timeSlot, fetchBookings]);
+  }, [date, timeSlot, fetchBookings, fetchBookingsByDate, fetchAllCurrentMonthBookings]);
 
   const handleDateChange = (e) => {
     setDateState(e.target.value);
     setDate(e.target.value);
     setTimeSlotState({ startTime: "", endTime: "" });
     setTimeSlot({ startTime: "", endTime: "" });
-    
-    if (!e.target.value) {
-        fetchAllCurrentMonthBookings();
-    } else {
-        fetchBookingsByDate(e.target.value);
-    }
   };
   
   const handleTimeSlotChange = (e) => {
     const { name, value } = e.target;
     if (name === "startTime") {
       let endTime;
-      clearBookings();
       switch(value) {
         case "08:00 AM": endTime = "10:00 AM"; break;
         case "10:00 AM": endTime = "12:00 PM"; break;
@@ -86,13 +83,6 @@ const BookingTable = () => {
       }
       setTimeSlotState({ startTime: value, endTime });
       setTimeSlot({ startTime: value, endTime });
-      
-      // If both date and time slot are selected, fetch filtered data
-      if (date && value) {
-        fetchBookings(date, { startTime: value, endTime }).then(() => {
-            refreshBookingData();
-        });
-    }
     }
   };
 
@@ -136,7 +126,6 @@ const BookingTable = () => {
     setArImageData(null);
     setArImageError(null);
     setSelectedStudent(null);
-    refreshBookingData();
     onViewerClose();
     onClose();
   };
@@ -212,9 +201,9 @@ const BookingTable = () => {
                 <Tr key={`${index}-${studentIndex}`}>
                   <Td textAlign="center">{new Date(item._date).toLocaleDateString()}</Td>
                   <Td textAlign="center">{`${item._timeSlot.startTime} - ${item._timeSlot.endTime}`.toUpperCase()}</Td>
-                  <Td textAlign="center">{student._studentId._fName.toUpperCase()}</Td>
-                  <Td textAlign="center">{student._studentId._lName.toUpperCase()}</Td>
-                  <Td textAlign="center">{student._bookingStatus.toUpperCase()}</Td>
+                  <Td textAlign="center">{student._studentId && student._studentId._fName ? student._studentId._fName.toUpperCase() : '--'}</Td>
+                  <Td textAlign="center">{student._studentId && student._studentId._lName ? student._studentId._lName.toUpperCase() : '--'}</Td>
+                  <Td textAlign="center">{student._bookingStatus ? student._bookingStatus.toUpperCase() : '--'}</Td>
                   <Td textAlign="center">
                     {student._timedIn ? new Date(student._timedIn).toLocaleTimeString() : '--'}
                   </Td>

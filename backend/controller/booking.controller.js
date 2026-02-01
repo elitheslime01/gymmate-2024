@@ -8,6 +8,7 @@ export const fetchCurrentMonthBookings = async (req, res) => {
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        endOfMonth.setHours(23, 59, 59, 999); // Set to end of the day to include all bookings on the last day
 
         const bookings = await Booking.find({
         _date: {

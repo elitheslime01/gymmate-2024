@@ -13,6 +13,7 @@ import path from 'path';
 import arImageRoutes from "./routes/arImage.route.js";
 import bookingRoutes from "./routes/booking.route.js";
 import feedbackRoutes from "./routes/feedback.route.js";
+import allocationRoutes from "./routes/allocation.route.js";
 
 dotenv.config()
 
@@ -40,6 +41,7 @@ app.use("/api/queues", queueRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/arImage", arImageRoutes);
 app.use("/api/feedback", feedbackRoutes);
+app.use("/api/allocations", allocationRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

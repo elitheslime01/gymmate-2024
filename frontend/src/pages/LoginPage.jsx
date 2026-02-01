@@ -157,10 +157,8 @@ const InputField = ({ placeholder, icon, value, onChange, type = 'text', toggleV
           onChange={onChange}
       />
       {toggleVisibility && (
-          <InputRightElement h='50px' display='flex' alignItems='center' cursor='pointer' onClick={toggleVisibility}>
-              <Button variant='link' color='gray.500' onClick={toggleVisibility}>
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </Button>
+          <InputRightElement h='50px' display='flex' alignItems='center' cursor='pointer' onClick={toggleVisibility} color='gray.500'>
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
           </InputRightElement>
       )}
   </InputGroup>

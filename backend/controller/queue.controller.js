@@ -5,6 +5,8 @@ import AR from "../models/ar.model.js";
 import MaxHeap from '../utils/maxHeap.js';
 import Booking from "../models/booking.model.js";
 import Schedule from "../models/schedule.model.js";
+import AllocationStatus from "../models/allocationStatus.model.js";
+import { createNotification, NOTIFICATION_TYPES } from "./notification.controller.js";
 import { updateStudentMetrics } from "./student.controller.js";
 
 // Calculate priority score with the new logic
@@ -19,6 +21,44 @@ const calculatePriorityScore = (student) => {
   const attendanceBonus = student._attendedSlots || 0;
 
   return attendanceBonus + unsuccessfulPoints - noShowPenalty;
+};
+
+const getSlotLabel = (timeSlot) => `${timeSlot.startTime} - ${timeSlot.endTime}`;
+
+const sendAllocationNotification = async ({ userId, bookingId, status, reason, queueDate, queueSlot }) => {
+  try {
+    const dateLabel = new Date(queueDate).toLocaleDateString();
+    const slotLabel = getSlotLabel(queueSlot);
+
+    if (status === "ALLOCATED") {
+      await createNotification({
+        userId,
+        bookingId,
+        type: NOTIFICATION_TYPES.BOOKING_CONFIRMED,
+        title: "Booking confirmed",
+        message: `Your booking for ${slotLabel} on ${dateLabel} is confirmed.`,
+        metadata: {
+          queueDate,
+          queueSlot,
+        },
+      });
+    } else if (status === "FAILED") {
+      await createNotification({
+        userId,
+        bookingId,
+        type: NOTIFICATION_TYPES.QUEUE_FAIL,
+        title: "Allocation update",
+        message: reason || "We could not allocate a slot for your request.",
+        metadata: {
+          queueDate,
+          queueSlot,
+          reason,
+        },
+      });
+    }
+  } catch (error) {
+    console.error("Error sending allocation notification:", error.message);
+  }
 };
 
 export const addStudentToQueue = async (req, res) => {
@@ -64,7 +104,7 @@ export const addStudentToQueue = async (req, res) => {
 
     // Check if the queue for the specified date and time slot already exists
     let queue = await Queue.findOne({
-      _date: req.body._date,
+      _date: new Date(req.body._date + 'T00:00:00.000Z'),
       "_timeSlot.startTime": _timeSlot.startTime,
       "_timeSlot.endTime": _timeSlot.endTime,
     });
@@ -72,7 +112,7 @@ export const addStudentToQueue = async (req, res) => {
     // If the queue does not exist, create a new one
     if (!queue) {
       queue = new Queue({
-        _date: req.body._date,
+        _date: new Date(req.body._date + 'T00:00:00.000Z'),
         _timeSlot: {
           startTime: _timeSlot.startTime,
           endTime: _timeSlot.endTime,
@@ -107,6 +147,17 @@ export const addStudentToQueue = async (req, res) => {
 
     await queue.save();
 
+    try {
+      await AllocationStatus.create({
+        user: _studentId,
+        booking: null,
+        status: "WAITING",
+        allocatedAt: null,
+      });
+    } catch (statusError) {
+      console.error("Error creating allocation status:", statusError.message);
+    }
+
     return res.status(200).json({
       success: true,
       message: "Student added to queue successfully.",
@@ -135,8 +186,9 @@ export const fetchQueues = async (req, res) => {
 export const fetchCurrentMonthQueues = async (req, res) => {
   try {
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    // Create a broad date range to handle timezone differences
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 
     const queues = await Queue.find({
       _date: {
@@ -159,6 +211,7 @@ export const fetchCurrentMonthQueues = async (req, res) => {
 export const allocateStudentsToBooking = async (req, res) => {
   try {
     const allocationResults = [];
+    const statusChanges = [];
 
     // Fetch all queues with populated student data
     const queues = await Queue.find({})
@@ -214,6 +267,7 @@ export const allocateStudentsToBooking = async (req, res) => {
       // Allocate waiting students based on priority
       while (maxHeap.size() > 0 && schedule.timeSlots[timeSlotIndex]._availableSlots > 0) {
         const student = maxHeap.extractMax();
+        let bookingRecord = null;
         
         const existingBooking = await Booking.findOne({
             _date: queue._date,
@@ -228,6 +282,7 @@ export const allocateStudentsToBooking = async (req, res) => {
             if (existingBooking) {
                 existingBooking.students.push(student);
                 await existingBooking.save();
+                bookingRecord = existingBooking;
             } else {
                 const newBooking = new Booking({
                     _date: queue._date,
@@ -235,10 +290,48 @@ export const allocateStudentsToBooking = async (req, res) => {
                     students: [student],
                 });
                 await newBooking.save();
+                bookingRecord = newBooking;
             }
             
             schedule.timeSlots[timeSlotIndex]._availableSlots -= 1;
             allocatedStudents.push(student);
+
+            try {
+              await AllocationStatus.findOneAndUpdate(
+                {
+                  user: student._studentId,
+                },
+                {
+                  user: student._studentId,
+                  booking: bookingRecord?._id || null,
+                  status: "ALLOCATED",
+                  reason: null,
+                  allocatedAt: new Date(),
+                },
+                {
+                  new: true,
+                  upsert: true,
+                  sort: { createdAt: -1 },
+                  setDefaultsOnInsert: true,
+                }
+              );
+
+              statusChanges.push({
+                userId: student._studentId.toString(),
+                bookingId: bookingRecord?._id ? bookingRecord._id.toString() : null,
+                status: "ALLOCATED",
+              });
+
+              await sendAllocationNotification({
+                userId: student._studentId,
+                bookingId: bookingRecord?._id || null,
+                status: "ALLOCATED",
+                queueDate: queue._date,
+                queueSlot: queue._timeSlot,
+              });
+            } catch (allocationStatusError) {
+              console.error("Error updating allocation status:", allocationStatusError.message);
+            }
         }
     }
     
@@ -248,6 +341,47 @@ export const allocateStudentsToBooking = async (req, res) => {
         await updateStudentMetrics(student._studentId, 'unsuccessful');
         student._queueStatus = "Not allocated - No slots available";
         unallocatedStudents.push(student);
+
+        const reason = "No slots available";
+
+        try {
+          await AllocationStatus.findOneAndUpdate(
+            {
+              user: student._studentId,
+            },
+            {
+              user: student._studentId,
+              booking: null,
+              status: "FAILED",
+              reason,
+              allocatedAt: null,
+            },
+            {
+              new: true,
+              upsert: true,
+              sort: { createdAt: -1 },
+              setDefaultsOnInsert: true,
+            }
+          );
+
+          statusChanges.push({
+            userId: student._studentId.toString(),
+            bookingId: null,
+            status: "FAILED",
+            reason,
+          });
+
+          await sendAllocationNotification({
+            userId: student._studentId,
+            bookingId: null,
+            status: "FAILED",
+            reason,
+            queueDate: queue._date,
+            queueSlot: queue._timeSlot,
+          });
+        } catch (allocationStatusError) {
+          console.error("Error updating allocation status:", allocationStatusError.message);
+        }
       }
 
       // Update schedule status if needed
@@ -275,7 +409,8 @@ export const allocateStudentsToBooking = async (req, res) => {
         results: allocationResults,
         totalQueuesProcessed: allocationResults.length,
         totalAllocated: allocationResults.reduce((sum, result) => sum + result.allocated, 0),
-        totalUnallocated: allocationResults.reduce((sum, result) => sum + result.unallocated, 0)
+        totalUnallocated: allocationResults.reduce((sum, result) => sum + result.unallocated, 0),
+        statusChanges,
       }
     });
 

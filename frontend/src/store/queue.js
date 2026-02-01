@@ -65,10 +65,12 @@ const useQueueStore = create((set, get) => ({
       // Only set queues if we have valid data
       if (data && Array.isArray(data)) {
         // Filter queues by the selected date and time slot
-        const filteredQueues = data.filter(queue => 
-          new Date(queue._date).toISOString().split('T')[0] === date &&
-          queue._timeSlot.startTime === timeSlot.startTime
-        );
+        const filteredQueues = data.filter(queue => {
+          const queueDate = new Date(queue._date);
+          const selectedDate = new Date(date + 'T00:00:00.000Z'); // Ensure UTC date
+          return queueDate.toISOString().split('T')[0] === selectedDate.toISOString().split('T')[0] &&
+                 queue._timeSlot.startTime === timeSlot.startTime;
+        });
         set({ queues: filteredQueues });
       }
     } catch (error) {
@@ -105,6 +107,54 @@ const useQueueStore = create((set, get) => ({
       };
     }
   },
+
+  notifyAllocationStatuses: async (changes = []) => {
+    if (!Array.isArray(changes) || changes.length === 0) {
+      return [];
+    }
+
+    const notifications = [];
+
+    for (const change of changes) {
+      if (!change?.userId) {
+        continue;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/allocations/notify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: change.userId,
+            bookingId: change.bookingId || null,
+          }),
+        });
+
+        const data = await response.json();
+
+        notifications.push({
+          userId: change.userId,
+          bookingId: change.bookingId || null,
+          success: data?.success ?? false,
+          status: data?.data?.status || change.status || null,
+          message: data?.message,
+        });
+      } catch (error) {
+        console.error("Error notifying allocation status:", error.message);
+        notifications.push({
+          userId: change.userId,
+          bookingId: change.bookingId || null,
+          success: false,
+          status: change.status || null,
+          message: error.message,
+        });
+      }
+    }
+
+    return notifications;
+  },
   
   // Add this new function
   fetchQueuesByDate: async (date) => {
@@ -122,9 +172,11 @@ const useQueueStore = create((set, get) => ({
       
       if (data && Array.isArray(data)) {
         // Filter queues by just the date
-        const filteredQueues = data.filter(queue => 
-          new Date(queue._date).toISOString().split('T')[0] === date
-        );
+        const filteredQueues = data.filter(queue => {
+          const queueDate = new Date(queue._date);
+          const selectedDate = new Date(date + 'T00:00:00.000Z'); // Ensure UTC date
+          return queueDate.toISOString().split('T')[0] === selectedDate.toISOString().split('T')[0];
+        });
         set({ queues: filteredQueues });
       }
     } catch (error) {

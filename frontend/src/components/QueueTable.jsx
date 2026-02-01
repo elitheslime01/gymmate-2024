@@ -43,6 +43,7 @@ const QueueTable = () => {
     allocateStudents,
     fetchAllCurrentMonthQueues,
     refreshQueueData,
+    notifyAllocationStatuses,
     autoAllocationIntervalMinutes,
   } = useQueueStore();
   const [date, setDateState] = useState("");
@@ -194,6 +195,10 @@ const QueueTable = () => {
         const result = await allocateStudents();
 
         if (result?.success) {
+          if (result?.data?.statusChanges?.length) {
+            await notifyAllocationStatuses(result.data.statusChanges);
+          }
+
           if (trigger === "manual") {
             toast({
               title: "Allocation Complete",
@@ -236,7 +241,7 @@ const QueueTable = () => {
         allocationInProgressRef.current = false;
       }
     },
-    [allocateStudents, refreshQueueData, toast]
+    [allocateStudents, refreshQueueData, notifyAllocationStatuses, toast]
   );
 
   const handleAllocate = () => {
@@ -343,7 +348,7 @@ const QueueTable = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {queues && queues.length > 0 ? (
+            {queues && queues.some(queue => queue.students && queue.students.length > 0) ? (
               queues.map((item, index) => (
                 item.students.map((student, studentIndex) => (
                   <Tr key={`${index}-${studentIndex}`}>
