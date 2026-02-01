@@ -20,7 +20,7 @@ const calculatePriorityScore = (student) => {
   const noShowPenalty = student._noShows ? Math.floor(student._noShows / 2) : 0; // Only penalize if there are no-shows
   const attendanceBonus = student._attendedSlots || 0;
 
-  return attendanceBonus + unsuccessfulPoints - noShowPenalty;
+  return Math.max(0, attendanceBonus + unsuccessfulPoints - noShowPenalty);
 };
 
 const getSlotLabel = (timeSlot) => `${timeSlot.startTime} - ${timeSlot.endTime}`;

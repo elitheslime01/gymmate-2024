@@ -68,10 +68,10 @@ class MaxHeap {
             return scoreB > scoreA;
         }
         
-        // If priority scores are equal, compare queueing timestamps
+        // If priority scores are equal, compare queueing timestamps (FIFO: earlier queued wins)
         const timeA = new Date(this.heap[indexA]._queuedAt).getTime();
         const timeB = new Date(this.heap[indexB]._queuedAt).getTime();
-        return timeA < timeB; // Earlier timestamp gets priority
+        return timeB < timeA; // Swap when child queued earlier than parent
     }
 
     updatePriority(studentId, newScore) {
