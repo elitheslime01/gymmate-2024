@@ -1,6 +1,16 @@
 import mongoose from "mongoose";
 import Student from "../models/student.model.js";
 
+export const getStudents = async (req, res) => {
+  try {
+    const students = await Student.find({});
+    res.status(200).json({ success: true, data: students });
+  } catch (error) {
+    console.error("Error fetching students: ", error.message);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
 export const createStudent = async (req, res) => {
   const student = req.body; // User will send this data
 
@@ -126,3 +136,31 @@ export const loginStudent = async (req, res) => {
         res.status(500).json({ success: false, message: "Server error." });
     }
   };
+
+export const updateStudent = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const updated = await Student.findByIdAndUpdate(id, req.body, { new: true });
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Student not found." });
+    }
+    res.status(200).json({ success: true, data: updated });
+  } catch (error) {
+    console.error("Error updating student: ", error.message);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+export const deleteStudent = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deleted = await Student.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "Student not found." });
+    }
+    res.status(200).json({ success: true, message: "Student deleted." });
+  } catch (error) {
+    console.error("Error deleting student: ", error.message);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};

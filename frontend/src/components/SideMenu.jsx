@@ -5,6 +5,7 @@ import {
   MdLogout,
   MdOutlineSchedule,
   MdSettings,
+  MdPeople,
 } from "react-icons/md";
 import { GrSchedules } from "react-icons/gr";
 import { GiWalk } from "react-icons/gi";
@@ -23,6 +24,7 @@ const menuItems = [
   { label: "Queue", icon: MdOutlineSchedule, path: "/queue" },
   { label: "Booking", icon: ImTable, path: "/booking" },
   { label: "Feedback", icon: RiFeedbackLine, path: "/feedback" },
+  { label: "Users", icon: MdPeople, path: "/users" },
 ];
 
 const SideMenu = ({ onNavigate }) => {

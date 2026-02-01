@@ -86,3 +86,31 @@ export const createAdmin = async (req, res) => {
     }
 
 }
+
+export const updateAdmin = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const updated = await Admin.findByIdAndUpdate(id, req.body, { new: true });
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Admin not found." });
+    }
+    res.status(200).json({ success: true, data: updated });
+  } catch (error) {
+    console.error("Error updating admin: ", error.message);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+export const deleteAdmin = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deleted = await Admin.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "Admin not found." });
+    }
+    res.status(200).json({ success: true, message: "Admin deleted." });
+  } catch (error) {
+    console.error("Error deleting admin: ", error.message);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};

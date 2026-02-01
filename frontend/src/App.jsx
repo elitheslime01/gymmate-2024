@@ -15,6 +15,7 @@ import WalkinBookingPage from "./pages/WalkinBookingPage";
 import QueueManPage from "./pages/QueueManPage";
 import BookingManPage from "./pages/BookingManPage";
 import FeedbackManPage from "./pages/FeedbackManPage";
+import UserManPage from "./pages/UserManPage";
 
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
           <Route path="/queue" element={<QueueManPage onOpenMenu={onOpen} />} />
           <Route path="/booking" element={<BookingManPage onOpenMenu={onOpen} />} />
           <Route path="/feedback" element={<FeedbackManPage onOpenMenu={onOpen} />} />
+          <Route path="/users" element={<UserManPage onOpenMenu={onOpen} />} />
         </Routes>
       </Box>
     </Flex>
