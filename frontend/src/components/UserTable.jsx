@@ -215,11 +215,19 @@ const UserTable = () => {
 
   const priorityBreakdown = (user) => {
     if (!user) return { total: 0, attended: 0, noShows: 0, unsuccessful: 0 };
-    const attended = user._attendedSlots || 0;
-    const noShows = user._noShows || 0;
-    const unsuccessful = user._unsuccessfulAttempts || 0;
+    const attended = Number(user._attendedSlots) || 0;
+    const noShows = Number(user._noShows) || 0;
+    const unsuccessful = Number(user._unsuccessfulAttempts) || 0;
+  
+    // Derived score: attended + unsuccessful - floor(noShows / 2)
     const derived = unsuccessful + attended - Math.floor(noShows / 2);
-    const total = typeof user._priorityScore === "number" ? user._priorityScore : derived;
+  
+    // If a priority score is provided, ensure it's a valid non-negative number;
+    // otherwise use the derived value. Never return a negative total.
+    const total = (typeof user._priorityScore === "number" && !Number.isNaN(user._priorityScore))
+      ? Math.max(0, user._priorityScore)
+      : Math.max(0, derived);
+  
     return { total, attended, noShows, unsuccessful };
   };
 
