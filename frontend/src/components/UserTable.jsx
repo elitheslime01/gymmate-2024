@@ -42,7 +42,6 @@ import {
   AddIcon,
   ViewIcon,
   SearchIcon,
-  ArrowBackIcon,
   EditIcon,
   DeleteIcon,
   CloseIcon,
